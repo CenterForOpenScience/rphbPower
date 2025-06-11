@@ -1,0 +1,436 @@
+---
+title: "Linear Regression Power Analysis"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Linear Regression Power Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+devtools::load_all()
+```
+
+Power analysis for linear regression models using partial correlations within the unified framework with integrated discount factor system and effect size conversions.
+
+## Overview
+
+Linear regression examines relationships between continuous predictors and outcomes, serving as a core component of the unified framework. All effect sizes are converted to partial correlations for direct comparison across correlation, mediation, SEM, and other regression-based analyses.
+
+## Key Framework Features
+
+- **Unified Effect Size Metric**: All analyses use partial correlations for direct comparison
+- **Automatic Parameter Detection**: Provide any two of (r_partial, n, power) - the third is calculated
+- **Conservative Planning**: Built-in discount factor (default 0.75) for realistic estimates
+- **Framework Integration**: Seamless conversion from Cohen's d, f², R², eta-squared
+- **Model Complexity Handling**: Proper adjustment for multiple predictors
+
+## Quick Start
+
+```{r setup}
+library(rphbPower)
+```
+
+```r
+# Calculate power (provide r_partial and n)
+linear_regression_power(r_partial = 0.25, n = 120, n_predictors = 3)
+
+# Calculate sample size (provide r_partial and power)
+linear_regression_power(r_partial = 0.20, power = 0.8, n_predictors = 2)
+
+# Calculate effect size (provide n and power)
+linear_regression_power(n = 150, power = 0.8, n_predictors = 4)
+
+# Framework integration (automatic conversion and discount)
+linear_regression_power(effect_input = 0.15, effect_type = "r_squared", power = 0.8, n_predictors = 3)
+```
+
+## Main Functions
+
+### `linear_regression_power()`
+Core power analysis with framework integration.
+
+**Parameters:**
+
+- `r_partial`: Partial correlation coefficient (NULL to calculate)
+- `n`: Sample size (NULL to calculate)
+- `power`: Statistical power (NULL to calculate, default = 0.8)
+- `n_predictors`: Number of predictors in model
+- `alpha`: Significance level (default = 0.05)
+- `discount_factor`: Conservative discount factor (default = 0.75)
+- `effect_input`: Raw effect size input (alternative to r_partial)
+- `effect_type`: Type of effect_input ("r", "d", "f2", "r_squared", "eta_squared")
+
+### Convenience Functions
+
+- `linear_regression_sample_size()`: Quick sample size calculation
+- `linear_regression_power_check()`: Quick power calculation
+
+## Framework Integration Examples
+
+### Multiple Effect Size Types
+```r
+# Cohen's f² to framework regression
+linear_regression_power(effect_input = 0.15, effect_type = "f2", power = 0.8, n_predictors = 2)
+
+# R² to framework regression
+linear_regression_framework_power(effect_size = 0.12, effect_type = "r_squared", n = 150, power = NULL, n_predictors = 3)
+
+# Direct partial correlation
+linear_regression_power(r_partial = 0.25, power = 0.8, n_predictors = 1)
+```
+
+### Literature Integration
+```r
+# Convert mixed literature effects to unified framework
+# Note: unified_effect_size_table() expects single input_type for all values
+# For mixed types, convert individually using main functions
+
+# Example 1: All Cohen's f² values
+f2_values <- c(0.02, 0.15, 0.35)
+conversion_table_f2 <- unified_effect_size_table(
+  effect_values = f2_values,
+  input_type = "f2",
+  apply_discount = TRUE
+)
+
+# Example 2: Individual conversions for mixed types
+effect_1 <- linear_regression_power(effect_input = 0.12, effect_type = "r_squared", power = 0.8, n_predictors = 2)
+effect_2 <- linear_regression_power(effect_input = 0.4, effect_type = "d", power = 0.8, n_predictors = 3)  
+effect_3 <- linear_regression_power(effect_input = 0.08, effect_type = "f2", power = 0.8, n_predictors = 4)
+
+# Extract converted partial correlations for comparison
+r_values <- c(effect_1$r_partial, effect_2$r_partial, effect_3$r_partial)
+```
+
+## Effect Size Guidelines
+
+### Framework Interpretation (Cohen's Standard)
+
+- **r < 0.10**: Negligible effect
+- **r = 0.10-0.29**: Small effect
+- **r = 0.30-0.49**: Medium effect
+- **r ≥ 0.50**: Large effect
+
+### Field-Specific Planning (Cohen's d equivalents)
+
+- **Psychology**: d = 0.4 (r ≈ 0.20 after discount)
+- **Education**: d = 0.6 (r ≈ 0.23 after discount)
+- **Medicine**: d = 0.3 (r ≈ 0.11 after discount)
+- **Business**: d = 0.45 (r ≈ 0.17 after discount)
+
+## Sample Size Planning
+
+### Framework Rules of Thumb (80% power, two-tailed)
+
+- **Small effects** (r = 0.15): ~345 participants for simple models
+- **Medium effects** (r = 0.25): ~122 participants for simple models
+- **Large effects** (r = 0.40): ~46 participants for simple models
+
+### Model Complexity Impact
+Sample size requirements increase substantially with predictor count:
+
+```r
+# Example: r = 0.20 across model complexity
+linear_regression_power(r_partial = 0.20, power = 0.8, n_predictors = 1)  # 192
+linear_regression_power(r_partial = 0.20, power = 0.8, n_predictors = 5)  # 320
+linear_regression_power(r_partial = 0.20, power = 0.8, n_predictors = 10) # 410
+```
+
+**Planning Note**: Multiple-predictor models require substantially larger samples than simple correlation-based planning suggests. For models with 5+ predictors, expect 60-100% increases in required sample size.
+
+## Best Practices
+
+### Framework Workflow
+
+1. **Use framework_effect_size()** for all effect size conversions
+2. **Apply default discount factor** (0.75) for conservative planning
+3. **Leverage auto-detection** by providing any 2 of 3 parameters
+4. **Check framework conversions** in results for cross-method comparison
+
+### Study Planning
+
+1. **Literature Integration**: Convert all effect sizes to partial correlations
+2. **Model Complexity**: Account for predictor count in sample size planning - this has major impact
+3. **Individual Predictors**: Focus on partial correlations for specific predictors
+4. **Conservative Estimates**: Trust framework discount for realistic planning
+
+### Quality Assurance
+
+1. **Framework Integration**: Effect size conversions maintain statistical precision
+2. **Cross-Method Validation**: Partial correlations enable direct comparison across analyses
+3. **Mathematical Foundation**: F-distribution calculations with proper non-centrality parameters
+4. **Conservative Planning**: Built-in discount factor for realistic study planning
+
+## Common Pitfalls and Solutions
+
+### Underestimating Sample Size Requirements
+**Problem**: Using simple correlation guidelines for multiple-predictor models
+
+**Solution**: Always specify actual number of predictors in power calculations. The difference between 1-predictor and 5-predictor models can be 60%+ in required sample size.
+
+### Effect Size Conversion Errors
+**Problem**: Manual conversion between effect size metrics introduces errors
+
+**Solution**: Use framework conversion functions exclusively - they maintain mathematical precision and apply conservative discount factors consistently.
+
+### Optimistic Planning
+**Problem**: Literature effect sizes may not replicate in new studies
+
+**Solution**: Framework automatically applies 0.75 discount factor. Trust this conservative adjustment rather than using raw literature values.
+
+## Technical Notes
+
+### Mathematical Foundation
+This implementation uses F-distribution calculations with proper non-centrality parameter: `ncp = f² × df_denominator`. The framework ensures mathematically sound power analysis across all regression configurations.
+
+### Framework Integration
+All power calculations integrate with the unified partial correlation framework, enabling direct comparison across correlation, regression, mediation, SEM, multilevel, and longitudinal analyses.
+
+## Examples
+
+Essential scenarios demonstrating linear regression power analysis within the unified framework using partial correlations and discount factors.
+
+Author: Power Analysis Package
+Version: 1.2
+
+### EXAMPLE 1: BASIC FRAMEWORK WORKFLOW
+
+```{r ex1}
+# Research: Predicting job performance from personality
+# Using R² = 0.15, 3 predictors with framework integration
+
+result1 <- linear_regression_power(
+  effect_input = 0.15,
+  effect_type = "r_squared", 
+  n = 150,
+  n_predictors = 3,
+  power = NULL
+)
+print.linear_regression_power_analysis(result1)
+```
+
+### EXAMPLE 2: SAMPLE SIZE PLANNING WITH FRAMEWORK
+
+```{r}
+# Target: 80% power to detect partial r = 0.25, single predictor
+
+result2 <- linear_regression_power(r_partial = 0.25, n = NULL, power = 0.8, n_predictors = 1)
+
+cat("Sample size needed:", result2$n, "participants\n")
+cat("Effect interpretation:", result2$interpretation, "\n")
+```
+
+### EXAMPLE 3: MULTIPLE PREDICTORS COMPARISON
+
+```{r}
+# Fixed effect size, varying number of predictors
+# Demonstrates model complexity impact
+
+r_fixed <- 0.20
+predictor_counts <- c(1, 3, 5, 8)
+
+cat("Sample sizes for r =", r_fixed, " by predictor count:\n")
+for (p in predictor_counts) {
+  n_result <- linear_regression_power(r_partial = r_fixed, n = NULL, power = 0.8, n_predictors = p)
+  cat(p, "predictor(s):", n_result$n, "\n")
+}
+
+# Shows increasing sample requirements with model complexity
+```
+
+### EXAMPLE 4: DETECTABLE EFFECT SIZE
+
+```{r}
+# Study constraints: 200 participants, 4 predictors, want 80% power
+
+result4 <- linear_regression_power(r_partial = NULL, n = 200, power = 0.8, n_predictors = 4)
+
+cat("With n=200, p=4, 80% power detects r =", round(result4$r_partial, 3), 
+    "(f² =", round(result4$effect_size_conversions$cohens_f2, 3), ")\n")
+```
+
+### EXAMPLE 5: FRAMEWORK EFFECT SIZE CONVERSIONS
+
+```{r}
+# Convert Cohen's f² = 0.15 to framework partial correlation
+
+result5 <- linear_regression_power(
+  effect_input = 0.15,
+  effect_type = "f2",
+  n = NULL,
+  power = 0.8,
+  n_predictors = 2
+)
+
+cat("Cohen's f² = 0.15 → Framework r =", round(result5$r_partial, 3), 
+    ", Required n =", result5$n, "\n")
+```
+
+### EXAMPLE 6: FIELD-SPECIFIC APPLICATIONS
+
+```{r}
+# Typical effect sizes by research field using Cohen's d equivalents
+
+fields <- data.frame(
+  Field = c("Psychology", "Education", "Medicine", "Business"),
+  Effect_d = c(0.4, 0.6, 0.3, 0.45),
+  N_predictors = c(3, 4, 5, 6)
+)
+
+cat("Sample sizes for 80% power by field:\n")
+for (i in 1:nrow(fields)) {
+  field_result <- linear_regression_power(
+    effect_input = fields$Effect_d[i],
+    effect_type = "d",
+    n = NULL,
+    power = 0.8,
+    n_predictors = fields$N_predictors[i]
+  )
+  cat(fields$Field[i], "(d =", fields$Effect_d[i], ",", 
+      fields$N_predictors[i], "pred.):", field_result$n, "\n")
+}
+
+# Demonstrates field-specific planning considerations
+```
+
+### EXAMPLE 7: CONSERVATIVE VS. OPTIMISTIC PLANNING
+
+```{r}
+# Compare framework discount vs. no discount approaches
+
+pilot_r_squared <- 0.20
+
+# Framework approach (with discount) - uses effect_input with automatic discount
+conservative_result <- linear_regression_power(
+  effect_input = pilot_r_squared,
+  effect_type = "r_squared",
+  n = NULL,
+  power = 0.8,
+  n_predictors = 3
+)
+
+# No discount approach - convert manually without discount then use r_partial
+r_no_discount <- r_squared_to_partial_r(pilot_r_squared, apply_discount = FALSE)
+optimistic_result <- linear_regression_power(
+  r_partial = r_no_discount,
+  n = NULL,
+  power = 0.8,
+  n_predictors = 3
+)
+
+cat("Planning comparison for R² =", pilot_r_squared, ":\n")
+cat("Conservative (framework):", conservative_result$n, "vs Optimistic:", optimistic_result$n,
+    "- Safety margin:", conservative_result$n - optimistic_result$n, "\n")
+
+# Illustrates value of conservative planning for replication success
+```
+
+### EXAMPLE 8: POWER COMPARISON ACROSS MODEL COMPLEXITY
+
+```{r}
+# Fixed sample size, varying model complexity
+
+n_fixed <- 180
+r_fixed <- 0.22
+
+cat("Power for n =", n_fixed, ", r =", r_fixed, " by model complexity:\n")
+for (p in c(1, 3, 5, 7)) {
+  power_result <- linear_regression_power(r_partial = r_fixed, n = n_fixed, power = NULL, n_predictors = p)
+  cat(p, "predictor(s): Power =", round(power_result$power, 3), "\n")
+}
+
+# Shows how power decreases as model complexity increases
+```
+
+### EXAMPLE 9: FRAMEWORK CONVERSION TABLE
+
+```{r}
+# Demonstrate multiple effect size inputs using framework functions
+
+effect_sizes <- c(0.15, 0.25, 0.35)  # Partial correlations
+
+# Build complete table as single output
+output_lines <- c()
+output_lines <- c(output_lines, "Framework conversions for regression planning (2 predictors, 80% power):")
+output_lines <- c(output_lines, sprintf("%9s %11s %9s %9s %s", "Partial_r", "Sample_Size", "Cohens_f2", "R_squared", "Interpretation"))
+output_lines <- c(output_lines, sprintf("%9s %11s %9s %9s %s", "---------", "-----------", "---------", "---------", "--------------"))
+
+for (r_val in effect_sizes) {
+  result <- linear_regression_power(r_partial = r_val, n = NULL, power = 0.8, n_predictors = 2)
+  conv <- result$effect_size_conversions
+  interp <- result$interpretation
+  output_lines <- c(output_lines, sprintf("%9.2f %11d %9.3f %9.3f %s", 
+                                          r_val, result$n, conv$cohens_f2, conv$r_squared, interp))
+}
+
+# Display formatted table
+cat(paste(output_lines, collapse = "\n"), "\n")
+```
+
+### EXAMPLE 10: LITERATURE INTEGRATION WORKFLOW
+
+```{r}
+# Step 1: Literature review with mixed effect sizes
+
+literature_effects <- data.frame(
+  Study = c("A", "B", "C"),
+  Effect = c(0.12, 0.4, 0.08),  # R², Cohen's d, f²
+  Type = c("r_squared", "d", "f2"),
+  Predictors = c(2, 3, 4)
+)
+
+# Step 2: Convert to framework partial correlations using framework functions
+framework_results <- list()
+for (i in 1:nrow(literature_effects)) {
+  framework_results[[i]] <- linear_regression_power(
+    effect_input = literature_effects$Effect[i], 
+    effect_type = literature_effects$Type[i], 
+    n = NULL,
+    power = 0.8,
+    n_predictors = literature_effects$Predictors[i]
+  )
+}
+
+# Step 3: Meta-analytic planning (weighted by predictor complexity)
+framework_rs <- sapply(framework_results, function(x) x$r_partial)
+meta_r <- mean(framework_rs)
+meta_predictors <- round(mean(literature_effects$Predictors))
+meta_result <- linear_regression_power(r_partial = meta_r, n = NULL, power = 0.8, n_predictors = meta_predictors)
+
+cat("Literature integration: Meta r =", round(meta_r, 3), 
+    ", Required n =", meta_result$n, "(", meta_predictors, "pred.)\n")
+```
+
+### EXAMPLE 11: SENSITIVITY ANALYSIS
+
+```{r}
+# Test robustness of sample size decisions to effect size uncertainty
+
+base_r <- 0.25
+n_predictors <- 3
+
+# Test ±25% variation in effect size
+effect_variations <- c(0.19, 0.22, 0.25, 0.28, 0.31)
+
+cat("Sample size sensitivity (3 predictors, 80% power):\n")
+for (r in effect_variations) {
+  sens_result <- linear_regression_power(r_partial = r, n = NULL, power = 0.8, n_predictors = n_predictors)
+  cat("r =", r, ": n =", sens_result$n, "\n")
+}
+
+# Evaluates planning robustness to effect size uncertainty
+```
+
+## FRAMEWORK BEST PRACTICES
+
+- Use linear_regression_power() with effect_input for automatic conversion and discount
+- Account for model complexity: more predictors require larger samples
+- Framework partial correlations enable comparison with correlation/mediation analyses  
+- Conservative planning with 0.75 discount factor handles optimistic pilot effects
+- Focus on individual predictor partial correlations for theoretical interpretation
+- Consider sensitivity analysis for robust sample size planning

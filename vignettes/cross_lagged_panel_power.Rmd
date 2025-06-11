@@ -1,0 +1,408 @@
+---
+title: "Cross-Lagged Panel Power Analysis"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Cross-Lagged Panel Power Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+devtools::load_all()
+```
+
+Power analysis for cross-lagged panel models using partial correlations within the unified framework with integrated stability considerations and conservative planning.
+
+## Overview
+
+Cross-lagged panel models examine reciprocal causal relationships between variables over time, providing stronger causal inference than cross-sectional designs. All effect sizes are converted to partial correlations for direct comparison across correlation, regression, mediation, SEM, and other framework analyses.
+
+## Key Framework Features
+
+- **Unified Effect Size Metric**: All analyses use partial correlations for direct comparison
+- **Automatic Parameter Detection**: Provide any two of (r_partial, n, power) - the third is calculated
+- **Conservative Planning**: Built-in discount factor (default 0.75) for realistic estimates
+- **Framework Integration**: Seamless conversion from Cohen's d, f², R², eta-squared
+- **Longitudinal Complexity**: Accounts for stability coefficients and attrition effects
+
+## Quick Start
+
+```{r setup}
+library(rphbPower)
+```
+
+```r
+# Calculate power (provide r_partial and n)
+cross_lagged_panel_power(r_partial = 0.15, n = 300, n_waves = 3)
+
+# Calculate sample size (provide r_partial and power)
+cross_lagged_panel_power(r_partial = 0.12, power = 0.8, n_waves = 3)
+
+# Calculate effect size (provide n and power)
+cross_lagged_panel_power(n = 400, power = 0.8, n_waves = 3)
+
+# Framework integration (automatic conversion and discount)
+cross_lagged_panel_framework_power(effect_size = 0.3, effect_type = "d", power = 0.8, n_waves = 3)
+```
+
+## Main Functions
+
+### `cross_lagged_panel_power()`
+Core power analysis with framework integration.
+
+**Parameters:**
+
+- `r_partial`: Cross-lagged partial correlation coefficient (NULL to calculate)
+- `n`: Sample size (NULL to calculate)
+- `power`: Statistical power (NULL to calculate, default = 0.8)
+- `n_waves`: Number of measurement waves (default = 3)
+- `stability_coefficient`: Autoregressive stability coefficient (default = 0.6)
+- `alpha`: Significance level (default = 0.05)
+- `discount_factor`: Conservative discount factor (default = 0.75)
+- `effect_input`: Raw effect size input (alternative to r_partial)
+- `effect_type`: Type of effect_input ("r", "d", "f2", "r_squared", "eta_squared")
+
+### `cross_lagged_panel_framework_power()`
+Framework-integrated analysis with automatic conversion.
+
+**Parameters:**
+
+- `effect_size`: Effect size value
+- `effect_type`: Type of effect size ("r", "d", "f2", "r_squared", "eta_squared")
+- `n`: Sample size (NULL to calculate)
+- `power`: Target power (default = 0.8)
+- `n_waves`: Number of waves
+
+### Convenience Functions
+
+- `cross_lagged_panel_sample_size()`: Quick sample size calculation
+- `cross_lagged_panel_power_check()`: Quick power calculation
+
+## Framework Integration Examples
+
+### Multiple Effect Size Types
+```r
+# Cohen's d to framework cross-lagged
+cross_lagged_panel_framework_power(effect_size = 0.3, effect_type = "d", power = 0.8, n_waves = 3)
+
+# R² to framework cross-lagged
+cross_lagged_panel_framework_power(effect_size = 0.04, effect_type = "r_squared", n = 400, n_waves = 3)
+
+# Direct partial correlation
+cross_lagged_panel_power(r_partial = 0.15, power = 0.8, n_waves = 3)
+```
+
+### Cross-Method Efficiency Comparison
+```r
+# Same effect size: cross-lagged vs. cross-sectional regression
+effect_r <- 0.20
+
+# Cross-lagged panel (accounts for stability)
+cl_result <- cross_lagged_panel_power(r_partial = effect_r, power = 0.8, n_waves = 3)
+
+# Cross-sectional regression (framework comparison)
+source("05_methods/5.2_regression/linear_regression/linear_regression_power_analysis.R")
+cs_result <- linear_regression_power(r_partial = effect_r, power = 0.8, n_predictors = 1)
+
+# Efficiency comparison: cl_result$n vs cs_result$n
+```
+
+## Effect Size Guidelines
+
+### Framework Interpretation (Cohen's Standard)
+
+- **r < 0.10**: Negligible cross-lagged effect
+- **r = 0.10-0.29**: Small cross-lagged effect
+- **r = 0.30-0.49**: Medium cross-lagged effect
+- **r ≥ 0.50**: Large cross-lagged effect
+
+### Stability Coefficient Context
+
+**High Stability (0.7+)**: Small cross-lagged effects (r = 0.05-0.15) can be meaningful
+
+**Moderate Stability (0.5-0.7)**: Medium effects (r = 0.15-0.25) typically needed
+
+**Low Stability (<0.5)**: Larger effects (r = 0.25+) more detectable
+
+### Field-Specific Planning (Cross-lagged effects)
+
+- **Psychology**: r = 0.10-0.20 (personality-behavior dynamics)
+- **Education**: r = 0.08-0.18 (achievement-motivation cycles)
+- **Organizational**: r = 0.12-0.22 (job satisfaction-performance)
+- **Development**: r = 0.15-0.25 (parent-child interactions)
+
+## Sample Size Planning
+
+Cross-lagged panel models require larger samples than cross-sectional designs due to the need to detect effects while controlling for stability. Sample size requirements depend heavily on effect size, stability coefficients, and number of waves:
+
+```r
+# Assess stability coefficient impact on sample size
+cross_lagged_panel_power(r_partial = 0.15, power = 0.8, n_waves = 3, stability_coefficient = 0.5)
+cross_lagged_panel_power(r_partial = 0.15, power = 0.8, n_waves = 3, stability_coefficient = 0.7)
+cross_lagged_panel_power(r_partial = 0.15, power = 0.8, n_waves = 3, stability_coefficient = 0.8)
+
+# Compare with cross-sectional requirements
+linear_regression_power(r_partial = 0.15, power = 0.8, n_predictors = 1)
+```
+
+## Best Practices
+
+### Framework Workflow
+
+1. **Use framework functions** for all effect size conversions
+2. **Apply default discount factor** (0.75) for conservative planning
+3. **Leverage auto-detection** by providing any 2 of 3 parameters
+4. **Check framework conversions** in results for cross-method comparison
+
+### Study Planning
+
+1. **Estimate stability coefficients** from pilot data or literature
+2. **Account for attrition** in longitudinal designs (plan 20-40% larger initial sample)
+3. **Consider wave timing** balancing stability and change
+4. **Focus on partial correlations** for temporal precedence interpretation
+
+### Quality Assurance
+
+1. **Framework Validation**: All inputs validated by core utilities
+2. **Mathematical Accuracy**: Base R calculations ensure reliability
+3. **Consistent Interpretation**: Standard Cohen's effect size guidelines
+4. **Cross-method Comparison**: Direct comparison with regression, mediation, SEM results
+
+## Integration with Unified Framework
+
+### Framework Functions Used
+
+- `framework_effect_size()`: Unified effect size conversion
+- `validate_partial_r()`: Input validation
+- `framework_conversion_summary()`: Complete effect size report
+- `partial_r_to_cohens_f2()`: Framework-consistent conversions
+
+### Package Integration
+
+This cross-lagged panel analysis integrates seamlessly with all other framework methods:
+
+- **Linear Regression**: Same r_partial values for cross-sectional comparisons
+- **Repeated Measures**: Consistent effect size metric for temporal designs
+- **Mediation Analysis**: Unified effect interpretation for causal pathways
+- **SEM Models**: Framework foundation for complex structural longitudinal models
+
+Cross-lagged panel models provide sophisticated temporal analysis within the unified framework, with all longitudinal analyses building on regression principles while maintaining mathematical consistency and interpretive clarity through shared partial correlation metrics.
+
+## Examples
+
+Essential scenarios demonstrating cross-lagged panel power analysis within the unified framework using partial correlations and stability considerations.
+
+Author: Power Analysis Package
+Version: 1.2
+
+### EXAMPLE 1: BASIC FRAMEWORK WORKFLOW
+
+```{r ex1}
+# Research: Reciprocal stress-performance relationship over 3 waves
+# Expected cross-lagged effect r = 0.15, high stability
+
+result1 <- cross_lagged_panel_power(
+  r_partial = 0.15,
+  power = 0.8,
+  n_waves = 3,
+  stability_coefficient = 0.7
+)
+print.cross_lagged_panel_power_analysis(result1)
+```
+
+### EXAMPLE 2: FRAMEWORK EFFECT SIZE CONVERSION
+
+```{r ex2}
+# Literature reports Cohen's d = 0.3 for intervention cross-lagged effects
+
+result2 <- cross_lagged_panel_power(
+  effect_input = 0.3,
+  effect_type = "d",
+  power = 0.8,
+  n_waves = 3,
+  stability_coefficient = 0.6
+)
+
+cat("Cohen's d = 0.3 → Framework r =", round(result2$r_partial, 3), 
+    ", Required n =", result2$n, "\n")
+```
+
+### EXAMPLE 3: STABILITY COEFFICIENT IMPACT
+
+```{r ex3}
+# How stability affects sample size requirements
+
+base_effect <- 0.15
+stability_levels <- c(0.5, 0.7, 0.8)
+
+cat("Sample size by stability level (r = 0.15, 80% power):\n")
+for (stab in stability_levels) {
+  result <- cross_lagged_panel_power(r_partial = base_effect, power = 0.8, 
+                                     n_waves = 3, stability_coefficient = stab)
+  cat("Stability =", stab, ": n =", result$n, 
+      " (effective n =", round(result$n_effective), ")\n")
+}
+```
+
+### EXAMPLE 4: CROSS-METHOD EFFICIENCY COMPARISON
+
+```{r}
+# Same effect size: cross-lagged vs. cross-sectional regression
+
+effect_r <- 0.20
+
+# Cross-lagged panel
+cl_result <- cross_lagged_panel_power(r_partial = effect_r, power = 0.8, 
+                                      n_waves = 3, stability_coefficient = 0.6)
+
+# Cross-sectional comparison (simplified - using approximate multiplier)
+cs_approximate_n <- round(cl_result$n * 0.4)  # Cross-sectional typically needs ~40% of longitudinal sample
+
+cat("Sample size comparison for r =", effect_r, ":\n")
+cat("Cross-lagged panel:", cl_result$n, "vs Cross-sectional (approx.):", cs_approximate_n, "\n")
+cat("Longitudinal cost:", round(cl_result$n / cs_approximate_n, 1), "x\n")
+```
+
+### EXAMPLE 5: LONGITUDINAL WAVE PLANNING
+
+```{r}
+# Multiple waves with varying stability patterns
+
+wave_scenarios <- c(2, 3, 4)
+effect_size <- 0.18
+
+cat("Sample sizes for r = 0.18, stability = 0.65:\n")
+for (waves in wave_scenarios) {
+  result <- cross_lagged_panel_power(r_partial = effect_size, power = 0.8, 
+                                     n_waves = waves, stability_coefficient = 0.65)
+  cat(waves, "waves:", result$n, "\n")
+}
+```
+
+### EXAMPLE 6: FIELD-SPECIFIC APPLICATIONS
+
+```{r ex6}
+# Typical effect sizes and stability by research area
+
+fields <- data.frame(
+  Field = c("Psychology", "Education", "Organizational", "Development"),
+  Effect_r = c(0.15, 0.12, 0.18, 0.22),
+  Stability = c(0.6, 0.7, 0.65, 0.55),
+  Waves = c(3, 4, 3, 4)
+)
+
+cat("Sample sizes for 80% power by field:\n")
+for (i in 1:nrow(fields)) {
+  result <- cross_lagged_panel_power(
+    r_partial = fields$Effect_r[i],
+    power = 0.8,
+    n_waves = fields$Waves[i],
+    stability_coefficient = fields$Stability[i]
+  )
+  cat(fields$Field[i], "(r =", fields$Effect_r[i], ", stab =", fields$Stability[i], "):", result$n, "\n")
+}
+```
+
+### EXAMPLE 7: PILOT TO MAIN STUDY SCALING
+
+```{r ex7}
+# Conservative planning from pilot data
+
+pilot_effect <- 0.25  # Optimistic pilot result
+conservative_planning <- cross_lagged_panel_power(
+  effect_input = pilot_effect,
+  effect_type = "r",  # Framework applies 0.75 discount automatically
+  power = 0.8,
+  n_waves = 3,
+  stability_coefficient = 0.65
+)
+
+cat("Pilot effect r =", pilot_effect, "→ Planning r =", 
+    round(conservative_planning$r_partial, 3), ", Required n =", conservative_planning$n, "\n")
+```
+
+### EXAMPLE 8: DETECTABLE EFFECT SIZE ANALYSIS
+
+```{r ex8}
+# Resource-constrained study: what can we detect?
+
+constrained_n <- 400
+waves <- 3
+
+detectable_result <- cross_lagged_panel_power(
+  n = constrained_n,
+  power = 0.8,
+  n_waves = waves,
+  stability_coefficient = 0.6
+)
+
+cat("With n =", constrained_n, ", can detect cross-lagged r =", 
+    round(detectable_result$r_partial, 3), "\n")
+```
+
+### EXAMPLE 9: FRAMEWORK CONVERSION TABLE
+
+```{r ex9}
+# Multiple effect sizes for planning comparison
+
+effect_sizes <- c(0.10, 0.15, 0.20)
+
+for (r in effect_sizes) {
+  result <- cross_lagged_panel_power(r_partial = r, power = 0.8, 
+                                     n_waves = 3, stability_coefficient = 0.65)
+  cat("r =", r, ": n =", result$n, 
+      " (d =", round(result$effect_size_conversions$cohens_d, 2), ")\n")
+}
+```
+
+### EXAMPLE 10: LITERATURE INTEGRATION WORKFLOW
+
+```{r ex10}
+# Multiple studies with different effect metrics
+
+studies <- data.frame(
+  Study = c("A", "B", "C"),
+  Effect = c(0.3, 0.04, 0.18),  # d, R², direct r
+  Type = c("d", "r_squared", "r"),
+  Stability = c(0.6, 0.7, 0.65)
+)
+
+# Convert to framework partial correlations using direct function calls
+framework_results <- list()
+for (i in 1:nrow(studies)) {
+  framework_results[[i]] <- cross_lagged_panel_power(
+    effect_input = studies$Effect[i], 
+    effect_type = studies$Type[i], 
+    power = 0.8,
+    n_waves = 3,
+    stability_coefficient = studies$Stability[i]
+  )
+}
+
+# Meta-analytic planning
+framework_effects <- sapply(framework_results, function(x) x$r_partial)
+meta_r <- mean(framework_effects)
+meta_stability <- mean(studies$Stability)
+
+meta_result <- cross_lagged_panel_power(
+  r_partial = meta_r,
+  power = 0.8,
+  n_waves = 3,
+  stability_coefficient = meta_stability
+)
+
+cat("Literature integration: Meta r =", round(meta_r, 3), 
+    ", Required n =", meta_result$n, "\n")
+```
+
+## FRAMEWORK BEST PRACTICES
+
+- Use cross_lagged_panel_power() with effect_input for automatic conversion and discount
+- Higher stability coefficients require substantially larger samples
+- Framework partial correlations enable comparison with regression/mediation
+- Longitudinal designs costly but provide stronger causal inference
+- Conservative planning with 0.75 discount handles optimistic pilot effects

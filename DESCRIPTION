@@ -1,0 +1,16 @@
+Package: rphbPower
+Title: RPHB Power Analysis
+Version: 0.0.0.9000
+Authors@R: 
+    person("Andrew", "Tyner", , "andrewtyner@cos.io", role = c("aut", "cre"))
+Description: Comprehensive power analysis functions for regression-based statistical methods using partial correlations as the standardized effect size metric with integrated conservative planning.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Imports: 
+    cli
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

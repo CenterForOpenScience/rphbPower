@@ -1,0 +1,285 @@
+---
+title: "Assumption Validation Guide"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Assumption Validation Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+devtools::load_all()
+library(rphbPower)
+```
+
+Essential guidance for validating statistical assumptions within the unified partial correlation framework to ensure reliable power analysis across all methods.
+
+## Framework Overview
+
+The unified framework depends on regression-based assumptions across all analysis types. **Assumption violations invalidate partial correlation estimates and power calculations.** This guide ensures adequate sample sizes for both effect detection and assumption validation.
+
+**Core Principle:** Your power analysis is only meaningful if statistical assumptions hold for your chosen method.
+
+## Universal Assumption Requirements
+
+### Partial Correlation Reliability
+All framework analyses depend on reliable partial correlation estimates. Key assumptions affect this reliability:
+
+| **Assumption** | **Framework Impact** | **Minimum N** | **Recommended N** |
+|----------------|---------------------|---------------|-------------------|
+| **Linearity** | Underestimates r_partial | 100+ | 150+ |
+| **Normality** | Affects inference precision | 50+ | 100+ |
+| **Homoscedasticity** | Biases standard errors | 140+ | 200+ |
+| **Independence** | Violates core framework assumption | Design-dependent | Design-dependent |
+| **Multicollinearity** | Destabilizes r_partial estimates | 5×p | 8×p |
+
+*p = number of predictors*
+
+## Method-Specific Validation
+
+### Correlation Analysis
+```r
+library(rphbPower)
+
+# Basic requirements for reliable r_partial
+correlation_assumptions <- list(
+  linearity = 100,        # Bivariate scatterplot inspection
+  normality = 50,         # Q-Q plots adequate
+  homoscedasticity = 140, # Residual variance consistency
+  independence = "design" # No autocorrelation
+)
+
+# Framework integration
+correlation_power(r_partial = 0.25, n = max(unlist(correlation_assumptions[-4])))
+```
+
+### Linear/Logistic Regression
+```r
+# Requirements scale with model complexity
+regression_assumptions <- function(n_predictors) {
+  list(
+    linearity = 150,                    # Component + residual plots
+    normality = 100,                    # Residual Q-Q plots  
+    homoscedasticity = 200,             # Breusch-Pagan test power
+    multicollinearity = n_predictors * 8, # VIF < 5 detection
+    outliers = max(60, n_predictors * 5)  # Cook's distance reliability
+  )
+}
+
+# Framework application
+n_pred <- 3
+assumption_n <- max(unlist(regression_assumptions(n_pred)))
+linear_regression_power(r_partial = 0.20, n = assumption_n, n_predictors = n_pred)
+```
+
+### Mediation Analysis
+```r
+# Both a-path and b-path must satisfy assumptions
+mediation_assumptions <- list(
+  linearity_both_paths = 150,     # X→M and M→Y linearity
+  normality_residuals = 100,      # Both path residuals
+  homoscedasticity = 200,         # Consistent across paths
+  no_confounding = "design",      # Causal assumptions
+  measurement_reliability = 150   # Mediation especially sensitive
+)
+
+# Framework application  
+mediation_regression_power(r_a = 0.25, r_b = 0.25, n = 200)
+```
+
+### Longitudinal Analysis
+```r
+# Time-specific assumption considerations
+longitudinal_assumptions <- list(
+  stationarity = 200,           # Stable relationships over time
+  autocorrelation = 150,        # Residual independence across time
+  missing_data_mechanism = 100, # MCAR/MAR assumptions
+  measurement_invariance = 200  # Consistent measures over time
+)
+
+# Framework application
+cross_lagged_panel_power(r_partial = 0.15, n = 200, n_waves = 3)
+```
+
+### Multilevel Models
+```r
+# Hierarchical assumption requirements
+multilevel_assumptions <- list(
+  level_1_normality = 100,      # Individual-level residuals
+  level_2_normality = 30,       # Cluster-level (minimum clusters)
+  homoscedasticity = 200,       # Within and between cluster variance
+  independence_clusters = "design", # No cluster confounding
+  adequate_clustering = 50      # ICC detection power
+)
+
+# Framework application
+mixed_models_power(r_partial = 0.20, n_groups = 30, n_per_group = 7)  # Total n ≈ 210
+```
+
+## Integrated Planning Workflow
+
+### Step 1: Identify Critical Assumptions
+```r
+# Method-specific assumption priorities
+assumption_priorities <- list(
+  correlation = c("linearity", "normality"),
+  linear_regression = c("linearity", "homoscedasticity", "multicollinearity"),
+  mediation = c("linearity", "measurement_reliability", "confounding"),
+  longitudinal = c("stationarity", "missing_data"),
+  multilevel = c("clustering", "level_independence")
+)
+```
+
+### Step 2: Calculate Requirements
+```r
+# Framework-integrated planning function
+framework_assumption_planning <- function(method, r_partial, n_predictors = 1, power = 0.8) {
+  
+  # Method-specific minimums
+  method_minimums <- list(
+    correlation = 150,
+    linear_regression = max(200, n_predictors * 8),
+    mediation = 200,
+    longitudinal = 200,
+    multilevel = 200,
+    sem = max(250, n_predictors * 10)
+  )
+  
+  # Effect detection sample size
+  effect_n <- switch(method,
+    correlation = {
+      correlation_power(r_partial = r_partial, power = power)$n
+    },
+    linear_regression = {
+      linear_regression_power(r_partial = r_partial, power = power, n_predictors = n_predictors)$n
+    },
+    mediation = {
+      mediation_regression_power(r_a = r_partial, r_b = r_partial, power = power)$n
+    },
+    200  # Default for complex methods
+  )
+  
+  # Final recommendation
+  assumption_n <- method_minimums[[method]]
+  final_n <- max(effect_n, assumption_n)
+  
+  return(list(
+    effect_n = effect_n,
+    assumption_n = assumption_n,
+    recommended_n = final_n
+  ))
+}
+```
+
+### Step 3: Framework Application
+```r
+# Example: Linear regression planning
+planning_result <- framework_assumption_planning(
+  method = "linear_regression",
+  r_partial = 0.25,
+  n_predictors = 4,
+  power = 0.8
+)
+
+# Use recommended sample size
+final_analysis <- linear_regression_power(
+  r_partial = 0.25, 
+  n = planning_result$recommended_n, 
+  n_predictors = 4
+)
+```
+
+## Field-Specific Considerations
+
+### Psychology and Social Sciences
+
+**High Priority:** Multicollinearity, measurement reliability, normality
+
+**Common Issues:** Self-report bias, range restriction, missing data
+
+### Education Research
+
+**High Priority:** Clustering (classrooms/schools), missing data, measurement invariance
+
+**Common Issues:** Nested data, attrition, developmental changes
+
+### Health and Medicine
+
+**High Priority:** Non-normal distributions, heteroscedasticity, missing data
+
+**Common Issues:** Skewed outcomes, varying precision, dropout
+
+### Business and Economics
+
+**High Priority:** Heteroscedasticity, autocorrelation, measurement error
+
+**Common Issues:** Time trends, market effects, reporting bias
+
+## Quick Diagnostic Planning
+
+### Essential Checks by Method
+```r
+# Framework diagnostic checklist
+framework_diagnostics <- list(
+  
+  # All methods
+  universal = c("linearity", "outliers", "measurement_quality"),
+  
+  # Method-specific additions
+  regression = c("homoscedasticity", "multicollinearity", "normality"),
+  mediation = c("confounding", "reliability", "indirect_effect_distribution"),
+  longitudinal = c("stationarity", "autocorrelation", "missing_pattern"),
+  multilevel = c("clustering_adequacy", "level_assumptions", "convergence")
+)
+```
+
+### Sample Size Safety Margins
+Apply conservative multipliers for robust analysis:
+
+| **Concern Level** | **Multiplier** | **Application** |
+|-------------------|----------------|-----------------|
+| **Low** | 1.1 | Well-controlled lab studies |
+| **Medium** | 1.25 | Typical field research |
+| **High** | 1.5 | Observational, complex designs |
+
+## Framework Assumption Best Practices
+
+### Planning Phase
+
+1. **Identify method-specific critical assumptions** based on analysis type
+2. **Calculate assumption validation sample sizes** alongside effect detection
+3. **Use framework safety margins** for conservative planning
+4. **Plan diagnostic procedures** before data collection
+
+### Analysis Phase
+
+1. **Check assumptions systematically** using appropriate tests
+2. **Document violations** and remedial actions taken
+3. **Report assumption checks** in results
+4. **Use robust methods** when assumptions violated
+
+### Remedial Actions
+
+- **Transformation:** Log, square root, Box-Cox for normality/linearity
+- **Robust methods:** Robust standard errors, bootstrap confidence intervals
+- **Alternative analyses:** Nonparametric methods when appropriate
+- **Model adjustment:** Additional predictors, different specifications
+
+## Integration with Framework Power Analysis
+
+**Key Principle:** The unified framework ensures that assumption validation and effect detection are planned together using consistent partial correlation metrics.
+
+```r
+# Complete framework planning
+final_sample_size <- max(
+  framework_power_analysis_n,    # From specific method
+  framework_assumption_validation_n,  # From this guide
+  field_minimum_n               # From effect_size_guidelines.md
+)
+```
+
+This integrated approach ensures that your study has adequate power for both detecting meaningful effects and validating the statistical assumptions that make those effect estimates reliable within the unified partial correlation framework.

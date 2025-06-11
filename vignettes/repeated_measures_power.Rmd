@@ -1,0 +1,403 @@
+---
+title: "Repeated Measures Power Analysis"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Repeated Measures Power Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+devtools::load_all()
+```
+
+Power analysis for repeated measures designs using partial correlations within the unified framework with integrated design efficiency calculations and conservative planning.
+
+## Overview
+
+Repeated measures examines temporal effects while controlling for individual differences, providing substantial efficiency gains through correlated observations. All effect sizes are converted to partial correlations for direct comparison across correlation, regression, mediation, SEM, and other framework analyses.
+
+## Key Framework Features
+
+- **Unified Effect Size Metric**: All analyses use partial correlations for direct comparison
+- **Automatic Parameter Detection**: Provide any two of (r_partial, n, power) - the third is calculated
+- **Conservative Planning**: Built-in discount factor (default 0.75) for realistic estimates
+- **Framework Integration**: Seamless conversion from Cohen's d, f², R², eta-squared
+- **Design Efficiency**: Accounts for correlation benefits from repeated measures
+
+## Quick Start
+
+```{r setup}
+library(rphbPower)
+```
+
+```r
+# Calculate power (provide r_partial and n)
+repeated_measures_power(r_partial = 0.25, n = 40, n_timepoints = 3)
+
+# Calculate sample size (provide r_partial and power)
+repeated_measures_power(r_partial = 0.20, power = 0.8, n_timepoints = 2)
+
+# Calculate effect size (provide n and power)
+repeated_measures_power(n = 50, power = 0.8, n_timepoints = 4)
+
+# Framework integration (automatic conversion and discount)
+repeated_measures_framework_power(effect_size = 0.5, effect_type = "d", power = 0.8, n_timepoints = 3)
+```
+
+## Main Functions
+
+### `repeated_measures_power()`
+Core power analysis with framework integration.
+
+**Parameters:**
+
+- `r_partial`: Partial correlation coefficient (NULL to calculate)
+- `n`: Sample size (NULL to calculate)
+- `power`: Statistical power (NULL to calculate, default = 0.8)
+- `n_timepoints`: Number of repeated measures (default = 2)
+- `correlation_between_measures`: Correlation between measures (default = 0.5)
+- `alpha`: Significance level (default = 0.05)
+- `discount_factor`: Conservative discount factor (default = 0.75)
+- `effect_input`: Raw effect size input (alternative to r_partial)
+- `effect_type`: Type of effect_input ("r", "d", "f2", "r_squared", "eta_squared")
+
+### `repeated_measures_framework_power()`
+Framework-integrated analysis with automatic conversion.
+
+**Parameters:**
+
+- `effect_size`: Effect size value
+- `effect_type`: Type of effect size ("r", "d", "f2", "r_squared", "eta_squared")
+- `n`: Sample size (NULL to calculate)
+- `power`: Target power (default = 0.8)
+- `n_timepoints`: Number of timepoints
+
+### Convenience Functions
+
+- `repeated_measures_sample_size()`: Quick sample size calculation
+- `repeated_measures_power_check()`: Quick power calculation
+
+## Framework Integration Examples
+
+### Multiple Effect Size Types
+```r
+# Cohen's d to framework repeated measures
+repeated_measures_framework_power(effect_size = 0.5, effect_type = "d", power = 0.8, n_timepoints = 3)
+
+# R² to framework repeated measures
+repeated_measures_framework_power(effect_size = 0.09, effect_type = "r_squared", n = 40, n_timepoints = 2)
+
+# Direct partial correlation
+repeated_measures_power(r_partial = 0.25, power = 0.8, n_timepoints = 4)
+```
+
+### Cross-Method Efficiency Comparison
+```r
+# Same effect size: repeated measures vs. independent groups
+effect_r <- 0.25
+
+# Repeated measures (pre-post)
+rm_result <- repeated_measures_power(r_partial = effect_r, power = 0.8, n_timepoints = 2)
+
+# Independent groups (framework comparison)
+source("05_methods/5.2_regression/linear_regression/linear_regression_power_analysis.R")
+indep_result <- linear_regression_power(r_partial = effect_r, power = 0.8, n_predictors = 1)
+
+# Efficiency comparison: rm_result$n vs indep_result$n
+```
+
+## Effect Size Guidelines
+
+### Framework Interpretation (Cohen's Standard)
+
+- **r < 0.10**: Negligible effect
+- **r = 0.10-0.29**: Small effect
+- **r = 0.30-0.49**: Medium effect
+- **r ≥ 0.50**: Large effect
+
+### Field-Specific Planning (Cohen's d equivalents)
+
+- **Psychology**: d = 0.4 (r ≈ 0.15 after discount)
+- **Education**: d = 0.6 (r ≈ 0.23 after discount)
+- **Medicine**: d = 0.3 (r ≈ 0.11 after discount)
+- **Sports**: d = 0.8 (r ≈ 0.30 after discount)
+
+## Sample Size Planning
+
+### Design Efficiency Considerations
+Repeated measures designs require substantially smaller samples than independent groups due to correlated observations. Use framework functions to determine precise requirements for your specific design:
+
+```r
+# Assess correlation between measures impact
+repeated_measures_power(r_partial = 0.25, power = 0.8, n_timepoints = 3, correlation_between_measures = 0.3)
+repeated_measures_power(r_partial = 0.25, power = 0.8, n_timepoints = 3, correlation_between_measures = 0.6)
+repeated_measures_power(r_partial = 0.25, power = 0.8, n_timepoints = 3, correlation_between_measures = 0.8)
+
+# Assess number of timepoints impact
+repeated_measures_power(r_partial = 0.20, power = 0.8, n_timepoints = 2, correlation_between_measures = 0.6)
+repeated_measures_power(r_partial = 0.20, power = 0.8, n_timepoints = 4, correlation_between_measures = 0.6)
+repeated_measures_power(r_partial = 0.20, power = 0.8, n_timepoints = 6, correlation_between_measures = 0.6)
+```
+
+## Best Practices
+
+### Framework Workflow
+
+1. **Use framework functions** for all effect size conversions
+2. **Apply default discount factor** (0.75) for conservative planning
+3. **Leverage auto-detection** by providing any 2 of 3 parameters
+4. **Check framework conversions** in results for cross-method comparison
+
+### Study Planning
+
+1. **Estimate correlation between measures** from pilot data or literature
+2. **Account for design efficiency** in sample size planning
+3. **Individual Predictors**: Focus on partial correlations for temporal effects
+4. **Conservative Estimates**: Trust framework discount for realistic planning
+
+### Quality Assurance
+
+1. **Framework Validation**: All inputs validated by core utilities
+2. **Mathematical Accuracy**: Base R calculations ensure reliability
+3. **Consistent Interpretation**: Standard Cohen's effect size guidelines
+4. **Cross-method Comparison**: Direct comparison with correlation, regression, mediation results
+
+## Integration with Unified Framework
+
+### Framework Functions Used
+
+- `framework_effect_size()`: Unified effect size conversion
+- `validate_partial_r()`: Input validation
+- `framework_conversion_summary()`: Complete effect size report
+- `partial_r_to_cohens_f2()`: Framework-consistent conversions
+
+### Package Integration
+This repeated measures analysis integrates seamlessly with all other framework methods:
+
+- **Linear Regression**: Same r_partial values for between-subjects comparisons
+- **Correlation Analysis**: Consistent effect size metric for bivariate relationships
+- **Mediation Analysis**: Unified effect interpretation for temporal pathways
+- **Mixed Models**: Framework foundation for complex repeated measures designs
+
+Repeated measures provides substantial efficiency advantages within the unified framework, with all temporal analyses building on regression principles while maintaining mathematical consistency and interpretive clarity through shared partial correlation metrics.
+
+## Examples
+
+Essential scenarios demonstrating repeated measures power analysis within the unified framework using partial correlations and design efficiency.
+
+Author: Power Analysis Package
+Version: 1.2
+
+### EXAMPLE 1: BASIC FRAMEWORK WORKFLOW
+
+```{r ex1}
+# Research: Pre-post intervention effectiveness
+# Expected effect r = 0.25, moderate correlation between measures
+
+result1 <- repeated_measures_power(
+  r_partial = 0.25,
+  power = 0.8,
+  n_timepoints = 2,
+  correlation_between_measures = 0.6
+)
+print.repeated_measures_power_analysis(result1)
+```
+
+### EXAMPLE 2: FRAMEWORK EFFECT SIZE CONVERSION
+
+```{r ex2}
+# Literature meta-analysis reports Cohen's d = 0.5 for intervention effects
+
+result2 <- repeated_measures_power(
+  effect_input = 0.5,
+  effect_type = "d",
+  power = 0.8,
+  n_timepoints = 3,
+  correlation_between_measures = 0.7
+)
+
+cat("Cohen's d = 0.5 → Framework r =", round(result2$r_partial, 3), 
+    ", Required n =", result2$n, "\n")
+```
+
+### EXAMPLE 3: DESIGN EFFICIENCY DEMONSTRATION
+
+```{r ex3}
+# Compare efficiency across correlation patterns
+
+base_effect <- 0.20
+sample_size <- 50
+timepoints <- 4
+
+correlations <- c(0.3, 0.6, 0.8)
+cat("Design efficiency by correlation pattern (r = 0.20, n = 50):\n")
+for (corr in correlations) {
+  result <- repeated_measures_power(r_partial = base_effect, n = sample_size, 
+                                    n_timepoints = timepoints, correlation_between_measures = corr)
+  cat("Correlation =", corr, ": Power =", round(result$power, 3), 
+      ", Efficiency =", round(result$design_efficiency, 2), "x\n")
+}
+```
+
+### EXAMPLE 4: CROSS-METHOD EFFICIENCY COMPARISON
+
+```{r ex4}
+# Same effect size: repeated measures vs. independent groups
+
+effect_r <- 0.25
+
+# Repeated measures (pre-post)
+rm_result <- repeated_measures_power(r_partial = effect_r, power = 0.8, n_timepoints = 2)
+
+# Independent groups comparison (simplified - using design efficiency approximation)
+independent_approximate_n <- round(rm_result$n * rm_result$design_efficiency)
+
+cat("Sample size comparison for r =", effect_r, ":\n")
+cat("Repeated measures:", rm_result$n, "vs Independent groups (approx.):", independent_approximate_n, "\n")
+cat("Efficiency gain:", round(independent_approximate_n / rm_result$n, 1), "x\n")
+```
+
+### EXAMPLE 5: LONGITUDINAL STUDY PLANNING
+
+```{r ex5}
+# Multiple timepoints with varying correlation patterns
+
+timepoint_scenarios <- c(2, 3, 4, 5)
+effect_size <- 0.20
+
+cat("Sample sizes for r = 0.20, 80% power by design:\n")
+for (k in timepoint_scenarios) {
+  result <- repeated_measures_power(r_partial = effect_size, power = 0.8, 
+                                    n_timepoints = k, correlation_between_measures = 0.6)
+  cat(k, "timepoints:", result$n, "\n")
+}
+```
+
+### EXAMPLE 6: FIELD-SPECIFIC APPLICATIONS
+
+```{r ex6}
+# Typical effect sizes and designs by research area
+
+fields <- data.frame(
+  Field = c("Psychology", "Education", "Medicine", "Sports"),
+  Effect_r = c(0.20, 0.25, 0.15, 0.35),
+  Timepoints = c(3, 4, 5, 6),
+  Correlation = c(0.6, 0.7, 0.5, 0.8)
+)
+
+cat("Sample sizes for 80% power by field:\n")
+for (i in 1:nrow(fields)) {
+  result <- repeated_measures_power(
+    r_partial = fields$Effect_r[i],
+    power = 0.8,
+    n_timepoints = fields$Timepoints[i],
+    correlation_between_measures = fields$Correlation[i]
+  )
+  cat(fields$Field[i], "(r =", fields$Effect_r[i], ",", 
+      fields$Timepoints[i], "times):", result$n, "\n")
+}
+```
+
+### EXAMPLE 7: PILOT TO MAIN STUDY SCALING
+
+```{r ex7}
+# Conservative planning from pilot data
+
+pilot_effect <- 0.35  # Optimistic pilot result
+conservative_planning <- repeated_measures_power(
+  effect_input = pilot_effect,
+  effect_type = "r",  # Framework applies 0.75 discount automatically
+  power = 0.8,
+  n_timepoints = 3,
+  correlation_between_measures = 0.6
+)
+
+cat("Pilot effect r =", pilot_effect, "→ Planning r =", 
+    round(conservative_planning$r_partial, 3), ", Required n =", conservative_planning$n, "\n")
+```
+
+### EXAMPLE 8: DETECTABLE EFFECT SIZE ANALYSIS
+
+```{r ex8}
+# Resource-constrained study: what can we detect?
+
+constrained_n <- 40
+timepoints <- 3
+
+detectable_result <- repeated_measures_power(
+  n = constrained_n,
+  power = 0.8,
+  n_timepoints = timepoints,
+  correlation_between_measures = 0.6
+)
+
+cat("With n =", constrained_n, ", can detect r =", round(detectable_result$r_partial, 3),
+    " (R² =", round(detectable_result$effect_size_conversions$r_squared, 3), ")\n")
+```
+
+### EXAMPLE 9: FRAMEWORK CONVERSION TABLE
+
+```{r ex9}
+# Multiple effect sizes for planning comparison
+
+effect_sizes <- c(0.15, 0.25, 0.35)
+
+for (r in effect_sizes) {
+  result <- repeated_measures_power(r_partial = r, power = 0.8, n_timepoints = 3)
+  cat("r =", r, ": n =", result$n, 
+      " (d =", round(result$effect_size_conversions$cohens_d, 2), ")\n")
+}
+```
+
+### EXAMPLE 10: LITERATURE INTEGRATION WORKFLOW
+
+```{r ex10}
+# Multiple studies with different effect metrics
+
+studies <- data.frame(
+  Study = c("A", "B", "C"),
+  Effect = c(0.4, 0.12, 0.25),  # d, R², direct r
+  Type = c("d", "r_squared", "r"),
+  Timepoints = c(2, 3, 4)
+)
+
+# Convert to framework partial correlations using direct function calls
+framework_results <- list()
+for (i in 1:nrow(studies)) {
+  framework_results[[i]] <- repeated_measures_power(
+    effect_input = studies$Effect[i], 
+    effect_type = studies$Type[i], 
+    power = 0.8,
+    n_timepoints = studies$Timepoints[i],
+    correlation_between_measures = 0.6
+  )
+}
+
+# Meta-analytic planning
+framework_effects <- sapply(framework_results, function(x) x$r_partial)
+meta_r <- mean(framework_effects)
+meta_timepoints <- round(mean(studies$Timepoints))
+
+meta_result <- repeated_measures_power(
+  r_partial = meta_r,
+  power = 0.8,
+  n_timepoints = meta_timepoints,
+  correlation_between_measures = 0.6
+)
+
+cat("Literature integration: Meta r =", round(meta_r, 3), 
+    ", Required n =", meta_result$n, "\n")
+```
+
+## FRAMEWORK BEST PRACTICES
+
+- Use repeated_measures_power() with effect_input for automatic conversion and discount
+- Higher correlations between measures dramatically improve power
+- Framework partial correlations enable comparison with linear regression  
+- Design efficiency quantifies repeated measures advantages
+- Conservative planning with 0.75 discount handles optimistic pilot effects

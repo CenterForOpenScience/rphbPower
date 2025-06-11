@@ -1,0 +1,514 @@
+---
+title: "Method Selection Guide"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Method Selection Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+devtools::load_all()
+library(rphbPower)
+```
+
+Comprehensive guidance for choosing the optimal power analysis method within the unified partial correlation framework.
+
+## Framework Overview
+
+All power analysis methods in this package use **partial correlations** as the standardized effect size metric, enabling direct comparison across correlation, regression, mediation, SEM, multilevel, and longitudinal approaches. This unified framework simplifies method selection while maintaining statistical accuracy.
+
+**Key Advantages:**
+
+- **Direct comparison**: Same effect size (r_partial) across all methods
+- **Conservative planning**: Built-in 0.75 discount factor for realistic estimates
+- **Auto-detection**: Provide any 2 of (effect size, sample size, power) - calculates the third
+- **Unified interface**: Consistent function patterns across all analysis types
+
+## Quick Method Selection
+
+### By Research Design
+| **Research Question** | **Primary Method** | **Key Function** | **Notes** |
+|----------------------|-------------------|------------------|-----------|
+| Simple relationship between X and Y | Correlation | `correlation_power()` | Bivariate associations |
+| X predicts Y (multiple predictors) | Linear Regression | `linear_regression_power()` | Most common choice |
+| Binary outcome prediction | Logistic Regression | `logistic_regression_power()` | Yes/no, success/failure |
+| Within-subjects design | Repeated Measures | `repeated_measures_power()` | Pre-post, multiple conditions |
+| Clustered/nested data | Multilevel Models | `mixed_models_power()` | Students in schools, etc. |
+| Causal pathway testing | Mediation | `mediation_regression_power()` | X → M → Y mechanisms |
+| Complex structural models | SEM | `sem_direct_effects_power()` | Latent variables, multiple paths |
+| Panel/longitudinal data | Fixed Effects | `fixed_effects_power()` | Many time points |
+| Reciprocal causation | Cross-Lagged Panel | `cross_lagged_panel_power()` | X ⟷ Y over time |
+| Robust to outliers | Nonparametric | `wilcoxon_signed_rank_power()` | Distribution-free |
+
+### By Data Characteristics
+| **Data Type** | **Design Features** | **Recommended Method** |
+|---------------|-------------------|----------------------|
+| **Continuous outcome** | Single predictor | Linear regression |
+| **Continuous outcome** | Multiple predictors | Linear regression |
+| **Continuous outcome** | Repeated measures | Repeated measures |
+| **Continuous outcome** | Clustered structure | Mixed models |
+| **Binary outcome** | Any design | Logistic regression |
+| **Ordinal/skewed** | Robust alternative needed | Nonparametric |
+| **Longitudinal** | Many time points | Fixed effects |
+| **Longitudinal** | Reciprocal effects | Cross-lagged panel |
+
+## Framework Method Comparison
+
+### Same Effect Size, Different Methods
+The unified framework enables direct efficiency comparison:
+
+```r
+# Same research question: r_partial = 0.25
+effect_size <- 0.25
+
+# Compare sample size requirements
+corr_n <- correlation_power(r_partial = effect_size, power = 0.8)$n
+reg_n <- linear_regression_power(r_partial = effect_size, power = 0.8, n_predictors = 1)$n
+rm_n <- repeated_measures_power(r_partial = effect_size, power = 0.8, n_timepoints = 2)$n
+
+# Results show relative efficiency
+data.frame(
+  Method = c("Correlation", "Linear Regression", "Repeated Measures"),
+  Required_N = c(corr_n, reg_n, rm_n),
+  Efficiency = c("Baseline", "Similar", "Much better")
+)
+```
+
+## Detailed Method Specifications
+
+### Linear Regression
+**Best for:** Most research questions with continuous outcomes
+
+```r
+# Framework integration examples
+linear_regression_power(r_partial = 0.25, power = 0.8, n_predictors = 1)     # Calculate n
+linear_regression_power(r_partial = 0.25, n = 120, n_predictors = 3)         # Calculate power
+linear_regression_power(n = 150, power = 0.8, n_predictors = 2)              # Calculate effect
+
+# Framework effect input with automatic conversion
+linear_regression_power(
+  effect_input = 0.4,          # Cohen's d from literature
+  effect_type = "d",           # Automatic conversion to r_partial
+  power = 0.8,
+  n_predictors = 3
+)
+```
+
+**When to use:**
+
+- Continuous outcome variable
+- One or more predictors (continuous or categorical)
+- Independent observations
+- Normal residuals acceptable
+
+**Sample size considerations:**
+
+- More predictors require larger samples
+- Framework accounts for model complexity automatically
+- Conservative discount factor improves replication success
+
+### Logistic Regression  
+**Best for:** Binary outcomes (yes/no, success/failure)
+
+```r
+# Using framework partial correlations 
+logistic_regression_power(r_partial = 0.25, power = 0.8, n_predictors = 1)
+
+# Framework conversion from literature effect sizes
+logistic_regression_power(
+  effect_input = 0.15,         # Cohen's f² from meta-analysis
+  effect_type = "f2",
+  power = 0.8,
+  n_predictors = 2
+)
+
+# Using Cohen's d as effect size proxy
+logistic_regression_power(
+  effect_input = 0.5,          # Cohen's d from literature
+  effect_type = "d",
+  power = 0.8,
+  n_predictors = 1
+)
+```
+
+**Critical considerations:**
+
+- Larger samples needed compared to linear regression for equivalent effects
+- Framework enables comparison with linear regression approaches
+- Use Cohen's d as reasonable effect size proxy for binary outcomes
+
+### Repeated Measures
+**Best for:** Within-subjects designs, pre-post comparisons
+
+```r
+repeated_measures_power(
+  r_partial = 0.25,
+  power = 0.8,
+  n_timepoints = 3,
+  correlation_between_measures = 0.6
+)
+
+# Framework conversion for planning
+repeated_measures_power(
+  effect_input = 0.5,          # Cohen's d from pilot
+  effect_type = "d",
+  power = 0.8,
+  n_timepoints = 2
+)
+```
+
+**Advantages:**
+
+- Controls individual differences (higher power)
+- Smaller samples than between-subjects designs
+- Efficient for intervention studies
+
+**Key parameters:**
+
+- Higher correlation between measures = more power
+- More time points can increase or decrease power depending on effect pattern
+
+### Mixed Models
+**Best for:** Clustered, nested, or hierarchical data
+
+```r
+# Calculate number of groups needed
+mixed_models_power(
+  r_partial = 0.20,
+  power = 0.8,
+  n_per_group = 20,
+  icc = 0.10
+)
+
+# Framework approach with effect size conversion
+mixed_models_power(
+  effect_input = 0.09,         # R² from literature
+  effect_type = "r_squared",
+  power = 0.8,
+  n_per_group = 15
+)
+```
+
+**Essential for:**
+
+- Students nested in classrooms/schools
+- Patients nested in hospitals/clinics  
+- Repeated measures with missing data
+- Unbalanced designs
+
+**Key considerations:**
+
+- Intraclass correlation (ICC) critically affects power
+- Larger clusters generally more efficient than more clusters
+- Framework accounts for design effects automatically
+
+### Mediation Analysis
+**Best for:** Testing causal pathways (X → M → Y)
+
+```r
+# Regression-based mediation
+mediation_regression_power(
+  r_a = 0.30,                  # X → Mediator
+  r_b = 0.35,                  # Mediator → Y (controlling X)
+  power = 0.8,
+  test_type = "sobel"
+)
+
+# Framework conversion for both paths
+mediation_regression_power(
+  effect_input_a = 0.4,        # Cohen's d for a-path
+  effect_input_b = 0.3,        # Cohen's d for b-path
+  effect_type = "d",
+  power = 0.8
+)
+
+# SEM-based mediation
+load_analysis_method("mediation_sem")
+mediation_sem_power(
+  r_a = 0.25,
+  r_b = 0.40,
+  power = 0.8,
+  n_indicators_total = 9
+)
+```
+
+**Method selection:**
+
+- **Regression-based**: Simple mediation, observed variables
+- **SEM-based**: Multiple mediators, latent variables, complex models
+
+**Effect size reality:**
+
+- Indirect effects typically small (r_partial = 0.05-0.15)
+- Requires larger samples than direct effects
+- Framework discount factor especially important
+
+### Cross-Lagged Panel Models
+**Best for:** Reciprocal causation over time (X ↔ Y)
+
+```r
+cross_lagged_panel_power(
+  r_partial = 0.15,
+  power = 0.8,
+  n_waves = 3,
+  stability_coefficient = 0.6
+)
+
+# Framework integration
+cross_lagged_panel_power(
+  effect_input = 0.25,         # Small-medium effect
+  effect_type = "r",
+  power = 0.8,
+  n_waves = 4
+)
+```
+
+**Design considerations:**
+
+- Minimum 3 waves required
+- High stability reduces power for cross-lagged paths
+- Framework enables comparison with simple correlation approaches
+
+### Fixed Effects Models
+**Best for:** Panel data with many time points
+
+```r
+fixed_effects_power(
+  r_partial = 0.15,
+  power = 0.8,
+  n_units = 100,
+  n_periods = 8
+)
+
+# Framework conversion from literature
+fixed_effects_power(
+  effect_input = 0.08,         # Small effect from meta-analysis
+  effect_type = "r_squared",
+  power = 0.8,
+  n_units = 75,
+  n_periods = 10
+)
+```
+
+**Advantages:**
+
+- Controls for unobserved time-invariant confounds
+- More robust causal inference
+- Efficient with many time points
+
+**Requirements:**
+
+- Within-unit variation over time needed
+- More time points generally better
+- Framework accounts for fixed effects efficiency
+
+### SEM Direct Effects
+**Best for:** Complex structural models, latent variables
+
+```r
+sem_direct_effects_power(
+  r_partial = 0.25,
+  power = 0.8,
+  n_predictors = 4,
+  measurement_error = 0.10
+)
+
+# Framework integration with structural complexity
+sem_direct_effects_power(
+  effect_input = 0.12,         # Medium effect for SEM
+  effect_type = "r_squared",
+  power = 0.8,
+  n_predictors = 6
+)
+```
+
+**When needed:**
+
+- Multiple latent variables
+- Complex structural relationships
+- Measurement model testing
+- Theory-driven path specifications
+
+**Sample size considerations:**
+
+- Complex models require larger samples
+- Measurement error reduces effective sample size
+- Framework provides realistic estimates for structural models
+
+## Advanced Method Selection
+
+### Efficiency Comparisons
+The framework enables sophisticated efficiency analysis:
+
+```r
+# Same research question, different designs
+research_effect <- 0.20
+
+# Between-subjects (independent samples)
+between_n <- linear_regression_power(r_partial = research_effect, power = 0.8, n_predictors = 1)$n
+
+# Within-subjects (repeated measures)  
+within_n <- repeated_measures_power(r_partial = research_effect, power = 0.8, n_timepoints = 2)$n
+
+# Mixed design efficiency  
+mixed_n <- mixed_models_power(r_partial = research_effect, power = 0.8, n_per_group = 10)$total_n
+
+# Efficiency ratios
+within_n / between_n        # Repeated measures efficiency
+mixed_n / between_n         # Mixed model efficiency
+```
+
+### Method Selection Decision Tree
+
+#### Step 1: Outcome Variable Type
+```
+Outcome Variable
+├── Continuous → Consider regression methods
+├── Binary → Use logistic_regression_power()
+├── Ordinal/Skewed → Consider wilcoxon_signed_rank_power()
+└── Count/Rate → Use Poisson regression (future development)
+```
+
+#### Step 2: Design Structure
+```
+For Continuous Outcomes:
+├── Independent observations
+│   ├── Single predictor → linear_regression_power()
+│   └── Multiple predictors → linear_regression_power()
+├── Repeated measures → repeated_measures_power()
+├── Clustered/nested → mixed_models_power()
+├── Longitudinal panel → fixed_effects_power()
+└── Reciprocal causation → cross_lagged_panel_power()
+```
+
+#### Step 3: Research Question Type
+```
+Specific Questions:
+├── Association/prediction → regression methods
+├── Causal mechanism → mediation_regression_power()
+├── Complex theory → sem_direct_effects_power()
+└── Simple relationship → correlation_power()
+```
+
+## Framework Best Practices
+
+### Effect Size Selection Strategy
+```r
+# Literature integration across studies with mixed metrics
+literature_effects <- c(0.4, 0.12, 0.08)  # d, R², f²
+effect_types <- c("d", "r_squared", "f2")
+
+# Convert all to framework standard
+r_values <- mapply(framework_effect_size, literature_effects, effect_types, 
+                   MoreArgs = list(apply_discount = TRUE))
+
+# Use meta-analytic average
+meta_r <- mean(r_values)
+
+# Apply to any method
+linear_regression_power(r_partial = meta_r, power = 0.8, n_predictors = 3)
+mediation_regression_power(r_a = meta_r, r_b = meta_r, power = 0.8)
+```
+
+### Cross-Method Validation
+```r
+# Validate method choice by comparing alternatives
+base_effect <- 0.25
+
+# Method 1: Simple regression
+simple_result <- linear_regression_power(r_partial = base_effect, power = 0.8, n_predictors = 1)
+
+# Method 2: With covariates  
+complex_result <- linear_regression_power(r_partial = base_effect, power = 0.8, n_predictors = 4)
+
+# Method 3: Repeated measures alternative
+within_result <- repeated_measures_power(r_partial = base_effect, power = 0.8, n_timepoints = 2)
+
+# Compare sample size requirements
+data.frame(
+  Method = c("Simple", "With Covariates", "Repeated Measures"),
+  Sample_Size = c(simple_result$n, complex_result$n, within_result$n),
+  Relative_Efficiency = c(1.0, complex_result$n/simple_result$n, within_result$n/simple_result$n)
+)
+```
+
+## Common Selection Errors
+
+### ❌ Frequent Mistakes
+
+1. **Ignoring clustering**: Using simple regression when data is nested
+2. **Wrong effect size metric**: Using Cohen's d for logistic regression
+3. **Overcomplicated methods**: Using SEM when regression suffices
+4. **Ignoring dependencies**: Independent analysis for repeated measures data
+
+### ✅ Framework Solutions
+
+1. **Unified effect sizes**: All methods use comparable r_partial values
+2. **Automatic conversions**: Framework handles effect size transformations
+3. **Conservative planning**: Built-in discount factor prevents underpowering
+4. **Method comparison**: Easy to compare alternatives with same effect size
+
+## Field-Specific Guidance
+
+### Psychology Research
+**Common methods**: Linear regression, repeated measures, mediation
+
+**Typical effects**: r_partial = 0.15-0.35
+
+**Framework advantages**: Direct comparison across experimental and correlational studies
+
+### Educational Research  
+**Common methods**: Mixed models, mediation, longitudinal
+
+**Typical effects**: r_partial = 0.20-0.40
+
+**Framework advantages**: Handles nested data (students in classrooms) naturally
+
+### Medical Research
+**Common methods**: Logistic regression, mixed models, repeated measures
+
+**Typical effects**: r_partial = 0.10-0.25 
+
+**Framework advantages**: Conservative planning crucial for clinical trials
+
+### Business Research
+**Common methods**: Linear regression, SEM, panel data
+
+**Typical effects**: r_partial = 0.15-0.30
+
+**Framework advantages**: Complex structural models with unified effect sizes
+
+## Method Selection Checklist
+
+Before finalizing your choice:
+
+**☐ Research Design Match**
+
+- Method matches planned statistical analysis
+- Accounts for all design features (clustering, repeated measures, etc.)
+- Appropriate for outcome variable type
+
+**☐ Framework Integration**
+
+- Effect size converted to r_partial using framework functions
+- Conservative discount factor applied
+- Sample size accounts for model complexity
+
+**☐ Practical Considerations**
+
+- Sample size realistic for resources
+- Effect size appropriate for field
+- Power adequate for research goals
+
+**☐ Validation**
+
+- Cross-check with alternative methods using framework
+- Sensitivity analysis with different effect sizes
+- Documentation matches analysis plan
+
+The unified framework simplifies method selection while ensuring statistical rigor and realistic power analysis for successful research planning.

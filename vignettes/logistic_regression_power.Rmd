@@ -1,0 +1,399 @@
+---
+title: "Logistic Regression Power Analysis"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Logistic Regression Power Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+devtools::load_all()
+```
+
+Power analysis for logistic regression models using partial correlations within the unified framework with integrated discount factor system and effect size conversions.
+
+## Overview
+
+Logistic regression examines relationships between predictors and binary outcomes, extending the unified framework to generalized linear models. All effect sizes are converted to partial correlations for direct comparison across correlation, linear regression, mediation, and other analyses.
+
+## Key Framework Features
+
+- **Unified Effect Size Metric**: All analyses use partial correlations for direct comparison
+- **Automatic Parameter Detection**: Provide any two of (r_partial, n, power) - the third is calculated
+- **Conservative Planning**: Built-in discount factor (default 0.75) for realistic estimates
+- **Framework Integration**: Seamless conversion from Cohen's d, f², R², eta-squared
+- **Logistic Approximations**: Wald test approximations with efficiency adjustments
+
+## Quick Start
+
+```{r setup}
+library(rphbPower)
+```
+
+```r
+# Calculate power (provide r_partial and n)
+logistic_regression_power(r_partial = 0.25, n = 200, n_predictors = 2)
+
+# Calculate sample size (provide r_partial and power)
+logistic_regression_power(r_partial = 0.20, power = 0.8, n_predictors = 3)
+
+# Calculate effect size (provide n and power)
+logistic_regression_power(n = 300, power = 0.8, n_predictors = 4)
+
+# Framework integration (automatic conversion and discount)
+logistic_regression_framework_power(effect_size = 0.5, effect_type = "d", power = 0.8, n_predictors = 1)
+```
+
+## Main Functions
+
+### `logistic_regression_power()`
+Core power analysis with framework integration.
+
+**Parameters:**
+
+- `r_partial`: Partial correlation coefficient (NULL to calculate)
+- `n`: Sample size (NULL to calculate)
+- `power`: Statistical power (NULL to calculate, default = 0.8)
+- `n_predictors`: Number of predictors in model
+- `alpha`: Significance level (default = 0.05)
+- `discount_factor`: Conservative discount factor (default = 0.75)
+- `effect_input`: Raw effect size input (alternative to r_partial)
+- `effect_type`: Type of effect_input ("r", "d", "f2", "r_squared", "eta_squared")
+
+### `logistic_regression_framework_power()`
+Framework-integrated analysis with automatic conversion.
+
+**Parameters:**
+
+- `effect_size`: Effect size value
+- `effect_type`: Type of effect size ("r", "d", "f2", "r_squared", "eta_squared")
+- `n`: Sample size (NULL to calculate)
+- `power`: Target power (default = 0.8)
+- `n_predictors`: Number of predictors
+
+### Convenience Functions
+
+- `logistic_regression_sample_size()`: Quick sample size calculation
+- `logistic_regression_power_check()`: Quick power calculation
+
+## Framework Integration Examples
+
+### Multiple Effect Size Types
+```r
+# Cohen's d to framework logistic regression
+logistic_regression_framework_power(effect_size = 0.5, effect_type = "d", power = 0.8, n_predictors = 1)
+
+# Cohen's f² to framework logistic regression
+logistic_regression_framework_power(effect_size = 0.15, effect_type = "f2", n = 250, n_predictors = 2)
+
+# Direct partial correlation
+logistic_regression_power(r_partial = 0.20, power = 0.8, n_predictors = 3)
+```
+
+### Literature Integration
+```r
+# Convert mixed literature effects to unified framework
+# Note: unified_effect_size_table() expects single input_type for all values
+# For mixed types, convert individually using main functions
+
+# Example 1: All Cohen's d values
+d_values <- c(0.3, 0.5, 0.7)
+conversion_table_d <- unified_effect_size_table(
+  effect_values = d_values,
+  input_type = "d",
+  apply_discount = TRUE
+)
+
+# Example 2: Individual conversions for mixed types
+effect_1 <- logistic_regression_power(effect_input = 0.5, effect_type = "d", power = 0.8, n_predictors = 1)
+effect_2 <- logistic_regression_power(effect_input = 0.15, effect_type = "f2", power = 0.8, n_predictors = 2)
+effect_3 <- logistic_regression_power(effect_input = 0.25, effect_type = "r", power = 0.8, n_predictors = 2)
+
+# Extract converted partial correlations for comparison
+r_values <- c(effect_1$r_partial, effect_2$r_partial, effect_3$r_partial)
+```
+
+## Effect Size Guidelines
+
+### Framework Interpretation (Cohen's Standard)
+
+- **r < 0.10**: Negligible effect
+- **r = 0.10-0.29**: Small effect
+- **r = 0.30-0.49**: Medium effect
+- **r ≥ 0.50**: Large effect
+
+### Field-Specific Planning (Cohen's d equivalents)
+
+- **Medicine**: d = 0.3 (r ≈ 0.11 after discount)
+- **Psychology**: d = 0.5 (r ≈ 0.15 after discount)
+- **Education**: d = 0.4 (r ≈ 0.12 after discount)
+- **Marketing**: d = 0.6 (r ≈ 0.18 after discount)
+
+## Sample Size Planning
+
+Logistic regression typically requires larger samples than linear regression for equivalent effects due to reduced efficiency. Use framework power analysis functions to determine precise requirements:
+
+```r
+# Calculate your specific design requirements
+logistic_regression_power(r_partial = 0.20, power = 0.8, n_predictors = 2)
+
+# Compare with linear regression efficiency
+linear_regression_power(r_partial = 0.20, power = 0.8, n_predictors = 2)
+```
+
+## Best Practices
+
+### Framework Workflow
+
+1. **Use framework functions** for all effect size conversions
+2. **Apply default discount factor** (0.75) for conservative planning
+3. **Leverage auto-detection** by providing any 2 of 3 parameters
+4. **Check framework conversions** for cross-method comparison
+
+### Study Planning
+
+1. **Literature Integration**: Convert all effect sizes to partial correlations
+2. **Efficiency Adjustment**: Account for logistic regression's reduced efficiency
+3. **Base Rate Consideration**: Rare events require additional sample size
+4. **Conservative Estimates**: Trust framework discount for realistic planning
+
+### Quality Assurance
+
+1. **Framework Validation**: All inputs validated by core utilities
+2. **Mathematical Accuracy**: Wald test approximations ensure reliability
+3. **Consistent Interpretation**: Standard Cohen's effect size guidelines
+4. **Cross-method Comparison**: Direct comparison with linear regression, correlation results
+
+## Integration with Unified Framework
+
+### Core Dependencies
+```r
+# Automatically sources framework utilities
+source("04_core/compute_partial_correlations.R")
+```
+
+### Framework Functions Used
+
+- `framework_effect_size()`: Unified effect size conversion
+- `cohens_d_to_partial_r()`: Framework-consistent conversions
+- `validate_partial_r()`: Input validation
+- `framework_conversion_summary()`: Complete effect size report
+
+### Package Integration
+This logistic regression analysis integrates seamlessly with all other framework methods:
+
+- **Linear Regression**: Same r_partial values with efficiency adjustment
+- **Correlation Analysis**: Consistent effect size metric for bivariate relationships
+- **Mediation Analysis**: Unified effect interpretation for path coefficients
+- **SEM**: Direct comparison of structural coefficients across model types
+
+Logistic regression extends the unified framework to binary outcomes while maintaining mathematical consistency and interpretive clarity through shared partial correlation metrics, enabling researchers to compare effect sizes across diverse statistical approaches.
+
+## Examples
+
+Essential scenarios demonstrating logistic regression power analysis within the unified framework using partial correlations and framework conversions.
+
+Author: Power Analysis Package
+Version: 1.2
+
+### EXAMPLE 1: BASIC FRAMEWORK WORKFLOW
+
+```{r ex1}
+# Research: Predicting treatment response (binary outcome)
+# Expected effect size equivalent to Cohen's d = 0.5, framework integration
+
+result1 <- logistic_regression_power(
+  effect_input = 0.5,
+  effect_type = "d",  # Using Cohen's d as effect size proxy
+  n = 200,
+  n_predictors = 1
+)
+print.logistic_regression_power_analysis(result1)
+```
+
+### EXAMPLE 2: SAMPLE SIZE PLANNING WITH FRAMEWORK
+
+```{r ex2}
+# Target: 80% power to detect partial r = 0.25, single predictor
+
+result2 <- logistic_regression_power(r_partial = 0.25, power = 0.8, n_predictors = 1)
+
+cat("Sample size needed:", result2$n, "participants\n")
+cat("Effect interpretation:", result2$interpretation, "\n")
+```
+
+### EXAMPLE 3: EFFECT SIZE CONVERSIONS
+
+```{r ex3}
+# Convert various effect sizes to framework partial correlations
+
+effect_sizes <- c(0.3, 0.5, 0.7, 0.8)  # Cohen's d equivalents
+
+cat("Effect sizes to framework conversions:\n")
+for (d_val in effect_sizes) {
+  result <- logistic_regression_power(
+    effect_input = d_val,
+    effect_type = "d",
+    power = 0.8,
+    n_predictors = 1
+  )
+  cat("d =", d_val, ": r =", round(result$r_partial, 3), ", n =", result$n, "\n")
+}
+```
+
+### EXAMPLE 4: DETECTABLE EFFECT SIZE
+
+```{r ex4}
+# Study constraints: 300 participants, 3 predictors, want 80% power
+
+result4 <- logistic_regression_power(n = 300, power = 0.8, n_predictors = 3)
+
+cat("With n=300, p=3, 80% power detects r =", round(result4$r_partial, 3),
+    "(d ≈", round(result4$effect_size_conversions$cohens_d, 2), ")\n")
+```
+
+### EXAMPLE 5: FRAMEWORK EFFECT SIZE CONVERSIONS
+
+```{r ex5}
+# Convert Cohen's d = 0.5 to logistic regression framework
+
+result5 <- logistic_regression_power(
+  effect_input = 0.5,
+  effect_type = "d",
+  power = 0.8,
+  n_predictors = 2
+)
+
+cat("Cohen's d = 0.5 → Framework r =", round(result5$r_partial, 3),
+    ", Required n =", result5$n, "\n")
+```
+
+### EXAMPLE 6: FIELD-SPECIFIC APPLICATIONS
+
+```{r ex6}
+# Typical effect sizes by research field (as Cohen's d equivalents)
+
+fields <- data.frame(
+  Field = c("Medicine", "Psychology", "Education", "Marketing"),
+  Effect_d = c(0.3, 0.5, 0.4, 0.6),
+  N_predictors = c(2, 3, 4, 5)
+)
+
+cat("Sample sizes for 80% power by field:\n")
+for (i in 1:nrow(fields)) {
+  field_result <- logistic_regression_power(
+    effect_input = fields$Effect_d[i],
+    effect_type = "d",
+    power = 0.8,
+    n_predictors = fields$N_predictors[i]
+  )
+  cat(fields$Field[i], "(d =", fields$Effect_d[i], ",", 
+      fields$N_predictors[i], "pred.):", field_result$n, "\n")
+}
+```
+
+### EXAMPLE 7: CONSERVATIVE VS. OPTIMISTIC PLANNING
+
+```{r ex7}
+# Compare framework discount vs. no discount for d = 0.6
+
+pilot_d <- 0.6
+
+# Framework approach (with discount) - uses effect_input with automatic discount
+conservative_result <- logistic_regression_power(
+  effect_input = pilot_d,
+  effect_type = "d",
+  power = 0.8,
+  n_predictors = 2
+)
+
+# No discount approach - convert manually without discount then use r_partial
+r_no_discount <- cohens_d_to_partial_r(pilot_d, apply_discount = FALSE)
+optimistic_result <- logistic_regression_power(
+  r_partial = r_no_discount,
+  power = 0.8,
+  n_predictors = 2
+)
+
+cat("Planning comparison for d =", pilot_d, ":\n")
+cat("Conservative (framework):", conservative_result$n, "vs Optimistic:", optimistic_result$n,
+    "- Safety margin:", conservative_result$n - optimistic_result$n, "\n")
+```
+
+### EXAMPLE 8: POWER COMPARISON ACROSS MODEL COMPLEXITY
+
+```{r ex8}
+# Fixed sample size, varying model complexity
+
+n_fixed <- 250
+r_fixed <- 0.20
+
+cat("Power for n =", n_fixed, ", r =", r_fixed, " by model complexity:\n")
+for (p in c(1, 3, 5, 7)) {
+  power_achieved <- logistic_regression_power_check(r_partial = r_fixed, n = n_fixed, n_predictors = p)
+  cat(p, "predictor(s): Power =", round(power_achieved, 3), "\n")
+}
+```
+
+### EXAMPLE 9: FRAMEWORK CONVERSION TABLE
+
+```{r ex9}
+# Demonstrate multiple effect size inputs for logistic regression
+
+effect_sizes <- c(0.15, 0.25, 0.35)  # Partial correlations
+
+cat("Framework conversions for logistic regression planning:\n")
+cat("Input_r\tPartial_r\tCohens_d\tR_squared\n")
+for (r_val in effect_sizes) {
+  result <- logistic_regression_power(r_partial = r_val, power = 0.8, n_predictors = 2)
+  conv <- result$effect_size_conversions
+  cat(sprintf("%.2f\t%.3f\t\t%.3f\t\t%.3f\n", 
+              r_val, result$r_partial, conv$cohens_d, conv$r_squared))
+}
+```
+
+### EXAMPLE 10: LITERATURE INTEGRATION WORKFLOW
+
+```{r ex10}
+# Step 1: Literature review with mixed effect sizes (Cohen's d values)
+
+literature_effects <- data.frame(
+  Study = c("A", "B", "C"),
+  Effect = c(0.4, 0.6, 0.3),  # Cohen's d values
+  Type = c("d", "d", "d"),
+  Predictors = c(1, 2, 3)
+)
+
+# Step 2: Convert to framework partial correlations using framework functions
+framework_results <- list()
+for (i in 1:nrow(literature_effects)) {
+  framework_results[[i]] <- logistic_regression_power(
+    effect_input = literature_effects$Effect[i], 
+    effect_type = literature_effects$Type[i], 
+    power = 0.8,
+    n_predictors = literature_effects$Predictors[i]
+  )
+}
+
+# Step 3: Meta-analytic planning
+framework_rs <- sapply(framework_results, function(x) x$r_partial)
+meta_r <- mean(framework_rs)
+meta_predictors <- round(mean(literature_effects$Predictors))
+meta_result <- logistic_regression_power(r_partial = meta_r, power = 0.8, n_predictors = meta_predictors)
+
+cat("Literature integration: Meta r =", round(meta_r, 3),
+    ", Required n =", meta_result$n, "(", meta_predictors, "pred.)\n")
+```
+
+## FRAMEWORK BEST PRACTICES
+
+- Use logistic_regression_power() with effect_input for automatic conversion
+- Framework enables direct comparison with linear regression and correlation results
+- Conservative planning accounts for logistic regression's reduced efficiency
+- Larger sample sizes needed compared to linear regression for equivalent effects
+- Focus on partial correlations for cross-method theoretical consistency

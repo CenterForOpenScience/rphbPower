@@ -1,0 +1,367 @@
+---
+title: "Correlation Power Analysis"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Correlation Power Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+library(rphbPower)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+devtools::load_all()
+```
+
+Power analysis for correlation studies using partial correlations as the foundation within the unified regression framework with integrated discount factor system.
+
+## Overview
+
+Correlation analysis examines linear relationships between continuous variables and serves as the foundational building block for all regression-based analyses in the unified framework. All effect sizes are converted to partial correlations for direct comparison across methods.
+
+## Key Framework Features
+
+- **Unified Effect Size Metric**: All analyses use partial correlations for direct comparison
+- **Automatic Parameter Detection**: Provide any two of (r_partial, n, power) - the third is calculated
+- **Conservative Planning**: Built-in discount factor (default 0.75) for realistic estimates
+- **Framework Integration**: Seamless conversion from Cohen's d, f², R², eta-squared
+- **Auto-Detection Logic**: Intelligent calculation type determination
+
+## Quick Start
+
+```r
+# Calculate power (provide r_partial and n)
+correlation_power(r_partial = 0.3, n = 100)
+
+# Calculate sample size (provide r_partial and power)
+correlation_power(r_partial = 0.25, power = 0.8)
+
+# Calculate effect size (provide n and power)
+correlation_power(n = 150, power = 0.8)
+
+# Framework integration (automatic conversion and discount)
+correlation_power(effect_input = 0.5, effect_type = "d", power = 0.8)
+```
+
+## Main Functions
+
+### `correlation_power()`
+Core power analysis with framework integration.
+
+**Parameters:**
+
+- `r_partial`: Partial correlation coefficient (NULL to calculate)
+- `n`: Sample size (NULL to calculate)
+- `power`: Statistical power (NULL to calculate, default = 0.8)
+- `alpha`: Significance level (default = 0.05)
+- `discount_factor`: Conservative discount factor (default = 0.75)
+- `two_tailed`: Two-tailed test (default = TRUE)
+- `effect_input`: Raw effect size input (alternative to r_partial)
+- `effect_type`: Type of effect_input ("r", "d", "f2", "r_squared", "eta_squared")
+
+### Convenience Functions
+- `correlation_sample_size()`: Quick sample size calculation
+- `correlation_power_check()`: Quick power calculation
+
+## Framework Integration Examples
+
+### Multiple Effect Size Types
+```r
+# Cohen's d to framework correlation
+correlation_power(effect_input = 0.5, effect_type = "d", power = 0.8)
+
+# R² to framework correlation  
+correlation_power(effect_input = 0.09, effect_type = "r_squared", power = 0.8)
+
+# Direct partial correlation
+correlation_power(r_partial = 0.25, power = 0.8)
+```
+
+### Literature Integration
+```r
+# Convert mixed literature effects to unified framework
+# Note: unified_effect_size_table() expects single input_type for all values
+# For mixed types, convert individually using main functions
+
+# Example 1: All Cohen's d values
+d_values <- c(0.3, 0.5, 0.7)
+conversion_table_d <- unified_effect_size_table(
+  effect_values = d_values,
+  input_type = "d",
+  apply_discount = TRUE
+)
+
+# Example 2: Individual conversions for mixed types
+effect_1 <- correlation_power(effect_input = 0.3, effect_type = "r", power = 0.8)
+effect_2 <- correlation_power(effect_input = 0.08, effect_type = "r_squared", power = 0.8)  
+effect_3 <- correlation_power(effect_input = 0.4, effect_type = "d", power = 0.8)
+
+# Extract converted partial correlations for comparison
+r_values <- c(effect_1$r_partial, effect_2$r_partial, effect_3$r_partial)
+```
+
+## Effect Size Guidelines
+
+### Framework Interpretation (Cohen's Standard)
+- **r < 0.10**: Negligible effect
+- **r = 0.10-0.29**: Small effect
+- **r = 0.30-0.49**: Medium effect
+- **r ≥ 0.50**: Large effect
+
+### Field-Specific Planning (Cohen's d equivalents)
+- **Psychology**: d = 0.4 (r ≈ 0.20 after discount)
+- **Education**: d = 0.6 (r ≈ 0.23 after discount)
+- **Medicine**: d = 0.3 (r ≈ 0.11 after discount)
+- **Marketing**: d = 0.35 (r ≈ 0.13 after discount)
+
+## Sample Size Planning
+
+### Framework Rules of Thumb (80% power, two-tailed)
+- **Small effects** (r = 0.15): ~350 participants
+- **Medium effects** (r = 0.25): ~125 participants
+- **Large effects** (r = 0.40): ~50 participants
+
+### Conservative vs. Optimistic Planning
+```r
+# Framework approach (recommended) - applies discount automatically
+correlation_power(effect_input = 0.5, effect_type = "d", power = 0.8)
+
+# No discount approach (optimistic) - convert manually
+r_no_discount <- cohens_d_to_partial_r(0.5, apply_discount = FALSE)
+correlation_power(r_partial = r_no_discount, power = 0.8)
+```
+
+## Best Practices
+
+### Framework Workflow
+1. **Use framework functions** for all effect size conversions
+2. **Apply default discount factor** (0.75) for conservative planning
+3. **Leverage auto-detection** by providing any 2 of 3 parameters
+4. **Check framework conversions** in results for cross-method comparison
+
+### Study Planning
+1. **Literature Integration**: Convert all effect sizes to partial correlations
+2. **Conservative Estimates**: Trust framework discount for realistic planning
+3. **Multi-method Consistency**: Use same r_partial across related analyses
+4. **Effect Size Validation**: Verify conversions make practical sense
+
+### Quality Assurance
+1. **Framework Validation**: All inputs validated by core utilities
+2. **Mathematical Accuracy**: Base R calculations ensure reliability
+3. **Consistent Interpretation**: Standard Cohen's effect size guidelines
+4. **Cross-method Comparison**: Direct comparison with regression, mediation, SEM results
+
+## Integration with Unified Framework
+
+### Framework Functions Used
+- `framework_effect_size()`: Unified effect size conversion
+- `validate_partial_r()`: Input validation
+- `framework_conversion_summary()`: Complete effect size report
+- `interpret_effect_size()`: Standard interpretation
+
+### Package Integration
+This correlation analysis integrates seamlessly with all other framework methods:
+
+- **Linear/Logistic Regression**: Same r_partial values
+- **Mediation Analysis**: Consistent effect size metric
+- **SEM**: Direct comparison of path coefficients
+- **Multilevel Models**: Unified effect interpretation
+
+All analyses share the same foundational correlation framework, enabling researchers to compare effect sizes and power requirements across different statistical approaches while maintaining mathematical consistency and interpretive clarity.
+
+## Examples
+
+Essential scenarios demonstrating correlation power analysis within the unified framework using partial correlations and discount factors.
+
+Author: Power Analysis Package
+Version: 1.2
+
+### EXAMPLE 1: BASIC POWER CALCULATION
+
+```{r ex1}
+# Research: Stress-performance relationship, expect medium effect r = 0.3
+# Calculate power with sample size n = 100
+
+result1 <- correlation_power(r_partial = 0.3, n = 100, power = NULL)
+print.correlation_power_analysis(result1)
+# Shows achieved power for detecting r = 0.3 with 100 participants
+```
+
+### EXAMPLE 2: SAMPLE SIZE PLANNING  
+
+```{r}
+# Target: 80% power to detect r = 0.25 (small-medium effect)
+
+result2 <- correlation_power(r_partial = 0.25, n = NULL, power = 0.8)
+print.correlation_power_analysis(result2)
+# Provides required sample size for adequate power
+```
+
+### EXAMPLE 3: MINIMUM DETECTABLE EFFECT
+
+```{r}
+# Calculate minimum detectable effect size for n=150, power=0.8
+
+result3 <- correlation_power(r_partial = NULL, n = 150, power = 0.8)
+print.correlation_power_analysis(result3)
+# Shows smallest effect size detectable with available sample
+```
+
+### EXAMPLE 4: SMALL EFFECT SIZE PLANNING
+
+```{r}
+# Conservative planning for small effect (r = 0.15)
+# Small effects are common in large-scale studies
+
+result4 <- correlation_power(r_partial = 0.15, n = NULL, power = 0.8)
+print.correlation_power_analysis(result4)
+# Demonstrates large samples needed for small effects
+```
+
+### EXAMPLE 5: POWER COMPARISON ACROSS SAMPLE SIZES
+
+```{r}
+# Compare power for fixed effect r = 0.25 across different sample sizes
+# Demonstrates power curve - how power increases with sample size
+
+r_fixed <- 0.25
+sample_sizes <- c(50, 100, 150, 200)
+
+cat("Power for r = 0.25 across sample sizes:\n")
+for (n in sample_sizes) {
+  power_result <- correlation_power(r_partial = r_fixed, n = n, power = NULL)
+  cat("n =", n, ": Power =", round(power_result$power, 3), "\n")
+}
+
+# Demonstrates increasing power with larger sample sizes
+```
+
+### EXAMPLE 6: EFFECT SIZE COMPARISON
+
+```{r}
+# Compare power for different effect sizes with fixed n = 120
+# Shows how effect size dramatically impacts statistical power
+
+effect_sizes <- c(0.1, 0.2, 0.3, 0.4, 0.5)
+fixed_n <- 120
+
+cat("\nPower by effect size (n = 120):\n")
+for (r in effect_sizes) {
+  power_result <- correlation_power(r_partial = r, n = fixed_n, power = NULL)
+  cat("r =", r, ": Power =", round(power_result$power, 3), "\n")
+}
+
+# Illustrates the critical importance of effect size in power analysis
+```
+
+### EXAMPLE 7: FIELD-SPECIFIC SAMPLE PLANNING
+
+```{r}
+# Realistic effect sizes by research field for sample size planning
+# Based on typical correlation magnitudes in different domains
+
+fields <- data.frame(
+  Field = c("Psychology", "Education", "Medicine", "Marketing"),
+  Typical_r = c(0.25, 0.30, 0.20, 0.22)
+)
+
+cat("\nSample sizes by field (80% power):\n")
+for (i in 1:nrow(fields)) {
+  field_result <- correlation_power(
+    r_partial = fields$Typical_r[i],
+    n = NULL,
+    power = 0.8
+  )
+  cat(fields$Field[i], "(r =", fields$Typical_r[i], "):", 
+      field_result$n, "participants\n")
+}
+
+# Provides field-specific planning guidance
+```
+
+### EXAMPLE 8: CONSERVATIVE VS. OPTIMISTIC PLANNING
+
+```{r}
+# Compare planning approaches using pilot study results
+# Conservative: Apply framework discount factor for realistic planning
+# Optimistic: Use pilot estimates directly without discount
+
+pilot_r <- 0.35  # Pilot study correlation
+
+# Conservative: Framework approach (with discount)
+conservative_result <- correlation_power(
+  effect_input = pilot_r,
+  effect_type = "r", 
+  n = NULL,
+  power = 0.8
+)
+
+# Optimistic: No discount approach using manual conversion
+optimistic_r <- framework_effect_size(pilot_r, "r", apply_discount = FALSE)
+optimistic_result <- correlation_power(
+  r_partial = optimistic_r,
+  n = NULL,
+  power = 0.8
+)
+
+cat("\nConservative vs Optimistic Planning:\n")
+cat("Pilot r:", pilot_r, "\n")
+cat("Conservative (framework):", conservative_result$n, "vs Optimistic:", optimistic_result$n,
+    "- Safety margin:", conservative_result$n - optimistic_result$n, "extra participants\n")
+
+# Demonstrates the value of conservative planning for replication success
+```
+
+### EXAMPLE 9: POWER SENSITIVITY ANALYSIS
+
+```{r}
+# Examine power sensitivity around target effect size
+# Useful for understanding robustness of sample size decisions
+
+target_r <- 0.3
+target_n <- 100
+
+# Test power for ±20% effect size variation
+effect_variations <- c(0.24, 0.27, 0.30, 0.33, 0.36)  # ±20% around 0.3
+
+cat("\nPower sensitivity (n = 100):\n")
+for (r in effect_variations) {
+  sens_result <- correlation_power(r_partial = r, n = target_n, power = NULL)
+  cat("r =", r, ": Power =", round(sens_result$power, 3), "\n")
+}
+
+# Evaluates robustness of power analysis to effect size uncertainty
+```
+
+### EXAMPLE 10: FRAMEWORK INTEGRATION DEMONSTRATION
+
+```{r}
+# Shows comprehensive framework features and output interpretation
+
+comprehensive_result <- correlation_power(r_partial = 0.25, power = 0.8)
+
+cat("\nFramework Integration Features:\n")
+cat("Analysis type:", comprehensive_result$analysis_type, "\n")
+cat("Required sample size:", comprehensive_result$n, "\n")
+cat("Effect size interpretation:", comprehensive_result$interpretation, "\n")
+cat("Discount factor applied:", comprehensive_result$discount_factor, "\n")
+
+# Display effect size conversions
+print("Effect size conversions:")
+print(comprehensive_result$effect_size_conversions)
+```
+
+## FRAMEWORK INTEGRATION NOTES
+
+Key Framework Features:
+
+ - Uses partial correlations as universal effect size metric
+ - Auto-detection: Provide any 2 of (r_partial, n, power)  
+ - Conservative planning encouraged via discount factors
+ - Foundation for cross-method comparisons in unified framework
+ - All results include interpretation and effect size conversions
+ - Use correlation_power() function for all correlation power analysis
+
