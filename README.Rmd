@@ -153,31 +153,33 @@ The framework uses accurate F-distribution calculations with proper non-centrali
 
 ### Core Documentation
 
-Use `browseVignettes("rphbPower")` to see available documentation for this package.
-
-`vignette("Getting Started", package = "rphbPower")` - Tutorial guide
+Use `browseVignettes("rphbPower")` to see available documentation for this package. The "Getting Started" document is a tutorial guide for this package.
 
 ### Method Documentation
 
-- `vignette("Correlation Power Analysis", package = "rphbPower")`
-- `vignette("Cross-Lagged Panel Power Analysis", package = "rphbPower")`
-- `vignette("Fixed Effects Power Analysis", package = "rphbPower")`
-- `vignette("Linear Regression Power Analysis", package = "rphbPower")`
-- `vignette("Logistic Regression Power Analysis", package = "rphbPower")`
-- `vignette("Mediation Regression Power Analysis", package = "rphbPower")`
-- `vignette("Mediation SEM Power Analysis", package = "rphbPower")`
-- `vignette("Mixed Models Power Analysis", package = "rphbPower")`
-- `vignette("Repeated Measures Power Analysis", package = "rphbPower")`
-- `vignette("SEM Direct Effects Power Analysis", package = "rphbPower")`
-- `vignette("Wilcoxon Signed-Rank Power Analysis", package = "rphbPower")`
+The following vignettes displayed using `browseVignettes("rphbPower")` document the various methods.
+
+- Correlation Power Analysis
+- Cross-Lagged Panel Power Analysis
+- Fixed Effects Power Analysis
+- Linear Regression Power Analysis
+- Logistic Regression Power Analysis
+- Mediation Regression Power Analysis
+- Mediation SEM Power Analysis
+- Mixed Models Power Analysis
+- Repeated Measures Power Analysis
+- SEM Direct Effects Power Analysis
+- Wilcoxon Signed-Rank Power Analysis
 
 ### Comprehensive Guides
 
-- `vignette("Assumption Validation Guide", package = "rphbPower")`
-- `vignette("Effect Size Guidelines", package = "rphbPower")`
-- `vignette("Method Selection Guide", package = "rphbPower")`
-- `vignette("Quick Reference Guide", package = "rphbPower")`
-- `vignette("Troubleshooting Guide", package = "rphbPower")`
+The following vignettes displayed using `browseVignettes("rphbPower")` are comprehensive guides.
+
+- Assumption Validation Guide
+- Effect Size Guidelines
+- Method Selection Guide
+- Quick Reference Guide
+- Troubleshooting Guide
 
 ## Framework Validation
 
@@ -194,13 +196,13 @@ Use `browseVignettes("rphbPower")` to see available documentation for this packa
 ## Getting Help
 
 ### Quick Reference
-Use `vignette("Quick Reference Guide", package = "rphbPower")` for fast lookup of functions, parameters, and sample size estimates.
+Use `browseVignettes("rphbPower")` and select the "Quick Reference Guide" for fast lookup of functions, parameters, and sample size estimates.
 
 ### Method Selection
-Use `vignette("Method Selection Guide", package = "rphbPower")` for guidance on choosing appropriate analysis approaches.
+Use `browseVignettes("rphbPower")` and select the "Method Selection Guide" for guidance on choosing appropriate analysis approaches.
 
 ### Troubleshooting
-Use `vignette("Troubleshooting Guide", package = "rphbPower")` for common issues and framework-specific solutions.
+Use `browseVignettes("rphbPower")` and select the "Troubleshooting Guide" for common issues and framework-specific solutions.
 
 ## Version Information
 
