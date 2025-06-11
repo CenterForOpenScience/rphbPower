@@ -18,13 +18,18 @@ effect sizes to partial correlations, enabling direct comparison across
 correlation, regression, mediation, SEM, multilevel, and longitudinal
 approaches.
 
-**Core Features:** - **Unified Effect Size Metric**: Partial
-correlations across all analysis types - **Conservative Planning**:
-Built-in 0.75 discount factor for realistic sample sizes  
+**Core Features:**
+
+- **Unified Effect Size Metric**: Partial correlations across all
+  analysis types
+- **Conservative Planning**: Built-in 0.75 discount factor for realistic
+  sample sizes  
 - **Auto-Detection**: Provide any 2 of (effect size, sample size,
-power) - calculates the third - **Framework Integration**: Conversion
-between Cohen’s d, f², R², eta-squared - **Mathematical Precision**:
-Accurate F-distribution calculations for precise power analysis
+  power) - calculates the third
+- **Framework Integration**: Conversion between Cohen’s d, f², R²,
+  eta-squared
+- **Mathematical Precision**: Accurate F-distribution calculations for
+  precise power analysis
 
 ## Quick Start
 
@@ -58,19 +63,19 @@ linear_regression_power(effect_input = 0.25, effect_type = "r", power = 0.8, n_p
 
 ## Available Analysis Methods
 
-| Analysis Type | Location | Key Function | Effect Size Input |
-|----|----|----|----|
-| **Correlation** | `05_methods/5.1_correlation/` | `correlation_power()` | r (zero-order correlation) |
-| **Linear Regression** | `05_methods/5.2_regression/` | `linear_regression_power()` | r_partial |
-| **Logistic Regression** | `05_methods/5.2_regression/` | `logistic_regression_power()` | r_partial or OR |
-| **Cross-Lagged Panel** | `05_methods/5.3_longitudinal/` | `cross_lagged_panel_power()` | r_partial |
-| **Fixed Effects** | `05_methods/5.3_longitudinal/` | `fixed_effects_power()` | r_partial |
-| **Repeated Measures** | `05_methods/5.3_longitudinal/` | `repeated_measures_power()` | r_partial |
-| **Mediation (Regression)** | `05_methods/5.4_mediation/` | `mediation_regression_power()` | r_a, r_b paths |
-| **Mediation (SEM)** | `05_methods/5.4_mediation/` | `mediation_sem_power()` | r_a, r_b paths |
-| **Multilevel Models** | `05_methods/5.5_multilevel/` | `mixed_models_power()` | r_partial |
-| **SEM Direct Effects** | `05_methods/5.6_sem/` | `sem_direct_effects_power()` | r_partial |
-| **Nonparametric** | `05_methods/5.7_nonparametric/` | `wilcoxon_signed_rank_power()` | r_partial |
+| Analysis Type | Key Function | Effect Size Input |
+|----|----|----|
+| **Correlation** | `correlation_power()` | r (zero-order correlation) |
+| **Linear Regression** | `linear_regression_power()` | r_partial |
+| **Logistic Regression** | `logistic_regression_power()` | r_partial or OR |
+| **Cross-Lagged Panel** | `cross_lagged_panel_power()` | r_partial |
+| **Fixed Effects** | `fixed_effects_power()` | r_partial |
+| **Repeated Measures** | `repeated_measures_power()` | r_partial |
+| **Mediation (Regression)** | `mediation_regression_power()` | r_a, r_b paths |
+| **Mediation (SEM)** | `mediation_sem_power()` | r_a, r_b paths |
+| **Multilevel Models** | `mixed_models_power()` | r_partial |
+| **SEM Direct Effects** | `sem_direct_effects_power()` | r_partial |
+| **Nonparametric** | `wilcoxon_signed_rank_power()` | r_partial |
 
 ## Method Selection Guide
 
@@ -103,10 +108,8 @@ result <- linear_regression_power(effect_input = 0.4, effect_type = "d", power =
 r_partial <- result$r_partial  # Converted partial correlation
 
 # Available effect types: "r", "d", "f2", "r_squared", "eta_squared"
-load_analysis_method("correlation")
 correlation_power(effect_input = 0.15, effect_type = "f2", power = 0.8)
 
-load_analysis_method("mediation_regression")
 mediation_regression_power(effect_input_a = 0.09, effect_type = "r_squared", r_b = 0.3, power = 0.8)
 ```
 
@@ -146,36 +149,49 @@ ensuring precise power analysis across all regression-based methods.
 sample size requirements. Always specify actual predictor count rather
 than using simple correlation estimates.
 
-**Example Impact (r = 0.20, 80% power)**: - Single predictor model: ~192
-participants - Five predictor model: ~320 participants (+67%) - Ten
-predictor model: ~410 participants (+113%)
+**Example Impact (r = 0.20, 80% power)**:
 
-**Framework Recommendations**: 1. Use framework auto-detection for
-precise calculations 2. Apply conservative discount factors (default
-behavior) 3. Account for model complexity in planning 4. Validate effect
-sizes through framework conversions
+- Single predictor model: ~192 participants
+- Five predictor model: ~320 participants (+67%)
+- Ten predictor model: ~410 participants (+113%)
+
+**Framework Recommendations**:
+
+1.  Use framework auto-detection for precise calculations
+2.  Apply conservative discount factors (default behavior)
+3.  Account for model complexity in planning
+4.  Validate effect sizes through framework conversions
 
 ## Documentation Structure
 
 ### Core Documentation
 
-- `01_README.md` - Package overview (this file)
-- `02_setup.R` - Working setup system
-- `03_Getting Started.md` - Tutorial guide
-- `04_core/` - Framework utilities and mathematical functions
+Use `browseVignettes("rphbPower")` to see available documentation for
+this package.
+
+`vignette("Getting Started", package = "rphbPower")` - Tutorial guide
 
 ### Method Documentation
 
-- `05_methods/` - Complete analysis methods (11 total)
-- Each method includes: power analysis functions, examples, and
-  documentation
-- All methods integrate with unified framework architecture
+- `vignette("Correlation Power Analysis", package = "rphbPower")`
+- `vignette("Cross-Lagged Panel Power Analysis", package = "rphbPower")`
+- `vignette("Fixed Effects Power Analysis", package = "rphbPower")`
+- `vignette("Linear Regression Power Analysis", package = "rphbPower")`
+- `vignette("Logistic Regression Power Analysis", package = "rphbPower")`
+- `vignette("Mediation Regression Power Analysis", package = "rphbPower")`
+- `vignette("Mediation SEM Power Analysis", package = "rphbPower")`
+- `vignette("Mixed Models Power Analysis", package = "rphbPower")`
+- `vignette("Repeated Measures Power Analysis", package = "rphbPower")`
+- `vignette("SEM Direct Effects Power Analysis", package = "rphbPower")`
+- `vignette("Wilcoxon Signed-Rank Power Analysis", package = "rphbPower")`
 
 ### Comprehensive Guides
 
-- `06_documentation/` - Advanced guides and reference materials
-- Assumption validation, effect size guidelines, troubleshooting
-- Quick reference with sample size estimates
+- `vignette("Assumption Validation Guide", package = "rphbPower")`
+- `vignette("Effect Size Guidelines", package = "rphbPower")`
+- `vignette("Method Selection Guide", package = "rphbPower")`
+- `vignette("Quick Reference Guide", package = "rphbPower")`
+- `vignette("Troubleshooting Guide", package = "rphbPower")`
 
 ## Framework Validation
 
@@ -197,18 +213,18 @@ standardized effect sizes
 
 ### Quick Reference
 
-Use `06_documentation/quick_reference_guide.md` for fast lookup of
-functions, parameters, and sample size estimates.
+Use `vignette("Quick Reference Guide", package = "rphbPower")` for fast
+lookup of functions, parameters, and sample size estimates.
 
 ### Method Selection
 
-Use `06_documentation/method_selection_guide.md` for guidance on
-choosing appropriate analysis approaches.
+Use `vignette("Method Selection Guide", package = "rphbPower")` for
+guidance on choosing appropriate analysis approaches.
 
 ### Troubleshooting
 
-Use `06_documentation/troubleshooting.md` for common issues and
-framework-specific solutions.
+Use `vignette("Troubleshooting Guide", package = "rphbPower")` for
+common issues and framework-specific solutions.
 
 ## Version Information
 
