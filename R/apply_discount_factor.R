@@ -3,6 +3,7 @@
 #' @param discount_factor Discount factor (default: 0.75 per framework)
 #' @param apply_discount Whether to apply discount (default: TRUE)
 #' @return Discounted effect size
+#' @export
 apply_discount_factor <- function(effect_size, discount_factor = 0.75, apply_discount = TRUE) {
   if (!is.numeric(effect_size) || any(is.na(effect_size))) {
     stop("Effect size must be numeric without NA values")
