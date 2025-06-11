@@ -23,6 +23,7 @@
 #' @param effect_input Raw effect size input (alternative to r_partial)
 #' @param effect_type Type of effect_input ("r", "d", "f2", "r_squared", "eta_squared")
 #' @return Power analysis results with framework integration
+#' @export
 correlation_power <- function(r_partial = NULL, n = NULL, power = 0.8,
                               alpha = 0.05, discount_factor = 0.75, two_tailed = TRUE,
                               effect_input = NULL, effect_type = "r") {
@@ -141,6 +142,7 @@ correlation_power <- function(r_partial = NULL, n = NULL, power = 0.8,
 #' @param alpha Significance level
 #' @param two_tailed Two-tailed test flag
 #' @return Statistical power
+#' @export
 correlation_power_calculation <- function(r_partial, n, alpha, two_tailed) {
   # Transform correlation to t-statistic
   t_calc <- r_partial * sqrt((n - 2) / (1 - r_partial^2))
@@ -169,6 +171,7 @@ correlation_power_calculation <- function(r_partial, n, alpha, two_tailed) {
 #' @param alpha Significance level
 #' @param two_tailed Two-tailed test flag
 #' @return Required sample size
+#' @export
 correlation_sample_size_calculation <- function(r_partial, power, alpha, two_tailed) {
   # Use iterative approach to find required sample size
   n_min <- 10
@@ -201,6 +204,7 @@ correlation_sample_size_calculation <- function(r_partial, power, alpha, two_tai
 #' @param alpha Significance level
 #' @param two_tailed Two-tailed test flag
 #' @return Required partial correlation
+#' @export
 correlation_effect_size_calculation <- function(n, power, alpha, two_tailed) {
   # Use iterative approach to find required effect size
   r_min <- 0.01
@@ -239,6 +243,7 @@ correlation_effect_size_calculation <- function(n, power, alpha, two_tailed) {
 #' @param alpha Significance level
 #' @param discount_factor Framework discount factor
 #' @return Power analysis result
+#' @export
 correlation_framework_power <- function(effect_size, effect_type = "r", n = NULL,
                                         power = 0.8, alpha = 0.05, discount_factor = 0.75) {
   correlation_power(effect_input = effect_size, effect_type = effect_type,
@@ -250,6 +255,7 @@ correlation_framework_power <- function(effect_size, effect_type = "r", n = NULL
 #' @param power Target power (default = 0.8)
 #' @param alpha Significance level (default = 0.05)
 #' @return Required sample size
+#' @export
 correlation_sample_size <- function(r_partial, power = 0.8, alpha = 0.05) {
   result <- correlation_power(r_partial = r_partial, power = power, alpha = alpha)
   return(result$n)
@@ -260,6 +266,7 @@ correlation_sample_size <- function(r_partial, power = 0.8, alpha = 0.05) {
 #' @param n Sample size
 #' @param alpha Significance level (default = 0.05)
 #' @return Statistical power
+#' @export
 correlation_power_check <- function(r_partial, n, alpha = 0.05) {
   result <- correlation_power(r_partial = r_partial, n = n, alpha = alpha)
   return(result$power)
@@ -273,6 +280,7 @@ correlation_power_check <- function(r_partial, n, alpha = 0.05) {
 #' @importFrom cli symbol
 #' @param x Correlation power analysis result
 #' @param ... Additional arguments
+#' @export
 print.correlation_power_analysis <- function(x, ...) {
   cat("\n", x$method, "\n")
   cat(rep("=", nchar(x$method)), "\n\n")

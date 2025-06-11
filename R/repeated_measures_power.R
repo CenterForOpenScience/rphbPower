@@ -13,6 +13,7 @@
 #' @param effect_input Raw effect size input (alternative to r_partial)
 #' @param effect_type Type of effect_input ("r", "d", "f2", "r_squared", "eta_squared")
 #' @return Power analysis results with framework integration
+#' @export
 repeated_measures_power <- function(r_partial = NULL, n = NULL, power = 0.8,
                                     n_timepoints = 2, correlation_between_measures = 0.5,
                                     alpha = 0.05, discount_factor = 0.75,
@@ -145,6 +146,7 @@ repeated_measures_power <- function(r_partial = NULL, n = NULL, power = 0.8,
 #' @param correlation_between_measures Correlation between measures
 #' @param alpha Significance level
 #' @return Statistical power
+#' @export
 repeated_measures_power_calculation <- function(r_partial, n, n_timepoints,
                                                 correlation_between_measures, alpha) {
   # Convert to F-statistic approach
@@ -177,6 +179,7 @@ repeated_measures_power_calculation <- function(r_partial, n, n_timepoints,
 #' @param correlation_between_measures Correlation between measures
 #' @param alpha Significance level
 #' @return Required sample size
+#' @export
 repeated_measures_sample_size_calculation <- function(r_partial, power, n_timepoints,
                                                       correlation_between_measures, alpha) {
   # Use iterative approach
@@ -212,6 +215,7 @@ repeated_measures_sample_size_calculation <- function(r_partial, power, n_timepo
 #' @param correlation_between_measures Correlation between measures
 #' @param alpha Significance level
 #' @return Required partial correlation
+#' @export
 repeated_measures_effect_size_calculation <- function(n, power, n_timepoints,
                                                       correlation_between_measures, alpha) {
   # Use iterative approach
@@ -244,6 +248,7 @@ repeated_measures_effect_size_calculation <- function(n, power, n_timepoints,
 #' @param n_timepoints Number of timepoints
 #' @param correlation_between_measures Correlation between measures
 #' @return Design efficiency multiplier
+#' @export
 calculate_repeated_measures_efficiency <- function(n_timepoints, correlation_between_measures) {
   # Formula based on compound symmetry assumption
   efficiency <- 1 + (n_timepoints - 1) * correlation_between_measures
@@ -268,6 +273,7 @@ calculate_repeated_measures_efficiency <- function(n_timepoints, correlation_bet
 #' @param alpha Significance level
 #' @param discount_factor Framework discount factor
 #' @return Power analysis result
+#' @export
 repeated_measures_framework_power <- function(effect_size, effect_type = "r", n = NULL,
                                               power = 0.8, n_timepoints = 2,
                                               correlation_between_measures = 0.5,
@@ -285,6 +291,7 @@ repeated_measures_framework_power <- function(effect_size, effect_type = "r", n 
 #' @param correlation_between_measures Correlation between measures (default = 0.5)
 #' @param alpha Significance level (default = 0.05)
 #' @return Required sample size
+#' @export
 repeated_measures_sample_size <- function(r_partial, power = 0.8, n_timepoints = 2,
                                           correlation_between_measures = 0.5, alpha = 0.05) {
   result <- repeated_measures_power(r_partial = r_partial, power = power,
@@ -301,6 +308,7 @@ repeated_measures_sample_size <- function(r_partial, power = 0.8, n_timepoints =
 #' @param correlation_between_measures Correlation between measures (default = 0.5)
 #' @param alpha Significance level (default = 0.05)
 #' @return Statistical power
+#' @export
 repeated_measures_power_check <- function(r_partial, n, n_timepoints = 2,
                                           correlation_between_measures = 0.5, alpha = 0.05) {
   result <- repeated_measures_power(r_partial = r_partial, n = n,
@@ -317,6 +325,7 @@ repeated_measures_power_check <- function(r_partial, n, n_timepoints = 2,
 #' Print Method for Repeated Measures Power Analysis
 #' @param x Repeated measures power analysis result
 #' @param ... Additional arguments
+#' @export
 print.repeated_measures_power_analysis <- function(x, ...) {
   cat("\n", x$method, "\n")
   cat(rep("=", nchar(x$method)), "\n\n")

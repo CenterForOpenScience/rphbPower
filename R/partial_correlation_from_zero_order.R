@@ -3,6 +3,7 @@
 #' @param r_xz Correlation between X and control variable Z
 #' @param r_yz Correlation between Y and control variable Z
 #' @return Partial correlation of X and Y controlling for Z
+#' @export
 partial_correlation_from_zero_order <- function(r_xy, r_xz, r_yz) {
   correlations <- c(r_xy, r_xz, r_yz)
   if (!all(is.numeric(correlations)) || any(is.na(correlations))) {

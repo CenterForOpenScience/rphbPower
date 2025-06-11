@@ -14,6 +14,7 @@
 #' @param effect_input Raw effect size input (alternative to r_partial)
 #' @param effect_type Type of effect_input ("r", "d", "f2", "r_squared", "eta_squared")
 #' @return Power analysis results with framework integration
+#' @export
 mixed_models_power <- function(r_partial = NULL, n_groups = NULL, n_per_group = 10,
                                power = 0.8, icc = 0.05, alpha = 0.05,
                                discount_factor = 0.75, test_level = "level1",
@@ -161,6 +162,7 @@ mixed_models_power <- function(r_partial = NULL, n_groups = NULL, n_per_group = 
 #' @param alpha Significance level
 #' @param test_level Level being tested
 #' @return Statistical power
+#' @export
 mixed_models_power_calculation <- function(r_partial, n_groups, n_per_group, icc, alpha, test_level) {
   # Convert partial correlation to F-statistic approach
   f2 <- partial_r_to_cohens_f2(r_partial)
@@ -206,6 +208,7 @@ mixed_models_power_calculation <- function(r_partial, n_groups, n_per_group, icc
 #' @param alpha Significance level
 #' @param test_level Level being tested
 #' @return Required number of groups
+#' @export
 mixed_models_sample_size_calculation <- function(r_partial, power, n_per_group, icc, alpha, test_level) {
   # Use iterative approach to find required number of groups
   n_min <- 3
@@ -241,6 +244,7 @@ mixed_models_sample_size_calculation <- function(r_partial, power, n_per_group, 
 #' @param alpha Significance level
 #' @param test_level Level being tested
 #' @return Required partial correlation
+#' @export
 mixed_models_effect_size_calculation <- function(n_groups, power, n_per_group, icc, alpha, test_level) {
   # Use iterative approach to find required effect size
   r_min <- 0.01
@@ -283,6 +287,7 @@ mixed_models_effect_size_calculation <- function(n_groups, power, n_per_group, i
 #' @param alpha Significance level
 #' @param discount_factor Framework discount factor
 #' @return Power analysis result
+#' @export
 mixed_models_framework_power <- function(effect_size, effect_type = "r", n_groups = NULL,
                                          power = 0.8, n_per_group = 10, icc = 0.05,
                                          test_level = "level1", alpha = 0.05,
@@ -300,6 +305,7 @@ mixed_models_framework_power <- function(effect_size, effect_type = "r", n_group
 #' @param icc Intraclass correlation (default = 0.05)
 #' @param test_level Level being tested (default = "level1")
 #' @return Required number of groups
+#' @export
 mixed_models_sample_size <- function(r_partial, power = 0.8, n_per_group = 10,
                                      icc = 0.05, test_level = "level1") {
   result <- mixed_models_power(r_partial = r_partial, power = power,
@@ -314,6 +320,7 @@ mixed_models_sample_size <- function(r_partial, power = 0.8, n_per_group = 10,
 #' @param icc Intraclass correlation (default = 0.05)
 #' @param test_level Level being tested (default = "level1")
 #' @return Statistical power
+#' @export
 mixed_models_power_check <- function(r_partial, n_groups, n_per_group = 10,
                                      icc = 0.05, test_level = "level1") {
   result <- mixed_models_power(r_partial = r_partial, n_groups = n_groups,
@@ -328,6 +335,7 @@ mixed_models_power_check <- function(r_partial, n_groups, n_per_group = 10,
 #' Print Method for Mixed Models Power Analysis
 #' @param x Mixed models power analysis result
 #' @param ... Additional arguments
+#' @export
 print.mixed_models_power_analysis <- function(x, ...) {
   cat("\n", x$method, "\n")
   cat(rep("=", nchar(x$method)), "\n\n")

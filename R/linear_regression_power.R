@@ -12,6 +12,7 @@
 #' @param effect_input Raw effect size input (alternative to r_partial)
 #' @param effect_type Type of effect_input ("r", "d", "f2", "r_squared", "eta_squared")
 #' @return Power analysis results with framework integration
+#' @export
 linear_regression_power <- function(r_partial = NULL, n = NULL, power = 0.8,
                                     n_predictors = 1, alpha = 0.05, discount_factor = 0.75,
                                     effect_input = NULL, effect_type = "r") {
@@ -136,6 +137,7 @@ linear_regression_power <- function(r_partial = NULL, n = NULL, power = 0.8,
 #' @param n_predictors Number of predictors
 #' @param alpha Significance level
 #' @return Statistical power
+#' @export
 linear_regression_power_calculation <- function(r_partial, n, n_predictors, alpha) {
   # Convert partial correlation to F-statistic
   f2 <- partial_r_to_cohens_f2(r_partial)
@@ -166,6 +168,7 @@ linear_regression_power_calculation <- function(r_partial, n, n_predictors, alph
 #' @param n_predictors Number of predictors
 #' @param alpha Significance level
 #' @return Required sample size
+#' @export
 linear_regression_sample_size_calculation <- function(r_partial, power, n_predictors, alpha) {
   # Use iterative approach to find required sample size
   n_min <- n_predictors + 10
@@ -198,6 +201,7 @@ linear_regression_sample_size_calculation <- function(r_partial, power, n_predic
 #' @param n_predictors Number of predictors
 #' @param alpha Significance level
 #' @return Required partial correlation
+#' @export
 linear_regression_effect_size_calculation <- function(n, power, n_predictors, alpha) {
   # Use iterative approach to find required effect size
   r_min <- 0.01
@@ -237,6 +241,7 @@ linear_regression_effect_size_calculation <- function(n, power, n_predictors, al
 #' @param alpha Significance level
 #' @param discount_factor Framework discount factor
 #' @return Power analysis result
+#' @export
 linear_regression_framework_power <- function(effect_size, effect_type = "r", n = NULL,
                                               power = 0.8, n_predictors = 1, alpha = 0.05,
                                               discount_factor = 0.75) {
@@ -251,6 +256,7 @@ linear_regression_framework_power <- function(effect_size, effect_type = "r", n 
 #' @param n_predictors Number of predictors (default = 1)
 #' @param alpha Significance level (default = 0.05)
 #' @return Required sample size
+#' @export
 linear_regression_sample_size <- function(r_partial, power = 0.8, n_predictors = 1, alpha = 0.05) {
   result <- linear_regression_power(r_partial = r_partial, power = power,
                                     n_predictors = n_predictors, alpha = alpha)
@@ -263,6 +269,7 @@ linear_regression_sample_size <- function(r_partial, power = 0.8, n_predictors =
 #' @param n_predictors Number of predictors (default = 1)
 #' @param alpha Significance level (default = 0.05)
 #' @return Statistical power
+#' @export
 linear_regression_power_check <- function(r_partial, n, n_predictors = 1, alpha = 0.05) {
   result <- linear_regression_power(r_partial = r_partial, n = n,
                                     n_predictors = n_predictors, alpha = alpha)
@@ -276,6 +283,7 @@ linear_regression_power_check <- function(r_partial, n, n_predictors = 1, alpha 
 #' Print Method for Linear Regression Power Analysis
 #' @param x Linear regression power analysis result
 #' @param ... Additional arguments
+#' @export
 print.linear_regression_power_analysis <- function(x, ...) {
   cat("\n", x$method, "\n")
   cat(rep("=", nchar(x$method)), "\n\n")

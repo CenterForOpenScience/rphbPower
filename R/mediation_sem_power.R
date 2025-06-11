@@ -15,6 +15,7 @@
 #' @param effect_input_b Raw effect size input for path b (alternative to r_b)
 #' @param effect_type Type of effect inputs ("r", "d", "f2", "r_squared", "eta_squared")
 #' @return Power analysis results with framework integration
+#' @export
 mediation_sem_power <- function(r_a = NULL, r_b = NULL, n = NULL, power = 0.8,
                                 measurement_error = 0.1, n_indicators_total = 9,
                                 alpha = 0.05, discount_factor = 0.75,
@@ -149,6 +150,7 @@ mediation_sem_power <- function(r_a = NULL, r_b = NULL, n = NULL, power = 0.8,
 #' @param sem_complexity_factor SEM complexity adjustment
 #' @param alpha Significance level
 #' @return Statistical power
+#' @export
 mediation_sem_power_calculation <- function(r_a, r_b, n, sem_complexity_factor, alpha) {
   # Calculate indirect effect
   indirect_effect <- r_a * r_b
@@ -176,6 +178,7 @@ mediation_sem_power_calculation <- function(r_a, r_b, n, sem_complexity_factor, 
 #' @param sem_complexity_factor SEM complexity adjustment
 #' @param alpha Significance level
 #' @return Required sample size
+#' @export
 mediation_sem_sample_size_calculation <- function(r_a, r_b, power, sem_complexity_factor, alpha) {
   # Use iterative approach
   n_min <- 100
@@ -206,6 +209,7 @@ mediation_sem_sample_size_calculation <- function(r_a, r_b, power, sem_complexit
 #' @param n_indicators_total Total number of indicators
 #' @param measurement_error Measurement error proportion
 #' @return Complexity adjustment factor
+#' @export
 calculate_sem_complexity_factor <- function(n_indicators_total, measurement_error) {
   # Base complexity from number of indicators
   indicator_penalty <- 1 + (n_indicators_total - 6) * 0.05
@@ -235,6 +239,7 @@ calculate_sem_complexity_factor <- function(n_indicators_total, measurement_erro
 #' @param alpha Significance level
 #' @param discount_factor Framework discount factor
 #' @return Power analysis result
+#' @export
 mediation_sem_framework_power <- function(effect_size_a, effect_size_b, effect_type = "r",
                                           n = NULL, power = 0.8, measurement_error = 0.1,
                                           n_indicators_total = 9, alpha = 0.05,
@@ -254,6 +259,7 @@ mediation_sem_framework_power <- function(effect_size_a, effect_size_b, effect_t
 #' @param n_indicators_total Total indicators (default = 9)
 #' @param alpha Significance level (default = 0.05)
 #' @return Required sample size
+#' @export
 mediation_sem_sample_size <- function(r_a, r_b, power = 0.8, measurement_error = 0.1,
                                       n_indicators_total = 9, alpha = 0.05) {
   result <- mediation_sem_power(r_a = r_a, r_b = r_b, power = power,
@@ -270,6 +276,7 @@ mediation_sem_sample_size <- function(r_a, r_b, power = 0.8, measurement_error =
 #' @param n_indicators_total Total indicators (default = 9)
 #' @param alpha Significance level (default = 0.05)
 #' @return Statistical power
+#' @export
 mediation_sem_power_check <- function(r_a, r_b, n, measurement_error = 0.1,
                                       n_indicators_total = 9, alpha = 0.05) {
   result <- mediation_sem_power(r_a = r_a, r_b = r_b, n = n,
@@ -285,6 +292,7 @@ mediation_sem_power_check <- function(r_a, r_b, n, measurement_error = 0.1,
 #' Print Method for SEM Mediation Power Analysis
 #' @param x SEM mediation power analysis result
 #' @param ... Additional arguments
+#' @export
 print.mediation_sem_power_analysis <- function(x, ...) {
   cat("\n", x$method, "\n")
   cat(rep("=", nchar(x$method)), "\n\n")

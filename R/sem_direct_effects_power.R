@@ -13,6 +13,7 @@
 #' @param effect_input Raw effect size input (alternative to r_partial)
 #' @param effect_type Type of effect_input ("r", "d", "f2", "r_squared", "eta_squared")
 #' @return Power analysis results with framework integration
+#' @export
 sem_direct_effects_power <- function(r_partial = NULL, n = NULL, power = 0.8,
                                      n_predictors = 3, alpha = 0.05,
                                      discount_factor = 0.75, measurement_reliability = 0.85,
@@ -146,6 +147,7 @@ sem_direct_effects_power <- function(r_partial = NULL, n = NULL, power = 0.8,
 #' @param alpha Significance level
 #' @param measurement_reliability Average measurement reliability
 #' @return Statistical power
+#' @export
 sem_direct_effects_power_calculation <- function(r_partial, n, n_predictors, alpha, measurement_reliability) {
   # Adjust for measurement reliability (attenuation correction)
   r_adjusted <- r_partial * sqrt(measurement_reliability)
@@ -183,6 +185,7 @@ sem_direct_effects_power_calculation <- function(r_partial, n, n_predictors, alp
 #' @param alpha Significance level
 #' @param measurement_reliability Average measurement reliability
 #' @return Required sample size
+#' @export
 sem_direct_effects_sample_size_calculation <- function(r_partial, power, n_predictors, alpha, measurement_reliability) {
   # Use iterative approach to find required sample size
   n_min <- 100
@@ -217,6 +220,7 @@ sem_direct_effects_sample_size_calculation <- function(r_partial, power, n_predi
 #' @param alpha Significance level
 #' @param measurement_reliability Average measurement reliability
 #' @return Required partial correlation
+#' @export
 sem_direct_effects_effect_size_calculation <- function(n, power, n_predictors, alpha, measurement_reliability) {
   # Use iterative approach to find required effect size
   r_min <- 0.01
@@ -249,6 +253,7 @@ sem_direct_effects_effect_size_calculation <- function(n, power, n_predictors, a
 #' @param n_predictors Number of predictors
 #' @param measurement_reliability Average measurement reliability
 #' @return Effective sample size
+#' @export
 calculate_sem_effective_sample_size <- function(n, n_predictors, measurement_reliability) {
   if (is.null(n)) return(NULL)
 
@@ -276,6 +281,7 @@ calculate_sem_effective_sample_size <- function(n, n_predictors, measurement_rel
 #' @param alpha Significance level
 #' @param discount_factor Framework discount factor
 #' @return Power analysis result
+#' @export
 sem_direct_effects_framework_power <- function(effect_size, effect_type = "r", n = NULL,
                                                power = 0.8, n_predictors = 3, alpha = 0.05,
                                                discount_factor = 0.75) {
@@ -290,6 +296,7 @@ sem_direct_effects_framework_power <- function(effect_size, effect_type = "r", n
 #' @param n_predictors Number of predictors (default = 3)
 #' @param alpha Significance level (default = 0.05)
 #' @return Required sample size
+#' @export
 sem_direct_effects_sample_size <- function(r_partial, power = 0.8, n_predictors = 3, alpha = 0.05) {
   result <- sem_direct_effects_power(r_partial = r_partial, power = power,
                                      n_predictors = n_predictors, alpha = alpha)
@@ -302,6 +309,7 @@ sem_direct_effects_sample_size <- function(r_partial, power = 0.8, n_predictors 
 #' @param n_predictors Number of predictors (default = 3)
 #' @param alpha Significance level (default = 0.05)
 #' @return Statistical power
+#' @export
 sem_direct_effects_power_check <- function(r_partial, n, n_predictors = 3, alpha = 0.05) {
   result <- sem_direct_effects_power(r_partial = r_partial, n = n,
                                      n_predictors = n_predictors, alpha = alpha)
@@ -315,6 +323,7 @@ sem_direct_effects_power_check <- function(r_partial, n, n_predictors = 3, alpha
 #' Print Method for SEM Direct Effects Power Analysis
 #' @param x SEM direct effects power analysis result
 #' @param ... Additional arguments
+#' @export
 print.sem_direct_effects_power_analysis <- function(x, ...) {
   cat("\n", x$method, "\n")
   cat(rep("=", nchar(x$method)), "\n\n")

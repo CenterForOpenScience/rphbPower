@@ -13,6 +13,7 @@
 #' @param effect_input Raw effect size input (alternative to r_partial)
 #' @param effect_type Type of effect_input ("r", "d", "f2", "r_squared", "eta_squared")
 #' @return Power analysis results with framework integration
+#' @export
 wilcoxon_signed_rank_power <- function(r_partial = NULL, n = NULL, power = NULL,
                                        alpha = 0.05, discount_factor = 0.75,
                                        two_tailed = TRUE, asymptotic = TRUE,
@@ -143,6 +144,7 @@ wilcoxon_signed_rank_power <- function(r_partial = NULL, n = NULL, power = NULL,
 #' @param two_tailed Two-tailed test flag
 #' @param asymptotic Use asymptotic approximation
 #' @return Statistical power
+#' @export
 wilcoxon_power_calculation <- function(r_partial, n, alpha, two_tailed, asymptotic) {
   # Convert partial correlation to Cohen's d for Wilcoxon calculations
   cohens_d <- partial_r_to_cohens_d(r_partial)
@@ -185,6 +187,7 @@ wilcoxon_power_calculation <- function(r_partial, n, alpha, two_tailed, asymptot
 #' @param two_tailed Two-tailed test flag
 #' @param asymptotic Use asymptotic approximation
 #' @return Required sample size
+#' @export
 wilcoxon_sample_size_calculation <- function(r_partial, power, alpha, two_tailed, asymptotic) {
   # Use iterative approach to find required sample size
   n_min <- 6
@@ -218,6 +221,7 @@ wilcoxon_sample_size_calculation <- function(r_partial, power, alpha, two_tailed
 #' @param two_tailed Two-tailed test flag
 #' @param asymptotic Use asymptotic approximation
 #' @return Required partial correlation
+#' @export
 wilcoxon_effect_size_calculation <- function(n, power, alpha, two_tailed, asymptotic) {
   # Use iterative approach to find required effect size
   r_min <- 0.01
@@ -250,6 +254,7 @@ wilcoxon_effect_size_calculation <- function(n, power, alpha, two_tailed, asympt
 
 #' Calculate Asymptotic Relative Efficiency Factor
 #' @return ARE factor for Wilcoxon vs t-test
+#' @export
 calculate_are_factor <- function() {
   # Asymptotic relative efficiency of Wilcoxon signed-rank vs t-test
   return(3/pi)  # ≈ 0.955
@@ -261,6 +266,7 @@ calculate_are_factor <- function() {
 #' @param alpha Significance level
 #' @param two_tailed Two-tailed test flag
 #' @return Statistical power
+#' @export
 exact_wilcoxon_power <- function(cohens_d, n, alpha, two_tailed) {
   # Convert Cohen's d to probability of favorable outcome
   p_favorable <- pnorm(cohens_d / sqrt(2))
@@ -291,6 +297,7 @@ exact_wilcoxon_power <- function(cohens_d, n, alpha, two_tailed) {
 #' Wilcoxon-Specific Effect Size Conversions
 #' @param r_partial Partial correlation
 #' @return Named list of Wilcoxon-specific metrics
+#' @export
 wilcoxon_specific_conversions <- function(r_partial) {
   cohens_d <- partial_r_to_cohens_d(r_partial)
 
@@ -320,6 +327,7 @@ wilcoxon_specific_conversions <- function(r_partial) {
 #' @param alpha Significance level
 #' @param discount_factor Framework discount factor
 #' @return Power analysis result
+#' @export
 wilcoxon_signed_rank_framework_power <- function(effect_size, effect_type = "r", n = NULL,
                                                  power = NULL, alpha = 0.05,
                                                  discount_factor = 0.75) {
@@ -338,6 +346,7 @@ wilcoxon_signed_rank_framework_power <- function(effect_size, effect_type = "r",
 #' @param power Target power (default = 0.8)
 #' @param alpha Significance level (default = 0.05)
 #' @return Required sample size
+#' @export
 wilcoxon_sample_size <- function(r_partial, power = 0.8, alpha = 0.05) {
   result <- wilcoxon_signed_rank_power(r_partial = r_partial, power = power, alpha = alpha)
   return(result$n)
@@ -348,6 +357,7 @@ wilcoxon_sample_size <- function(r_partial, power = 0.8, alpha = 0.05) {
 #' @param n Sample size
 #' @param alpha Significance level (default = 0.05)
 #' @return Statistical power
+#' @export
 wilcoxon_power_check <- function(r_partial, n, alpha = 0.05) {
   result <- wilcoxon_signed_rank_power(r_partial = r_partial, n = n, alpha = alpha)
   return(result$power)
@@ -360,6 +370,7 @@ wilcoxon_power_check <- function(r_partial, n, alpha = 0.05) {
 #' Print Method for Wilcoxon Signed-Rank Power Analysis
 #' @param x Wilcoxon power analysis result
 #' @param ... Additional arguments
+#' @export
 print.wilcoxon_signed_rank_power_analysis <- function(x, ...) {
   cat("\n", x$method, "\n")
   cat(rep("=", nchar(x$method)), "\n\n")

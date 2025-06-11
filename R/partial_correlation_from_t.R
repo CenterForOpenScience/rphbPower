@@ -2,6 +2,7 @@
 #' @param t_value t-statistic for coefficient
 #' @param df Degrees of freedom
 #' @return Partial correlation
+#' @export
 partial_correlation_from_t <- function(t_value, df) {
   if (!is.numeric(t_value) || !is.numeric(df) || any(is.na(c(t_value, df)))) {
     stop("t-value and df must be numeric without NA values")

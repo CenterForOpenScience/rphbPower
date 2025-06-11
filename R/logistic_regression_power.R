@@ -12,6 +12,7 @@
 #' @param effect_input Raw effect size input (alternative to r_partial)
 #' @param effect_type Type of effect_input ("r", "d", "f2", "r_squared", "eta_squared")
 #' @return Power analysis results with framework integration
+#' @export
 logistic_regression_power <- function(r_partial = NULL, n = NULL, power = 0.8,
                                       n_predictors = 1, alpha = 0.05, discount_factor = 0.75,
                                       effect_input = NULL, effect_type = "r") {
@@ -131,6 +132,7 @@ logistic_regression_power <- function(r_partial = NULL, n = NULL, power = 0.8,
 #' @param n_predictors Number of predictors
 #' @param alpha Significance level
 #' @return Statistical power
+#' @export
 logistic_regression_power_calculation <- function(r_partial, n, n_predictors, alpha) {
   # Convert partial correlation to approximate Cohen's d
   cohens_d <- partial_r_to_cohens_d(r_partial)
@@ -157,6 +159,7 @@ logistic_regression_power_calculation <- function(r_partial, n, n_predictors, al
 #' @param n_predictors Number of predictors
 #' @param alpha Significance level
 #' @return Required sample size
+#' @export
 logistic_regression_sample_size_calculation <- function(r_partial, power, n_predictors, alpha) {
   # Use iterative approach to find required sample size
   n_min <- n_predictors * 20 + 50  # Conservative starting point
@@ -189,6 +192,7 @@ logistic_regression_sample_size_calculation <- function(r_partial, power, n_pred
 #' @param n_predictors Number of predictors
 #' @param alpha Significance level
 #' @return Required partial correlation
+#' @export
 logistic_regression_effect_size_calculation <- function(n, power, n_predictors, alpha) {
   # Use iterative approach to find required effect size
   r_min <- 0.01
@@ -228,6 +232,7 @@ logistic_regression_effect_size_calculation <- function(n, power, n_predictors, 
 #' @param alpha Significance level
 #' @param discount_factor Framework discount factor
 #' @return Power analysis result
+#' @export
 logistic_regression_framework_power <- function(effect_size, effect_type = "r", n = NULL,
                                                 power = 0.8, n_predictors = 1, alpha = 0.05,
                                                 discount_factor = 0.75) {
@@ -242,6 +247,7 @@ logistic_regression_framework_power <- function(effect_size, effect_type = "r", 
 #' @param n_predictors Number of predictors (default = 1)
 #' @param alpha Significance level (default = 0.05)
 #' @return Required sample size
+#' @export
 logistic_regression_sample_size <- function(r_partial, power = 0.8, n_predictors = 1, alpha = 0.05) {
   result <- logistic_regression_power(r_partial = r_partial, power = power,
                                       n_predictors = n_predictors, alpha = alpha)
@@ -254,6 +260,7 @@ logistic_regression_sample_size <- function(r_partial, power = 0.8, n_predictors
 #' @param n_predictors Number of predictors (default = 1)
 #' @param alpha Significance level (default = 0.05)
 #' @return Statistical power
+#' @export
 logistic_regression_power_check <- function(r_partial, n, n_predictors = 1, alpha = 0.05) {
   result <- logistic_regression_power(r_partial = r_partial, n = n,
                                       n_predictors = n_predictors, alpha = alpha)
@@ -267,6 +274,7 @@ logistic_regression_power_check <- function(r_partial, n, n_predictors = 1, alph
 #' Print Method for Logistic Regression Power Analysis
 #' @param x Logistic regression power analysis result
 #' @param ... Additional arguments
+#' @export
 print.logistic_regression_power_analysis <- function(x, ...) {
   cat("\n", x$method, "\n")
   cat(rep("=", nchar(x$method)), "\n\n")

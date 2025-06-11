@@ -3,6 +3,7 @@
 #' @param allow_zero Whether to allow exactly zero (default: TRUE)
 #' @param context Context for error messages (optional)
 #' @return Validated r value
+#' @export
 validate_partial_r <- function(r, allow_zero = TRUE, context = "") {
   if (!is.numeric(r) || any(is.na(r))) {
     stop(paste("Partial correlation must be numeric without NA", context))

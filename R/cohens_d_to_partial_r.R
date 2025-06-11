@@ -2,6 +2,7 @@
 #' @param d Cohen's d effect size
 #' @param apply_discount Apply framework discount factor
 #' @return Partial correlation equivalent
+#' @export
 cohens_d_to_partial_r <- function(d, apply_discount = FALSE) {
   if (!is.numeric(d) || any(is.na(d))) {
     stop("Cohen's d must be numeric without NA values")

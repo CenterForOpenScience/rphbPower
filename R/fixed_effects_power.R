@@ -13,6 +13,7 @@
 #' @param effect_input Raw effect size input (alternative to r_partial)
 #' @param effect_type Type of effect_input ("r", "d", "f2", "r_squared", "eta_squared")
 #' @return Power analysis results with framework integration
+#' @export
 fixed_effects_power <- function(r_partial = NULL, n_units = NULL, n_periods = 4,
                                 power = 0.8, icc = 0.3, alpha = 0.05,
                                 discount_factor = 0.75, effect_input = NULL, effect_type = "r") {
@@ -159,6 +160,7 @@ fixed_effects_power <- function(r_partial = NULL, n_units = NULL, n_periods = 4,
 #' @param icc Intraclass correlation coefficient
 #' @param alpha Significance level
 #' @return Statistical power
+#' @export
 fixed_effects_power_calculation <- function(r_partial, n_effective, icc, alpha) {
   # Degrees of freedom for within-person effect
   df <- n_effective - 2
@@ -186,6 +188,7 @@ fixed_effects_power_calculation <- function(r_partial, n_effective, icc, alpha) 
 #' @param icc Intraclass correlation coefficient
 #' @param alpha Significance level
 #' @return Required effective sample size
+#' @export
 fixed_effects_sample_size_calculation <- function(r_partial, power, icc, alpha) {
   # Use iterative approach
   n_min <- 20
@@ -218,6 +221,7 @@ fixed_effects_sample_size_calculation <- function(r_partial, power, icc, alpha) 
 #' @param icc Intraclass correlation coefficient
 #' @param alpha Significance level
 #' @return Required within-person partial correlation
+#' @export
 fixed_effects_effect_size_calculation <- function(n_effective, power, icc, alpha) {
   # Use iterative approach
   r_min <- 0.01
@@ -248,6 +252,7 @@ fixed_effects_effect_size_calculation <- function(n_effective, power, icc, alpha
 #' @param n_periods Number of time periods
 #' @param icc Intraclass correlation coefficient
 #' @return Design effect multiplier
+#' @export
 calculate_fixed_effects_design_effect <- function(n_periods, icc) {
   # Standard design effect formula for clustered data
   design_effect <- 1 + (n_periods - 1) * icc
@@ -259,6 +264,7 @@ calculate_fixed_effects_design_effect <- function(n_periods, icc) {
 #' @param n_periods Number of periods
 #' @param icc Intraclass correlation coefficient
 #' @return Effective sample size
+#' @export
 calculate_fixed_effects_effective_n <- function(n_units, n_periods, icc) {
   # Total observations
   n_total <- n_units * n_periods
@@ -279,6 +285,7 @@ calculate_fixed_effects_effective_n <- function(n_units, n_periods, icc) {
 #' @param n_periods Number of periods
 #' @param icc Intraclass correlation coefficient
 #' @return Required number of units
+#' @export
 calculate_fixed_effects_required_n <- function(n_effective_needed, n_periods, icc) {
   # Reverse the effective sample size calculation
   design_effect <- calculate_fixed_effects_design_effect(n_periods, icc)
@@ -307,6 +314,7 @@ calculate_fixed_effects_required_n <- function(n_effective_needed, n_periods, ic
 #' @param alpha Significance level
 #' @param discount_factor Framework discount factor
 #' @return Power analysis result
+#' @export
 fixed_effects_framework_power <- function(effect_size, effect_type = "r", n_units = NULL,
                                           n_periods = 4, power = 0.8, icc = 0.3,
                                           alpha = 0.05, discount_factor = 0.75) {
@@ -322,6 +330,7 @@ fixed_effects_framework_power <- function(effect_size, effect_type = "r", n_unit
 #' @param icc Intraclass correlation coefficient (default = 0.3)
 #' @param alpha Significance level (default = 0.05)
 #' @return Required number of units
+#' @export
 fixed_effects_sample_size <- function(r_partial, power = 0.8, n_periods = 4,
                                       icc = 0.3, alpha = 0.05) {
   result <- fixed_effects_power(r_partial = r_partial, power = power,
@@ -336,6 +345,7 @@ fixed_effects_sample_size <- function(r_partial, power = 0.8, n_periods = 4,
 #' @param icc Intraclass correlation coefficient (default = 0.3)
 #' @param alpha Significance level (default = 0.05)
 #' @return Statistical power
+#' @export
 fixed_effects_power_check <- function(r_partial, n_units, n_periods = 4,
                                       icc = 0.3, alpha = 0.05) {
   result <- fixed_effects_power(r_partial = r_partial, n_units = n_units,

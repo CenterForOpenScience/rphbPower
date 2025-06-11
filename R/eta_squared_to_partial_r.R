@@ -2,6 +2,7 @@
 #' @param eta_squared Eta-squared effect size
 #' @param apply_discount Apply framework discount factor
 #' @return Partial correlation equivalent
+#' @export
 eta_squared_to_partial_r <- function(eta_squared, apply_discount = FALSE) {
   if (!is.numeric(eta_squared) || any(is.na(eta_squared))) {
     stop("Eta-squared must be numeric without NA values")

@@ -3,6 +3,7 @@
 #' @param effect_type Type of effect size ("r", "d", "f2", "r_squared", "eta_squared")
 #' @param apply_discount Whether to apply 0.75 discount factor
 #' @return Partial correlation with discount applied
+#' @export
 framework_effect_size <- function(effect_size, effect_type = "r", apply_discount = TRUE) {
   # Apply discount first, then convert
   discounted_effect <- apply_discount_factor(effect_size, apply_discount = apply_discount)

@@ -3,6 +3,7 @@
 #' @param input_type Type of input effect size
 #' @param apply_discount Apply framework discount factor
 #' @return Named list with all conversions
+#' @export
 framework_conversion_summary <- function(effect_value, input_type = "r", apply_discount = TRUE) {
   # Convert to partial correlation first
   r_partial <- framework_effect_size(effect_value, input_type, apply_discount)

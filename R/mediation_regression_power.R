@@ -14,6 +14,7 @@
 #' @param effect_input_b Raw effect size input for b-path (alternative to r_b)
 #' @param effect_type Type of effect inputs ("r", "d", "f2", "r_squared", "eta_squared")
 #' @return Power analysis results with framework integration
+#' @export
 mediation_regression_power <- function(r_a = NULL, r_b = NULL, n = NULL, power = 0.8,
                                        alpha = 0.05, discount_factor = 0.75, test_type = "sobel",
                                        effect_input_a = NULL, effect_input_b = NULL,
@@ -165,6 +166,7 @@ mediation_regression_power <- function(r_a = NULL, r_b = NULL, n = NULL, power =
 #' @param alpha Significance level
 #' @param test_type Type of mediation test
 #' @return Statistical power
+#' @export
 mediation_power_calculation <- function(r_a, r_b, n, alpha, test_type) {
   # Calculate indirect effect
   indirect_effect <- r_a * r_b
@@ -207,6 +209,7 @@ mediation_power_calculation <- function(r_a, r_b, n, alpha, test_type) {
 #' @param alpha Significance level
 #' @param test_type Type of mediation test
 #' @return Required sample size
+#' @export
 mediation_sample_size_calculation <- function(r_a, r_b, power, alpha, test_type) {
   # Use iterative approach to find required sample size
   n_min <- 50
@@ -240,6 +243,7 @@ mediation_sample_size_calculation <- function(r_a, r_b, power, alpha, test_type)
 #' @param alpha Significance level
 #' @param test_type Type of mediation test
 #' @return Required a-path correlation
+#' @export
 mediation_effect_size_calculation_a <- function(r_b, n, power, alpha, test_type) {
   # Use iterative approach to find required a-path
   r_min <- 0.01
@@ -273,6 +277,7 @@ mediation_effect_size_calculation_a <- function(r_b, n, power, alpha, test_type)
 #' @param alpha Significance level
 #' @param test_type Type of mediation test
 #' @return Required b-path partial correlation
+#' @export
 mediation_effect_size_calculation_b <- function(r_a, n, power, alpha, test_type) {
   # Use iterative approach to find required b-path
   r_min <- 0.01
@@ -312,6 +317,7 @@ mediation_effect_size_calculation_b <- function(r_a, n, power, alpha, test_type)
 #' @param alpha Significance level
 #' @param discount_factor Framework discount factor
 #' @return Power analysis result
+#' @export
 mediation_framework_power <- function(effect_size_a, effect_size_b, effect_type = "r",
                                       n = NULL, power = 0.8, alpha = 0.05,
                                       discount_factor = 0.75) {
@@ -326,6 +332,7 @@ mediation_framework_power <- function(effect_size_a, effect_size_b, effect_type 
 #' @param power Target power (default = 0.8)
 #' @param alpha Significance level (default = 0.05)
 #' @return Required sample size
+#' @export
 mediation_sample_size <- function(r_a, r_b, power = 0.8, alpha = 0.05) {
   result <- mediation_regression_power(r_a = r_a, r_b = r_b, power = power, alpha = alpha)
   return(result$n)
@@ -337,6 +344,7 @@ mediation_sample_size <- function(r_a, r_b, power = 0.8, alpha = 0.05) {
 #' @param n Sample size
 #' @param alpha Significance level (default = 0.05)
 #' @return Statistical power
+#' @export
 mediation_power_check <- function(r_a, r_b, n, alpha = 0.05) {
   result <- mediation_regression_power(r_a = r_a, r_b = r_b, n = n, alpha = alpha)
   return(result$power)
@@ -350,6 +358,7 @@ mediation_power_check <- function(r_a, r_b, n, alpha = 0.05) {
 #' @param r_a A-path correlation
 #' @param r_b B-path partial correlation
 #' @return Interpretation string
+#' @export
 interpret_mediation_effect <- function(r_a, r_b) {
   indirect_effect <- abs(r_a * r_b)
 
@@ -366,6 +375,7 @@ interpret_mediation_effect <- function(r_a, r_b) {
 #' Print Method for Mediation Regression Power Analysis
 #' @param x Mediation regression power analysis result
 #' @param ... Additional arguments
+#' @export
 print.mediation_regression_power_analysis <- function(x, ...) {
   cat("\n", x$method, "\n")
   cat(rep("=", nchar(x$method)), "\n\n")

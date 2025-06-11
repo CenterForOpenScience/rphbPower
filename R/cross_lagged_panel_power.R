@@ -13,6 +13,7 @@
 #' @param effect_input Raw effect size input (alternative to r_partial)
 #' @param effect_type Type of effect_input ("r", "d", "f2", "r_squared", "eta_squared")
 #' @return Power analysis results with framework integration
+#' @export
 cross_lagged_panel_power <- function(r_partial = NULL, n = NULL, power = 0.8,
                                      n_waves = 3, stability_coefficient = 0.6,
                                      alpha = 0.05, discount_factor = 0.75,
@@ -152,6 +153,7 @@ cross_lagged_panel_power <- function(r_partial = NULL, n = NULL, power = 0.8,
 #' @param stability_coefficient Stability coefficient
 #' @param alpha Significance level
 #' @return Statistical power
+#' @export
 cross_lagged_power_calculation <- function(r_partial, n_effective, stability_coefficient, alpha) {
   # Adjust correlation for stability effects
   r_adjusted <- r_partial / sqrt(1 - stability_coefficient^2)
@@ -182,6 +184,7 @@ cross_lagged_power_calculation <- function(r_partial, n_effective, stability_coe
 #' @param stability_coefficient Stability coefficient
 #' @param alpha Significance level
 #' @return Required effective sample size
+#' @export
 cross_lagged_sample_size_calculation <- function(r_partial, power, stability_coefficient, alpha) {
   # Use iterative approach
   n_min <- 50
@@ -214,6 +217,7 @@ cross_lagged_sample_size_calculation <- function(r_partial, power, stability_coe
 #' @param stability_coefficient Stability coefficient
 #' @param alpha Significance level
 #' @return Required cross-lagged partial correlation
+#' @export
 cross_lagged_effect_size_calculation <- function(n_effective, power, stability_coefficient, alpha) {
   # Use iterative approach
   r_min <- 0.01
@@ -245,6 +249,7 @@ cross_lagged_effect_size_calculation <- function(n_effective, power, stability_c
 #' @param stability_coefficient Stability coefficient
 #' @param n_waves Number of waves
 #' @return Effective sample size
+#' @export
 calculate_cross_lagged_effective_n <- function(n, stability_coefficient, n_waves) {
   # Reductions due to:
   # 1. Partial correlation complexity (controlling for stability)
@@ -264,6 +269,7 @@ calculate_cross_lagged_effective_n <- function(n, stability_coefficient, n_waves
 #' @param stability_coefficient Stability coefficient
 #' @param n_waves Number of waves
 #' @return Required nominal sample size
+#' @export
 calculate_cross_lagged_required_n <- function(n_effective_needed, stability_coefficient, n_waves) {
   # Reverse the effective sample size calculation
   stability_penalty <- 1 - (stability_coefficient^2 * 0.3)
@@ -290,6 +296,7 @@ calculate_cross_lagged_required_n <- function(n_effective_needed, stability_coef
 #' @param alpha Significance level
 #' @param discount_factor Framework discount factor
 #' @return Power analysis result
+#' @export
 cross_lagged_panel_framework_power <- function(effect_size, effect_type = "r", n = NULL,
                                                power = 0.8, n_waves = 3,
                                                stability_coefficient = 0.6,
@@ -307,6 +314,7 @@ cross_lagged_panel_framework_power <- function(effect_size, effect_type = "r", n
 #' @param stability_coefficient Stability coefficient (default = 0.6)
 #' @param alpha Significance level (default = 0.05)
 #' @return Required sample size
+#' @export
 cross_lagged_panel_sample_size <- function(r_partial, power = 0.8, n_waves = 3,
                                            stability_coefficient = 0.6, alpha = 0.05) {
   result <- cross_lagged_panel_power(r_partial = r_partial, power = power,
@@ -322,6 +330,7 @@ cross_lagged_panel_sample_size <- function(r_partial, power = 0.8, n_waves = 3,
 #' @param stability_coefficient Stability coefficient (default = 0.6)
 #' @param alpha Significance level (default = 0.05)
 #' @return Statistical power
+#' @export
 cross_lagged_panel_power_check <- function(r_partial, n, n_waves = 3,
                                            stability_coefficient = 0.6, alpha = 0.05) {
   result <- cross_lagged_panel_power(r_partial = r_partial, n = n,
@@ -337,6 +346,7 @@ cross_lagged_panel_power_check <- function(r_partial, n, n_waves = 3,
 #' Print Method for Cross-Lagged Panel Power Analysis
 #' @param x Cross-lagged panel power analysis result
 #' @param ... Additional arguments
+#' @export
 print.cross_lagged_panel_power_analysis <- function(x, ...) {
   cat("\n", x$method, "\n")
   cat(rep("=", nchar(x$method)), "\n\n")

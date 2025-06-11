@@ -2,6 +2,7 @@
 #' @param r Partial correlation
 #' @param standard Interpretation standard ("cohen", "field")
 #' @return Interpretation string
+#' @export
 interpret_effect_size <- function(r, standard = "cohen") {
   r <- validate_partial_r(r)
   r_abs <- abs(r)

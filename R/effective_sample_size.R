@@ -4,6 +4,7 @@
 #' @param icc Intracluster correlation (optional)
 #' @param cluster_size Average cluster size (optional)
 #' @return Effective sample size
+#' @export
 effective_sample_size <- function(n_nominal, design_effect = 1.0, icc = NULL, cluster_size = NULL) {
   if (!is.numeric(n_nominal) || any(n_nominal <= 0)) {
     stop("Nominal sample size must be positive")

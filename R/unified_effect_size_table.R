@@ -3,6 +3,7 @@
 #' @param input_type Type of input effect sizes
 #' @param apply_discount Apply framework discount factor
 #' @return Data frame with unified conversions
+#' @export
 unified_effect_size_table <- function(effect_values, input_type = "r", apply_discount = TRUE) {
   if (length(effect_values) == 0) {
     stop("No effect sizes provided")

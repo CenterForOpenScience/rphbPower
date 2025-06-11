@@ -3,6 +3,7 @@
 #' @param df_num Numerator degrees of freedom (default: 1)
 #' @param df_den Denominator degrees of freedom
 #' @return Partial correlation
+#' @export
 partial_correlation_from_f <- function(f_value, df_num = 1, df_den) {
   if (!is.numeric(f_value) || !is.numeric(df_num) || !is.numeric(df_den)) {
     stop("F-statistic parameters must be numeric")
