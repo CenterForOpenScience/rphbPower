@@ -4,6 +4,7 @@
 # rphbPower - Unified Power Analysis Package
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 Comprehensive power analysis functions for regression-based statistical
