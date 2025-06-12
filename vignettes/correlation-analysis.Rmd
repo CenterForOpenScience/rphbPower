@@ -13,7 +13,6 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-devtools::load_all()
 ```
 
 Power analysis for correlation studies using partial correlations as the foundation within the unified regression framework with integrated discount factor system.
@@ -33,6 +32,8 @@ Correlation analysis examines linear relationships between continuous variables 
 ## Quick Start
 
 ```r
+library(rphbPower)
+
 # Calculate power (provide r_partial and n)
 correlation_power(r_partial = 0.3, n = 100)
 
@@ -186,7 +187,7 @@ Version: 1.2
 # Calculate power with sample size n = 100
 
 result1 <- correlation_power(r_partial = 0.3, n = 100, power = NULL)
-print.correlation_power_analysis(result1)
+print(result1)
 # Shows achieved power for detecting r = 0.3 with 100 participants
 ```
 
@@ -196,7 +197,7 @@ print.correlation_power_analysis(result1)
 # Target: 80% power to detect r = 0.25 (small-medium effect)
 
 result2 <- correlation_power(r_partial = 0.25, n = NULL, power = 0.8)
-print.correlation_power_analysis(result2)
+print(result2)
 # Provides required sample size for adequate power
 ```
 
@@ -206,7 +207,7 @@ print.correlation_power_analysis(result2)
 # Calculate minimum detectable effect size for n=150, power=0.8
 
 result3 <- correlation_power(r_partial = NULL, n = 150, power = 0.8)
-print.correlation_power_analysis(result3)
+print(result3)
 # Shows smallest effect size detectable with available sample
 ```
 
@@ -217,7 +218,7 @@ print.correlation_power_analysis(result3)
 # Small effects are common in large-scale studies
 
 result4 <- correlation_power(r_partial = 0.15, n = NULL, power = 0.8)
-print.correlation_power_analysis(result4)
+print(result4)
 # Demonstrates large samples needed for small effects
 ```
 

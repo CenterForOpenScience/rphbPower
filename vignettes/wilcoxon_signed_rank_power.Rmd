@@ -7,12 +7,12 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-devtools::load_all()
+library(rphbPower)
 ```
 
 Power analysis for Wilcoxon signed-rank test using partial correlations within the unified framework with integrated discount factor system and asymptotic relative efficiency adjustments.
@@ -31,11 +31,9 @@ The Wilcoxon signed-rank test provides a nonparametric alternative to paired t-t
 
 ## Quick Start
 
-```{r setup}
-library(rphbPower)
-```
-
 ```r
+library(rphbPower)
+
 # Calculate power (provide r_partial and n)
 wilcoxon_signed_rank_power(r_partial = 0.25, n = 40)
 
@@ -223,7 +221,7 @@ result1 <- wilcoxon_signed_rank_power(
   effect_type = "d",
   n = 50
 )
-print.wilcoxon_signed_rank_power_analysis(result1)
+print(result1)
 ```
 
 ### EXAMPLE 2: SAMPLE SIZE PLANNING WITH FRAMEWORK

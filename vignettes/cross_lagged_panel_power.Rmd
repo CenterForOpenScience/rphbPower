@@ -7,12 +7,12 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-devtools::load_all()
+library(rphbPower)
 ```
 
 Power analysis for cross-lagged panel models using partial correlations within the unified framework with integrated stability considerations and conservative planning.
@@ -31,11 +31,9 @@ Cross-lagged panel models examine reciprocal causal relationships between variab
 
 ## Quick Start
 
-```{r setup}
-library(rphbPower)
-```
-
 ```r
+library(rphbPower)
+
 # Calculate power (provide r_partial and n)
 cross_lagged_panel_power(r_partial = 0.15, n = 300, n_waves = 3)
 
@@ -211,7 +209,7 @@ result1 <- cross_lagged_panel_power(
   n_waves = 3,
   stability_coefficient = 0.7
 )
-print.cross_lagged_panel_power_analysis(result1)
+print(result1)
 ```
 
 ### EXAMPLE 2: FRAMEWORK EFFECT SIZE CONVERSION

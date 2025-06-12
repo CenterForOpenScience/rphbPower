@@ -7,12 +7,12 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-devtools::load_all()
+library(rphbPower)
 ```
 
 Power analysis for repeated measures designs using partial correlations within the unified framework with integrated design efficiency calculations and conservative planning.
@@ -31,11 +31,9 @@ Repeated measures examines temporal effects while controlling for individual dif
 
 ## Quick Start
 
-```{r setup}
-library(rphbPower)
-```
-
 ```r
+library(rphbPower)
+
 # Calculate power (provide r_partial and n)
 repeated_measures_power(r_partial = 0.25, n = 40, n_timepoints = 3)
 
@@ -205,7 +203,7 @@ result1 <- repeated_measures_power(
   n_timepoints = 2,
   correlation_between_measures = 0.6
 )
-print.repeated_measures_power_analysis(result1)
+print(result1)
 ```
 
 ### EXAMPLE 2: FRAMEWORK EFFECT SIZE CONVERSION

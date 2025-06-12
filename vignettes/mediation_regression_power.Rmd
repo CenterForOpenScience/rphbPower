@@ -7,12 +7,12 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-devtools::load_all()
+library(rphbPower)
 ```
 
 Power analysis for mediation models using partial correlations within the unified framework with integrated discount factor system and dual-path analysis capabilities.
@@ -31,11 +31,9 @@ Mediation analysis examines indirect effects through sequential pathways (X→M�
 
 ## Quick Start
 
-```{r setup}
-library(rphbPower)
-```
-
 ```r
+library(rphbPower)
+
 # Calculate power (provide both paths and n)
 mediation_regression_power(r_a = 0.30, r_b = 0.25, n = 200)
 
@@ -257,7 +255,7 @@ Version: 1.2
 # Expected b-path (self-efficacy → performance | training): r = 0.25
 
 result1 <- mediation_regression_power(r_a = 0.30, r_b = 0.25, n = 200)
-print.mediation_regression_power_analysis(result1)
+print(result1)
 ```
 
 ### EXAMPLE 2: SAMPLE SIZE PLANNING WITH FRAMEWORK

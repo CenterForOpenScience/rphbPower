@@ -7,12 +7,12 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-devtools::load_all()
+library(rphbPower)
 ```
 
 Power analysis for logistic regression models using partial correlations within the unified framework with integrated discount factor system and effect size conversions.
@@ -31,11 +31,9 @@ Logistic regression examines relationships between predictors and binary outcome
 
 ## Quick Start
 
-```{r setup}
-library(rphbPower)
-```
-
 ```r
+library(rphbPower)
+
 # Calculate power (provide r_partial and n)
 logistic_regression_power(r_partial = 0.25, n = 200, n_predictors = 2)
 
@@ -213,7 +211,7 @@ result1 <- logistic_regression_power(
   n = 200,
   n_predictors = 1
 )
-print.logistic_regression_power_analysis(result1)
+print(result1)
 ```
 
 ### EXAMPLE 2: SAMPLE SIZE PLANNING WITH FRAMEWORK

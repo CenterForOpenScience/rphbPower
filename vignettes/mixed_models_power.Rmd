@@ -7,12 +7,12 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-devtools::load_all()
+library(rphbPower)
 ```
 
 Power analysis for mixed effects models using partial correlations within the unified framework with design effects, ICC adjustments, and hierarchical data structures.
@@ -31,11 +31,9 @@ Mixed effects models analyze hierarchical/clustered data by accounting for both 
 
 ## Quick Start
 
-```{r setup}
-library(rphbPower)
-```
-
 ```r
+library(rphbPower)
+
 # Calculate power (provide effect size and design)
 mixed_models_power(r_partial = 0.25, n_groups = 25, n_per_group = 20, icc = 0.08)
 
@@ -263,7 +261,7 @@ Version: 1.2
 
 result1 <- mixed_models_power(r_partial = 0.25, n_groups = 20, n_per_group = 25, 
                               icc = 0.08, test_level = "level1")
-print.mixed_models_power_analysis(result1)
+print(result1)
 ```
 
 ### EXAMPLE 2: SAMPLE SIZE PLANNING WITH FRAMEWORK

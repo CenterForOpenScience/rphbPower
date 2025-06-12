@@ -12,7 +12,6 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-devtools::load_all()
 library(rphbPower)
 options(rmarkdown.html_vignette.check_title = FALSE)
 ```
@@ -21,20 +20,9 @@ A hands-on tutorial for the partial correlation framework enabling power analysi
 
 ## Quick Setup
 
-### Installation and Initialization
-```r
-# Initialize the framework
-source("02_setup.R")
-
-# Core framework utilities are now loaded
-# Available methods can be checked with:
-show_available_methods()
-```
-
 ### First Power Analysis
 ```r
-# Load a specific analysis method
-load_analysis_method("linear_regression")
+library(rphbPower)
 
 # Basic power analysis (provide any 2 parameters, calculates the 3rd)
 result <- linear_regression_power(r_partial = 0.25, power = 0.8, n_predictors = 1)

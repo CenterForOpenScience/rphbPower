@@ -7,12 +7,12 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-devtools::load_all()
+library(rphbPower)
 ```
 
 Power analysis for SEM-based mediation models using partial correlations within the unified framework with integrated measurement error and model complexity adjustments.
@@ -31,11 +31,9 @@ SEM-based mediation analysis provides comprehensive latent variable testing of m
 
 ## Quick Start
 
-```{r setup}
-library(rphbPower)
-```
-
 ```r
+library(rphbPower)
+
 # Calculate power (provide path coefficients and sample size)
 mediation_sem_power(r_a = 0.30, r_b = 0.25, n = 400)
 
@@ -215,7 +213,7 @@ result1 <- mediation_sem_power(
   measurement_error = 0.1,
   n_indicators_total = 9
 )
-print.mediation_sem_power_analysis(result1)
+print(result1)
 ```
 
 ### EXAMPLE 2: FRAMEWORK EFFECT SIZE CONVERSION

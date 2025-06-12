@@ -13,7 +13,6 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 library(rphbPower)
-devtools::load_all()
 ```
 
 Comprehensive guidelines for selecting appropriate effect sizes within the unified partial correlation framework with conservative planning and cross-method consistency.
