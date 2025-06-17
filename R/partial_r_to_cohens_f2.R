@@ -1,4 +1,4 @@
-#' Convert Partial Correlation to Cohen's f².
+#' Convert Partial Correlation to Cohen's f²
 #' @param r Partial correlation
 #' @return Cohen's f\00B2 equivalent
 #' @export

@@ -2,11 +2,11 @@
 # MAIN POWER ANALYSIS FUNCTION
 # ==============================================================================
 
-#' Fixed Effects Power Analysis with Framework Integration
+#' Fixed Effects Power Analysis with Framework Integration (v2.2)
 #' @param r_partial Within-person partial correlation coefficient (NULL to calculate)
 #' @param n_units Number of individuals/units (NULL to calculate)
 #' @param n_periods Number of time periods per unit (default = 4)
-#' @param power Statistical power (NULL to calculate, default = 0.8)
+#' @param power Statistical power (NULL to calculate, default applied when needed = 0.8)
 #' @param icc Intraclass correlation coefficient (default = 0.3)
 #' @param alpha Significance level (default = 0.05)
 #' @param discount_factor Conservative discount factor (default = 0.75)
@@ -15,7 +15,7 @@
 #' @return Power analysis results with framework integration
 #' @export
 fixed_effects_power <- function(r_partial = NULL, n_units = NULL, n_periods = 4,
-                                power = 0.8, icc = 0.3, alpha = 0.05,
+                                power = NULL, icc = 0.3, alpha = 0.05,
                                 discount_factor = 0.75, effect_input = NULL, effect_type = "r") {
 
   # Parameter detection and validation
@@ -23,286 +23,172 @@ fixed_effects_power <- function(r_partial = NULL, n_units = NULL, n_periods = 4,
     r_partial <- framework_effect_size(effect_input, effect_type, apply_discount = TRUE)
   }
 
-  # Use missing() to detect actually provided parameters
+  if (is.null(power)) {
+    power_default_used <- TRUE
+    power <- 0.8
+  } else {
+    power_default_used <- FALSE
+  }
+
   provided_params <- c(
     r_partial = !missing(r_partial) && !is.null(r_partial),
     n_units = !missing(n_units) && !is.null(n_units),
-    power = !missing(power) && !is.null(power)
+    power = !missing(power) && !is.null(power) && !power_default_used
   )
 
   if (sum(provided_params) != 2) {
     stop("Provide exactly two of: r_partial, n_units, power (or use effect_input)")
   }
 
-  # Validate inputs using framework functions
+  # Validate inputs
   if (!is.null(r_partial)) {
     r_partial <- validate_partial_r(r_partial, allow_zero = FALSE,
                                     context = "for fixed effects power analysis")
   }
-
-  if (!is.null(n_units)) {
-    if (!is.numeric(n_units) || any(n_units != round(n_units)) || any(n_units < 10)) {
-      stop("Number of units must be whole number >= 10")
-    }
+  if (!is.null(n_units) && (n_units < 3 || n_units != round(n_units))) {
+    stop("Number of units must be a whole number >= 3.")
   }
-
-  if (!is.null(power)) {
-    if (!is.numeric(power) || any(power <= 0) || any(power >= 0.999)) {
-      stop("Power must be between 0 and 0.999")
-    }
+  if (!is.null(power) && (power <= 0 || power >= 1)) {
+    stop("Power must be between 0 and 1.")
   }
-
   if (!is.numeric(n_periods) || n_periods < 2 || n_periods != round(n_periods)) {
-    stop("Number of periods must be integer >= 2")
+    stop("Number of periods must be an integer >= 2.")
   }
-
   if (!is.numeric(icc) || icc < 0 || icc >= 1) {
-    stop("ICC must be between 0 and 1")
+    stop("ICC must be between 0 and 1.")
   }
 
-  # Calculate design effect and effective sample size
-  design_effect <- calculate_fixed_effects_design_effect(n_periods, icc)
-
-  if (!is.null(n_units)) {
-    n_effective <- calculate_fixed_effects_effective_n(n_units, n_periods, icc)
+  # Perform calculation
+  if (!provided_params["power"]) {
+    calculated_power <- fixed_effects_power_calculation(r_partial, n_units, n_periods, icc, alpha)
+    result <- list(power = calculated_power, calculation_target = "power")
+  } else if (!provided_params["n_units"]) {
+    calculated_n_units <- fixed_effects_sample_size_calculation(r_partial, power, n_periods, icc, alpha)
+    result <- list(n_units = calculated_n_units, calculation_target = "sample_size")
   } else {
-    n_effective <- NULL
+    calculated_r_partial <- fixed_effects_effect_size_calculation(n_units, power, n_periods, icc, alpha)
+    result <- list(r_partial = calculated_r_partial, calculation_target = "effect_size")
   }
 
-  # Perform power calculation
-  if (is.null(power)) {
-    # Calculate power
-    calculated_power <- fixed_effects_power_calculation(r_partial, n_effective, icc, alpha)
-
-    result <- list(
-      analysis_type = "fixed_effects_power",
-      method = "Fixed Effects Power Analysis",
-      r_partial = r_partial,
-      n_units = n_units,
-      n_periods = n_periods,
-      n_total_observations = n_units * n_periods,
-      n_effective = n_effective,
-      power = calculated_power,
-      icc = icc,
-      design_effect = design_effect,
-      alpha = alpha,
-      discount_factor = discount_factor,
-      calculation_target = "power"
-    )
-
-  } else if (is.null(n_units)) {
-    # Calculate sample size
-    n_effective_needed <- fixed_effects_sample_size_calculation(r_partial, power, icc, alpha)
-    calculated_n_units <- calculate_fixed_effects_required_n(n_effective_needed, n_periods, icc)
-
-    result <- list(
-      analysis_type = "fixed_effects_sample_size",
-      method = "Fixed Effects Sample Size Analysis",
-      r_partial = r_partial,
-      n_units = calculated_n_units,
-      n_periods = n_periods,
-      n_total_observations = calculated_n_units * n_periods,
-      n_effective = n_effective_needed,
-      power = power,
-      icc = icc,
-      design_effect = design_effect,
-      alpha = alpha,
-      discount_factor = discount_factor,
-      calculation_target = "sample_size"
-    )
-
-  } else {
-    # Calculate effect size
-    calculated_r_partial <- fixed_effects_effect_size_calculation(n_effective, power, icc, alpha)
-
-    result <- list(
-      analysis_type = "fixed_effects_effect_size",
-      method = "Fixed Effects Effect Size Analysis",
-      r_partial = calculated_r_partial,
-      n_units = n_units,
-      n_periods = n_periods,
-      n_total_observations = n_units * n_periods,
-      n_effective = n_effective,
-      power = power,
-      icc = icc,
-      design_effect = design_effect,
-      alpha = alpha,
-      discount_factor = discount_factor,
-      calculation_target = "effect_size"
-    )
-  }
-
-  # Add framework integration
-  r_for_conversion <- result$r_partial
-  result$effect_size_conversions <- framework_conversion_summary(
-    r_for_conversion, "r", apply_discount = FALSE
+  # Assemble final output object
+  final_result <- list(
+    analysis_type = paste("fixed_effects", result$calculation_target, sep="_"),
+    method = "Fixed Effects Power Analysis (v2.2)",
+    r_partial = if(is.null(r_partial)) result$r_partial else r_partial,
+    n_units = if(is.null(n_units)) result$n_units else n_units,
+    n_periods = n_periods,
+    power = if(is.null(power) || power_default_used) result$power else power,
+    icc = icc,
+    alpha = alpha,
+    discount_factor = discount_factor,
+    calculation_target = result$calculation_target
   )
-  result$interpretation <- interpret_effect_size(r_for_conversion)
 
-  # Add fixed effects specific information
-  result$panel_details <- list(
+  # Add derived values for reporting
+  final_result$n_total_observations <- final_result$n_units * final_result$n_periods
+  final_result$design_effect <- calculate_fixed_effects_design_effect(final_result$n_periods, final_result$icc)
+  final_result$n_effective <- calculate_fixed_effects_effective_n(final_result$n_units, final_result$n_periods, final_result$icc)
+  final_result$effect_size_conversions <- framework_conversion_summary(final_result$r_partial, "r", apply_discount = FALSE)
+  final_result$interpretation <- interpret_effect_size(final_result$r_partial)
+  final_result$panel_details <- list(
     within_person_focus = TRUE,
     time_invariant_controls = "all_unobserved",
-    efficiency_vs_cross_sectional = round(1 / design_effect, 2)
+    efficiency_vs_cross_sectional = round(1 / final_result$design_effect, 2)
   )
 
-  class(result) <- "fixed_effects_power_analysis"
-  return(result)
+  class(final_result) <- "fixed_effects_power_analysis"
+  return(final_result)
 }
 
 # ==============================================================================
-# CORE CALCULATION FUNCTIONS
+# CORE CALCULATION FUNCTIONS - CRITICALLY CORRECTED (v2.2)
 # ==============================================================================
 
-#' Calculate Power for Fixed Effects
+#' Calculate Power for Fixed Effects - Corrected (v2.2)
 #' @param r_partial Within-person partial correlation
-#' @param n_effective Effective sample size
-#' @param icc Intraclass correlation coefficient
+#' @param n_units Number of units
+#' @param n_periods Number of periods
+#' @param icc Intraclass correlation coefficient (used for reporting, not this calculation)
 #' @param alpha Significance level
 #' @return Statistical power
 #' @export
-fixed_effects_power_calculation <- function(r_partial, n_effective, icc, alpha) {
-  # Degrees of freedom for within-person effect
-  df <- n_effective - 2
+fixed_effects_power_calculation <- function(r_partial, n_units, n_periods, icc, alpha) {
+  # The test of a within-person (time-varying) predictor in a FE model is a t-test.
+  # Degrees of freedom are total observations minus number of units (for the fixed effects)
+  # minus the number of other predictors. Here, k=1.
+  df_den <- (n_units * n_periods) - n_units - 1
+  if (df_den <= 0) return(0)
 
-  if (df <= 0) {
-    stop("Insufficient degrees of freedom for analysis")
-  }
+  # The t-statistic for a partial correlation r_partial with the correct df_den.
+  t_stat <- r_partial * sqrt(df_den) / sqrt(1 - r_partial^2)
+  ncp <- t_stat
 
-  # Calculate t-statistic and power
-  t_value <- r_partial * sqrt(df / (1 - r_partial^2))
-  t_crit <- qt(1 - alpha/2, df)
+  # Critical t-value for a two-tailed test
+  t_crit <- stats::qt(1 - alpha / 2, df_den)
+  power <- stats::pt(t_crit, df_den, ncp = ncp, lower.tail = FALSE) + stats::pt(-t_crit, df_den, ncp = ncp, lower.tail = TRUE)
 
-  # Non-centrality parameter
-  ncp <- abs(t_value)
-
-  # Calculate power using non-central t distribution
-  power <- 1 - pt(t_crit, df, ncp = ncp) + pt(-t_crit, df, ncp = ncp)
-
-  return(pmax(0, pmin(1, power)))
+  return(pmax(0.001, pmin(0.999, power)))
 }
 
 #' Calculate Sample Size for Fixed Effects
 #' @param r_partial Within-person partial correlation
 #' @param power Target power
+#' @param n_periods Number of time periods
 #' @param icc Intraclass correlation coefficient
 #' @param alpha Significance level
 #' @return Required effective sample size
 #' @export
-fixed_effects_sample_size_calculation <- function(r_partial, power, icc, alpha) {
-  # Use iterative approach
-  n_min <- 20
-  n_max <- 5000
-  tolerance <- 0.001
-
-  for (i in 1:100) {
-    n_test <- round((n_min + n_max) / 2)
-    power_test <- fixed_effects_power_calculation(r_partial, n_test, icc, alpha)
-
-    if (abs(power_test - power) < tolerance) {
-      return(n_test)
-    }
-
-    if (power_test < power) {
-      n_min <- n_test
-    } else {
-      n_max <- n_test
-    }
-
-    if (n_max - n_min <= 1) break
+fixed_effects_sample_size_calculation <- function(r_partial, power, n_periods, icc, alpha) {
+  power_func <- function(n_units) {
+    if ((n_units * n_periods) - n_units - 1 <= 0) return(-1)
+    fixed_effects_power_calculation(r_partial, n_units, n_periods, icc, alpha) - power
   }
-
-  return(n_max)
+  min_n <- ceiling(1 + 1/n_periods) + 1 # Min n_units to have df_den > 0
+  result <- tryCatch(stats::uniroot(power_func, interval = c(min_n, 100000))$root, error = function(e) NA)
+  if(is.na(result)) stop("Could not find sample size.")
+  return(ceiling(result))
 }
 
 #' Calculate Effect Size for Fixed Effects
-#' @param n_effective Effective sample size
+#' @param n_units Number of units
 #' @param power Target power
+#' @param n_periods Number of time periods
 #' @param icc Intraclass correlation coefficient
 #' @param alpha Significance level
 #' @return Required within-person partial correlation
 #' @export
-fixed_effects_effect_size_calculation <- function(n_effective, power, icc, alpha) {
-  # Use iterative approach
-  r_min <- 0.01
-  r_max <- 0.95
-  tolerance <- 0.001
-
-  for (i in 1:100) {
-    r_test <- (r_min + r_max) / 2
-    power_test <- fixed_effects_power_calculation(r_test, n_effective, icc, alpha)
-
-    if (abs(power_test - power) < tolerance) {
-      return(r_test)
-    }
-
-    if (power_test < power) {
-      r_min <- r_test
-    } else {
-      r_max <- r_test
-    }
-
-    if (r_max - r_min <= 0.001) break
-  }
-
-  return(r_max)
+fixed_effects_effect_size_calculation <- function(n_units, power, n_periods, icc, alpha) {
+  power_func <- function(r) fixed_effects_power_calculation(r, n_units, n_periods, icc, alpha) - power
+  if ((n_units * n_periods) - n_units - 1 <= 0) stop("Insufficient N to calculate effect size.")
+  result <- tryCatch(stats::uniroot(power_func, interval = c(0.001, 0.999))$root, error = function(e) NA)
+  if(is.na(result)) stop("Could not find effect size.")
+  return(result)
 }
 
-#' Calculate Design Effect for Fixed Effects
+# ==============================================================================
+# HELPER, CONVENIENCE, AND PRINT FUNCTIONS
+# ==============================================================================
+
+#' Calculate Design Effect for Fixed Effects (REPORTING ONLY)
 #' @param n_periods Number of time periods
 #' @param icc Intraclass correlation coefficient
 #' @return Design effect multiplier
 #' @export
 calculate_fixed_effects_design_effect <- function(n_periods, icc) {
-  # Standard design effect formula for clustered data
   design_effect <- 1 + (n_periods - 1) * icc
   return(design_effect)
 }
 
-#' Calculate Effective Sample Size for Fixed Effects
+#' Calculate Effective Sample Size for Fixed Effects (REPORTING ONLY)
 #' @param n_units Number of units
 #' @param n_periods Number of periods
 #' @param icc Intraclass correlation coefficient
 #' @return Effective sample size
 #' @export
 calculate_fixed_effects_effective_n <- function(n_units, n_periods, icc) {
-  # Total observations
-  n_total <- n_units * n_periods
-
-  # Adjust for clustering
-  design_effect <- calculate_fixed_effects_design_effect(n_periods, icc)
-  n_effective <- n_total / design_effect
-
-  # Additional penalty for fixed effects complexity
-  complexity_penalty <- 0.85
-  n_effective <- n_effective * complexity_penalty
-
-  return(max(n_effective, n_units * 0.5))
+  n_effective <- (n_units * n_periods) / (1 + (n_periods - 1) * icc)
+  return(round(n_effective))
 }
-
-#' Calculate Required Number of Units
-#' @param n_effective_needed Required effective sample size
-#' @param n_periods Number of periods
-#' @param icc Intraclass correlation coefficient
-#' @return Required number of units
-#' @export
-calculate_fixed_effects_required_n <- function(n_effective_needed, n_periods, icc) {
-  # Reverse the effective sample size calculation
-  design_effect <- calculate_fixed_effects_design_effect(n_periods, icc)
-  complexity_penalty <- 0.85
-
-  # Calculate required total observations
-  n_total_needed <- n_effective_needed * design_effect / complexity_penalty
-
-  # Convert to number of units
-  n_units_needed <- ceiling(n_total_needed / n_periods)
-
-  return(n_units_needed)
-}
-
-# ==============================================================================
-# CONVENIENCE FUNCTIONS
-# ==============================================================================
 
 #' Framework-Integrated Fixed Effects Power Analysis
 #' @param effect_size Effect size value
@@ -316,7 +202,7 @@ calculate_fixed_effects_required_n <- function(n_effective_needed, n_periods, ic
 #' @return Power analysis result
 #' @export
 fixed_effects_framework_power <- function(effect_size, effect_type = "r", n_units = NULL,
-                                          n_periods = 4, power = 0.8, icc = 0.3,
+                                          n_periods = 4, power = NULL, icc = 0.3,
                                           alpha = 0.05, discount_factor = 0.75) {
   fixed_effects_power(effect_input = effect_size, effect_type = effect_type,
                       n_units = n_units, n_periods = n_periods, power = power,
@@ -353,46 +239,40 @@ fixed_effects_power_check <- function(r_partial, n_units, n_periods = 4,
   return(result$power)
 }
 
-# ==============================================================================
-# PRINT METHOD
-# ==============================================================================
-
 #' Print Method for Fixed Effects Power Analysis
 #' @param x Fixed effects power analysis result
 #' @param ... Additional arguments
+#' @export
 print.fixed_effects_power_analysis <- function(x, ...) {
   cat("\n", x$method, "\n")
   cat(rep("=", nchar(x$method)), "\n\n")
 
-  # Core results
   cat("Within-person partial correlation:", round(x$r_partial, 4),
       paste0("(", x$interpretation, ")"), "\n")
   cat("Number of units:", x$n_units, "\n")
   cat("Number of periods:", x$n_periods, "\n")
   cat("Total observations:", x$n_total_observations, "\n")
-  cat("Effective sample size:", round(x$n_effective), "\n")
+  cat("Effective sample size (reporting):", round(x$n_effective), "\n")
   cat("Statistical power:", round(x$power, 3), "\n")
   cat("Alpha level:", x$alpha, "\n")
 
-  # Panel details
   cat("\nPanel details:\n")
   cat("  ICC:", round(x$icc, 3), "\n")
   cat("  Design effect:", round(x$design_effect, 2), "\n")
   cat("  Efficiency vs cross-sectional:", x$panel_details$efficiency_vs_cross_sectional, "x\n")
 
-  # Framework conversions
   if (!is.null(x$effect_size_conversions)) {
     cat("\nFramework conversions:\n")
     conv <- x$effect_size_conversions
     cat("  Cohen's d:", round(conv$cohens_d, 3), "\n")
-    cat(paste0("  Cohen's f", cli::symbol$sup_2, ":"), round(conv$cohens_f2, 3), "\n")
-    cat(paste0("  R", cli::symbol$sup_2, ":"), round(conv$r_squared, 3), "\n")
+    cat("  Cohen's f\u00B2:", round(conv$cohens_f2, 3), "\n")
+    cat("  R\u00B2:", round(conv$r_squared, 3), "\n")
   }
 
-  # Analysis details
   cat("\nFramework details:\n")
   cat("  Discount factor:", x$discount_factor, "\n")
   cat("  Calculation target:", x$calculation_target, "\n")
+  cat("  Note: Uses correct DF and NCP for within-person effects.\n")
 
   cat("\n")
 }

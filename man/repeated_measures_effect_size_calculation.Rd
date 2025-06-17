@@ -7,24 +7,24 @@
 repeated_measures_effect_size_calculation(
   n,
   power,
-  n_timepoints,
+  alpha,
   correlation_between_measures,
-  alpha
+  n_timepoints
 )
 }
 \arguments{
-\item{n}{Sample size}
+\item{n}{Sample size (NULL to calculate)}
 
-\item{power}{Target power}
+\item{power}{Statistical power (NULL to calculate, default = 0.8)}
 
-\item{n_timepoints}{Number of timepoints}
+\item{alpha}{Significance level (default = 0.05)}
 
-\item{correlation_between_measures}{Correlation between measures}
+\item{correlation_between_measures}{Average correlation between measures (default = 0.5).}
 
-\item{alpha}{Significance level}
+\item{n_timepoints}{Number of repeated measures (default = 2). Note: engine uses paired t-test, best for 2 timepoints.}
 }
 \value{
-Required partial correlation
+Power analysis results with framework integration
 }
 \description{
 Calculate Effect Size for Repeated Measures

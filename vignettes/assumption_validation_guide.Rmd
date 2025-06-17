@@ -21,11 +21,12 @@ Essential guidance for validating statistical assumptions within the unified par
 
 The unified framework depends on regression-based assumptions across all analysis types. **Assumption violations invalidate partial correlation estimates and power calculations.** This guide ensures adequate sample sizes for both effect detection and assumption validation.
 
-**Core Principle:** Your power analysis is only meaningful if statistical assumptions hold for your chosen method.
+**Core Principle:** Your power analysis is only meaningful if the statistical assumptions hold for your chosen method.
 
 ## Universal Assumption Requirements
 
 ### Partial Correlation Reliability
+
 All framework analyses depend on reliable partial correlation estimates. Key assumptions affect this reliability:
 
 | **Assumption** | **Framework Impact** | **Minimum N** | **Recommended N** |
@@ -41,187 +42,130 @@ All framework analyses depend on reliable partial correlation estimates. Key ass
 ## Method-Specific Validation
 
 ### Correlation Analysis
-```r
-library(rphbPower)
 
-# Basic requirements for reliable r_partial
-correlation_assumptions <- list(
-  linearity = 100,        # Bivariate scatterplot inspection
-  normality = 50,         # Q-Q plots adequate
-  homoscedasticity = 140, # Residual variance consistency
-  independence = "design" # No autocorrelation
-)
+The key assumptions are **linearity** (the relationship is best described by a straight line), **normality** of the variables' distributions, and **homoscedasticity**.
 
-# Framework integration
-correlation_power(r_partial = 0.25, n = max(unlist(correlation_assumptions[-4])))
-```
+### Linear & Logistic Regression
 
-### Linear/Logistic Regression
-```r
-# Requirements scale with model complexity
-regression_assumptions <- function(n_predictors) {
-  list(
-    linearity = 150,                    # Component + residual plots
-    normality = 100,                    # Residual Q-Q plots  
-    homoscedasticity = 200,             # Breusch-Pagan test power
-    multicollinearity = n_predictors * 8, # VIF < 5 detection
-    outliers = max(60, n_predictors * 5)  # Cook's distance reliability
-  )
-}
-
-# Framework application
-n_pred <- 3
-assumption_n <- max(unlist(regression_assumptions(n_pred)))
-linear_regression_power(r_partial = 0.20, n = assumption_n, n_predictors = n_pred)
-```
+- **Linear Regression**: Relies on linearity, independence of errors, homoscedasticity, and normality of residuals. High multicollinearity (VIF > 5) should be avoided.
+- **Logistic Regression**: Requires linearity between the predictors and the *logit* of the outcome, independence of errors, and absence of strong multicollinearity. It does not assume normality or homoscedasticity of residuals in the same way as linear regression.
 
 ### Mediation Analysis
-```r
-# Both a-path and b-path must satisfy assumptions
-mediation_assumptions <- list(
-  linearity_both_paths = 150,     # X→M and M→Y linearity
-  normality_residuals = 100,      # Both path residuals
-  homoscedasticity = 200,         # Consistent across paths
-  no_confounding = "design",      # Causal assumptions
-  measurement_reliability = 150   # Mediation especially sensitive
-)
 
-# Framework application  
-mediation_regression_power(r_a = 0.25, r_b = 0.25, n = 200)
-```
+Both the a-path (X→M) and b-path (M→Y|X) must satisfy the assumptions of linear regression. Additionally, the framework's fast analytical engine relies on a key assumption:
+
+- **Normality of the indirect effect's sampling distribution**: This is a core assumption of the Aroian/Sobel test used by the calculation engine. This is more likely to hold in larger samples (N > 100).
 
 ### Longitudinal Analysis
-```r
-# Time-specific assumption considerations
-longitudinal_assumptions <- list(
-  stationarity = 200,           # Stable relationships over time
-  autocorrelation = 150,        # Residual independence across time
-  missing_data_mechanism = 100, # MCAR/MAR assumptions
-  measurement_invariance = 200  # Consistent measures over time
-)
 
-# Framework application
-cross_lagged_panel_power(r_partial = 0.15, n = 200, n_waves = 3)
-```
+This category uses several distinct methods with different assumptions:
 
-### Multilevel Models
-```r
-# Hierarchical assumption requirements
-multilevel_assumptions <- list(
-  level_1_normality = 100,      # Individual-level residuals
-  level_2_normality = 30,       # Cluster-level (minimum clusters)
-  homoscedasticity = 200,       # Within and between cluster variance
-  independence_clusters = "design", # No cluster confounding
-  adequate_clustering = 50      # ICC detection power
-)
+- **Repeated Measures ANOVA**: Assumes **sphericity**, meaning the variance of the differences between all pairs of repeated measures is equal. The framework's engine uses a paired t-test (ideal for 2 timepoints), a case where sphericity is always met.
+- **Cross-Lagged Panel Models**: Since the engine uses two linear regressions, the key assumptions are **linearity, normality of residuals, and homoscedasticity** for each of the outcome variables in the model.
+- **Fixed Effects Models**: The primary assumption is that the predictors are not correlated with the time-varying errors (a concept called **strict exogeneity**). This is stronger than the assumption for standard OLS regression.
 
-# Framework application
-mixed_models_power(r_partial = 0.20, n_groups = 30, n_per_group = 7)  # Total n ≈ 210
-```
+### Multilevel Models (Mixed Models)
+
+This method has assumptions at multiple levels:
+
+- **Level 1 (Within-group)**: Requires linearity and homoscedasticity of residuals.
+- **Level 2 (Between-group)**: The random effects (the intercepts and slopes that vary across groups) are assumed to be normally distributed.
+- **Independence of clusters**: The clusters themselves must be independent of one another.
 
 ## Integrated Planning Workflow
 
-### Step 1: Identify Critical Assumptions
-```r
-# Method-specific assumption priorities
-assumption_priorities <- list(
-  correlation = c("linearity", "normality"),
-  linear_regression = c("linearity", "homoscedasticity", "multicollinearity"),
-  mediation = c("linearity", "measurement_reliability", "confounding"),
-  longitudinal = c("stationarity", "missing_data"),
-  multilevel = c("clustering", "level_independence")
-)
+A robust study plan requires a sample size sufficient for both detecting your effect *and* validating the assumptions of your statistical test. The recommended approach is to calculate the sample size needed for each and choose the larger of the two.
+
+### Step 1: Calculate N for Effect Detection
+
+Use the appropriate power analysis function from the framework to determine the sample size needed to achieve your desired power (e.g., 80%) for your target effect size.
+
+```{r step-1}
+# Example: Find the sample size needed to detect r_partial = 0.20
+# with 80% power in a regression with 3 predictors.
+effect_n <- linear_regression_power(r_partial = 0.20, power = 0.8, n_predictors = 3)$n
+
+cat(paste0("Result: effect_n is ", effect_n))
 ```
 
-### Step 2: Calculate Requirements
-```r
-# Framework-integrated planning function
-framework_assumption_planning <- function(method, r_partial, n_predictors = 1, power = 0.8) {
-  
-  # Method-specific minimums
-  method_minimums <- list(
-    correlation = 150,
-    linear_regression = max(200, n_predictors * 8),
-    mediation = 200,
-    longitudinal = 200,
-    multilevel = 200,
-    sem = max(250, n_predictors * 10)
-  )
-  
-  # Effect detection sample size
-  effect_n <- switch(method,
-    correlation = {
-      correlation_power(r_partial = r_partial, power = power)$n
-    },
-    linear_regression = {
-      linear_regression_power(r_partial = r_partial, power = power, n_predictors = n_predictors)$n
-    },
-    mediation = {
-      mediation_regression_power(r_a = r_partial, r_b = r_partial, power = power)$n
-    },
-    200  # Default for complex methods
-  )
-  
-  # Final recommendation
-  assumption_n <- method_minimums[[method]]
-  final_n <- max(effect_n, assumption_n)
-  
-  return(list(
-    effect_n = effect_n,
-    assumption_n = assumption_n,
-    recommended_n = final_n
-  ))
-}
+
+### Step 2: Determine N for Assumption Validation
+
+Using the tables and guidance in this document, determine a minimum sample size for reliably testing the assumptions of your chosen method. For a linear regression, a common concern is multicollinearity and having enough power to test for it. A rule of thumb might be N > 200.
+
+```{r step-2}
+# Based on the Universal Assumption Requirements table
+assumption_n <- 200 
 ```
 
-### Step 3: Framework Application
-```r
-# Example: Linear regression planning
-planning_result <- framework_assumption_planning(
-  method = "linear_regression",
-  r_partial = 0.25,
-  n_predictors = 4,
-  power = 0.8
-)
 
-# Use recommended sample size
-final_analysis <- linear_regression_power(
-  r_partial = 0.25, 
-  n = planning_result$recommended_n, 
-  n_predictors = 4
-)
+### Step 3: Select the Final Sample Size
+
+Your final planned sample size should be the maximum of the two estimates. This ensures you can be confident in both your primary results and the validity of the model they came from.
+
+```{r step-3}
+# Choose the larger of the two estimates
+recommended_n <- max(effect_n, assumption_n)
+cat(paste0("Result: recommended_n is ", recommended_n))
 ```
 
 ## Field-Specific Considerations
 
+The importance of certain statistical assumptions can vary by research domain, as different fields contend with different types of data and common methodological challenges.
+
 ### Psychology and Social Sciences
 
-**High Priority:** Multicollinearity, measurement reliability, normality
+This field frequently uses survey data and experimental designs, bringing specific assumptions to the forefront.
 
-**Common Issues:** Self-report bias, range restriction, missing data
+**Key Concern**: Normality and Measurement Error. Psychological scales (e.g., Likert-type, personality inventories) often produce data that is ordinal and non-normally distributed. Furthermore, these scales measure latent constructs with some degree of error.
+
+**Framework Guidance**:
+
+- Always visualize your data using histograms and Q-Q plots to assess the severity of non-normality.
+- If significant deviations are found, plan for the use of a non-parametric alternative by using `wilcoxon_signed_rank_power()` for paired designs.
+- When working with constructs known to have measurement error, use the `sem_direct_effects_power()` or `mediation_sem_power()` functions and specify a realistic `measurement_reliability` (e.g., 0.85) to get a more accurate sample size estimate.
 
 ### Education Research
 
-**High Priority:** Clustering (classrooms/schools), missing data, measurement invariance
+Educational data is almost always hierarchical, making the independence assumption the primary concern.
 
-**Common Issues:** Nested data, attrition, developmental changes
+**Key Concern**: Independence and Clustering. Students are nested within classrooms, which are nested within schools. This clustering means the observations are not independent. Ignoring this is one of the most common errors in education research.
 
-### Health and Medicine
+**Framework Guidance**:
 
-**High Priority:** Non-normal distributions, heteroscedasticity, missing data
+- Your default choice for power analysis should be `mixed_models_power()`. This correctly accounts for the nested data structure.
+- Accurately estimating the Intraclass Correlation (ICC) is critical. A small change in the `icc` parameter can have a dramatic impact on the required number of groups. Consult prior literature in your specific domain to find a plausible ICC estimate.
+- Be mindful of multicollinearity when using student-level predictors (e.g., prior achievement, socioeconomic status), as they are often highly correlated.
 
-**Common Issues:** Skewed outcomes, varying precision, dropout
+### Health and Medical Research
 
-### Business and Economics
+Clinical trials and longitudinal health studies are often characterized by binary outcomes and participant attrition.
 
-**High Priority:** Heteroscedasticity, autocorrelation, measurement error
+**Key Concern**: Attrition and Linearity of Logit. Participant drop-out in long-term trials can lead to biased results if the reason for dropping out is related to the study's variables. For logistic regression, the assumption of a linear relationship between predictors and the log-odds of the outcome is critical for model validity.
 
-**Common Issues:** Time trends, market effects, reporting bias
+**Framework Guidance**:
+
+- The Sample Size Safety Margins are not optional in this field; they are essential. Plan for a high rate of attrition (25% or more) in any multi-wave study.
+- When using `logistic_regression_power()`, your study plan must include specific diagnostic checks for the linearity of the logit assumption after data is collected.
+- For studies with multiple measurements over time (e.g., tracking patient symptoms), `fixed_effects_power()` and `mixed_models_power()` are often more appropriate than simple repeated-measures tests as they can handle more complex data structures.
+
+### Business and Organizational Research
+
+Economic, financial, and organizational data often violate assumptions of constant variance and independence over time.
+
+**Key Concern**: Homoscedasticity and Exogeneity. Financial data (e.g., revenue, stock performance) often exhibits heteroscedasticity (i.e., the error variance is not constant). In panel data models, predictors like a firm's marketing budget may be influenced by its performance in prior years, violating the strict exogeneity assumption required for some models.
+
+**Framework Guidance**:
+
+- When planning a study using `linear_regression_power()`, make plotting residuals against fitted values a mandatory part of your pre-registered analysis plan to check for heteroscedasticity.
+- If heteroscedasticity is expected, you may need a larger sample size to have sufficient power for robust standard error corrections (e.g., using bootstrapping).
+- While the `fixed_effects_power()` function is powerful for panel data, be sure your theoretical model supports its assumption of strict exogeneity.
 
 ## Quick Diagnostic Planning
 
 ### Essential Checks by Method
-```r
+
+```{r essential-checks}
 # Framework diagnostic checklist
 framework_diagnostics <- list(
   
@@ -229,55 +173,71 @@ framework_diagnostics <- list(
   universal = c("linearity", "outliers", "measurement_quality"),
   
   # Method-specific additions
-  regression = c("homoscedasticity", "multicollinearity", "normality"),
-  mediation = c("confounding", "reliability", "indirect_effect_distribution"),
-  longitudinal = c("stationarity", "autocorrelation", "missing_pattern"),
-  multilevel = c("clustering_adequacy", "level_assumptions", "convergence")
+  regression = c("homoscedasticity", "multicollinearity", "normality_of_residuals"),
+  mediation = c("normality_of_indirect_effect_distribution", "no_confounding"),
+  repeated_measures = c("sphericity_assumption", "normality_at_each_timepoint"),
+  cross_lagged = c("normality_and_homoscedasticity_of_residuals_for_each_model"),
+  fixed_effects = c("strict_exogeneity_assumption"),
+  multilevel = c("normality_of_random_effects", "independence_of_clusters")
 )
 ```
 
 ### Sample Size Safety Margins
-Apply conservative multipliers for robust analysis:
 
-| **Concern Level** | **Multiplier** | **Application** |
-|-------------------|----------------|-----------------|
-| **Low** | 1.1 | Well-controlled lab studies |
-| **Medium** | 1.25 | Typical field research |
-| **High** | 1.5 | Observational, complex designs |
+A power analysis provides the *minimum* sample size needed under ideal conditions. Real-world research is rarely ideal. A safety margin must be added to your calculated sample size to account for participant drop-out, data cleaning, and other common issues. Failing to do so can leave you with an underpowered study.
+
+| **Scenario / Risk Factor** | **Recommended Safety Margin** | **Rationale** |
+|---------------------------|------------------------------|---------------|
+| **Single-Session Lab Study** | 10-15% | Accounts for no-shows, equipment failure, or participants who do not follow instructions |
+| **Online Survey (One-time)** | 15-25% | Accounts for incomplete responses, failed attention checks, and low-quality or nonsensical data that must be removed |
+| **Multi-Wave Longitudinal Study** | 25-40% | Critically important to account for cumulative attrition. The longer the study and the more waves, the higher the margin should be |
+| **Planned Subgroup Analyses** | 20-50% | Your overall sample size does not guarantee adequate power for smaller subgroup comparisons (e.g., comparing effects between men and women) |
+| **Highly Variable Population** | 15-20% | If you expect high variance or many outliers in your data, a larger sample provides a more stable estimate and more power for robust statistical methods |
+
+**Practical Example:** If your power analysis for a 3-wave longitudinal study suggests `N = 200`, you should plan to recruit `200 * 1.30 = 260` participants to ensure you have adequate power in your final, cleaned dataset.
 
 ## Framework Assumption Best Practices
 
-### Planning Phase
+Assumption validation is not just a statistical checkbox; it is a core part of ensuring your research findings are credible. The following best practices will help you use the framework effectively and produce robust results.
 
-1. **Identify method-specific critical assumptions** based on analysis type
-2. **Calculate assumption validation sample sizes** alongside effect detection
-3. **Use framework safety margins** for conservative planning
-4. **Plan diagnostic procedures** before data collection
+### 1. Design Before You Analyze
 
-### Analysis Phase
+The best way to handle assumptions is to prevent violations through good study design. Use reliable and validated measures to reduce measurement error, use random assignment in experimental designs to balance confounding variables, and understand your population to anticipate potential issues like restricted range or non-normality.
 
-1. **Check assumptions systematically** using appropriate tests
-2. **Document violations** and remedial actions taken
-3. **Report assumption checks** in results
-4. **Use robust methods** when assumptions violated
+### 2. Plan for Your **Actual** Analysis
 
-### Remedial Actions
+Your power analysis must be for the statistical test you intend to report. If you plan to run a multiple regression with five predictors, do not run a power analysis for a simple correlation. The framework is designed to handle this complexity; use the `n_predictors` and other model-specific arguments to get a realistic estimate.
 
-- **Transformation:** Log, square root, Box-Cox for normality/linearity
-- **Robust methods:** Robust standard errors, bootstrap confidence intervals
-- **Alternative analyses:** Nonparametric methods when appropriate
-- **Model adjustment:** Additional predictors, different specifications
+### 3. Always Over-Recruit
+
+As detailed in the "Sample Size Safety Margins" section, the number from a power analysis is a floor, not a ceiling. Always build a buffer into your recruitment goals to account for the realities of data collection. A slightly overpowered study is always better than an underpowered one.
+
+### 4. Visualize Before You Test
+
+Before running formal diagnostic tests, always visualize your data. Scatterplots are the best way to check for linearity and homoscedasticity. Histograms and Q-Q plots are excellent for assessing normality. Often, a clear visualization is more informative than a p-value from a formal test.
+
+### 5. Use Diagnostics as a Guide, Not a Mandate
+
+Formal tests like Shapiro-Wilk (for normality) or Breusch-Pagan (for homoscedasticity) can be useful, but they are heavily influenced by sample size. With a very large N, even trivial deviations from normality will be "statistically significant." Use these tests as one piece of evidence alongside visualizations.
+
+### 6. Have a Contingency Plan
+
+Know what you will do if a key assumption is violated.
+
+- **Mild Violation**: You might proceed but acknowledge the violation as a limitation in your report.
+- **Moderate Violation**: Consider using robust methods, such as bootstrapping your standard errors.
+- **Severe Violation**: Switch to a nonparametric alternative. The framework includes the `wilcoxon_signed_rank_power` function for this reason—it helps you plan for the possibility that you might need to use a nonparametric test.
 
 ## Integration with Framework Power Analysis
 
-**Key Principle:** The unified framework ensures that assumption validation and effect detection are planned together using consistent partial correlation metrics.
+**Key Principle**: The unified framework encourages planning for assumption validation and effect detection together, using consistent partial correlation metrics. The final recommended sample size for your study should satisfy both goals.
 
 ```r
 # Complete framework planning
 final_sample_size <- max(
-  framework_power_analysis_n,    # From specific method
-  framework_assumption_validation_n,  # From this guide
-  field_minimum_n               # From effect_size_guidelines.md
+  power_analysis_n,             # From a specific method function
+  assumption_validation_n,      # From this guide's rules of thumb
+  field_minimum_n               # From the Effect Size Guidelines vignette
 )
 ```
 

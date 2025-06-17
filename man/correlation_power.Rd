@@ -2,12 +2,12 @@
 % Please edit documentation in R/correlation_power.R
 \name{correlation_power}
 \alias{correlation_power}
-\title{Correlation Power Analysis with Framework Integration}
+\title{Correlation Power Analysis with Framework Integration (v2.2)}
 \usage{
 correlation_power(
   r_partial = NULL,
   n = NULL,
-  power = 0.8,
+  power = NULL,
   alpha = 0.05,
   discount_factor = 0.75,
   two_tailed = TRUE,
@@ -36,5 +36,5 @@ correlation_power(
 Power analysis results with framework integration
 }
 \description{
-Correlation Power Analysis with Framework Integration
+Correlation Power Analysis with Framework Integration (v2.2)
 }

@@ -1,0 +1,85 @@
+---
+title: "Specialized Models"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{specialized_models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(rphbPower)
+```
+
+Version: 2.0 - Revised to reflect validated engines.
+
+## PART 1: LOGISTIC REGRESSION
+
+Engine: `WebPower::wp.logistic`. Supports a SINGLE predictor only.
+
+### Example 1.1: Sample Size for a Binary Outcome
+
+```{r ex1-1}
+# Calculate N for 80% power to detect an effect of r=0.25.
+result_log_1 <- logistic_regression_power(r_partial = 0.25, power = 0.8)
+print(result_log_1)
+```
+
+## PART 2: MIXED-EFFECTS MODELS
+
+Engine: `WebPower::wp.crt2arm` (Level 1) and `pwr::pwr.f2.test` (Level 2).
+
+### Example 2.1: Sample Size for a Clustered Design (Level 1 Effect)
+
+```{r ex2-1}
+# Calculate the number of groups needed for a Level-1 (within-group) effect of r=0.20.
+# Assumes 15 students per school and an ICC of 0.05. You must specify `test_level`.
+result_mix_1 <- mixed_models_power(r_partial = 0.20, power = 0.8, n_per_group = 15, icc = 0.05, test_level = "level1")
+print(result_mix_1)
+```
+
+### Example 2.2: Power for a Between-Group Effect (Level 2 Effect)
+
+```{r ex2-2}
+# Calculate power to detect an effect of r=0.30 between 50 schools.
+result_mix_2 <- mixed_models_power(r_partial = 0.30, n_groups = 50, test_level = "level2")
+print(result_mix_2)
+```
+
+## PART 3: WILCOXON SIGNED-RANK TEST
+
+Engine: `pwr::pwr.t.test` (type="paired") as a robust parametric equivalent.
+
+### Example 3.1: Sample Size for a Non-Normal Pre-Post Design
+
+```{r ex3-1}
+# Calculate N for 90% power to detect a medium effect (r=0.25).
+result_wilcox_1 <- wilcoxon_signed_rank_power(r_partial = 0.25, power = 0.90)
+print(result_wilcox_1)
+```
+
+## PART 4: DEMONSTRATING THE DISCOUNT FEATURE
+
+Showcasing conservative planning for a nonparametric test. Literature suggests an effect of d=0.5.
+
+```{r discount-feature}
+# --- Conservative Planning (Recommended) ---
+conservative_result <- wilcoxon_signed_rank_power(effect_input = 0.5, effect_type = "d", power = 0.8)
+
+# --- Optimistic Planning (Not Recommended) ---
+optimistic_r <- cohens_d_to_partial_r(d = 0.5, apply_discount = FALSE)
+optimistic_result <- wilcoxon_signed_rank_power(r_partial = optimistic_r, power = 0.8)
+
+cat("\n--- Wilcoxon Conservative vs. Optimistic Planning ---\n")
+cat("Literature Effect (Cohen's d):", 0.5, "\n")
+cat("Conservative Plan (Framework Default): Requires N =", conservative_result$n, "\n")
+cat("Optimistic Plan (No Discount): Requires N =", optimistic_result$n, "\n")
+```
+

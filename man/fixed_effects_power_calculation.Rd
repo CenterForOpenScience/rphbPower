@@ -2,16 +2,18 @@
 % Please edit documentation in R/fixed_effects_power.R
 \name{fixed_effects_power_calculation}
 \alias{fixed_effects_power_calculation}
-\title{Calculate Power for Fixed Effects}
+\title{Calculate Power for Fixed Effects - Corrected (v2.2)}
 \usage{
-fixed_effects_power_calculation(r_partial, n_effective, icc, alpha)
+fixed_effects_power_calculation(r_partial, n_units, n_periods, icc, alpha)
 }
 \arguments{
 \item{r_partial}{Within-person partial correlation}
 
-\item{n_effective}{Effective sample size}
+\item{n_units}{Number of units}
 
-\item{icc}{Intraclass correlation coefficient}
+\item{n_periods}{Number of periods}
+
+\item{icc}{Intraclass correlation coefficient (used for reporting, not this calculation)}
 
 \item{alpha}{Significance level}
 }
@@ -19,5 +21,5 @@ fixed_effects_power_calculation(r_partial, n_effective, icc, alpha)
 Statistical power
 }
 \description{
-Calculate Power for Fixed Effects
+Calculate Power for Fixed Effects - Corrected (v2.2)
 }

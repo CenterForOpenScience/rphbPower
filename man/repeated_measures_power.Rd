@@ -2,12 +2,12 @@
 % Please edit documentation in R/repeated_measures_power.R
 \name{repeated_measures_power}
 \alias{repeated_measures_power}
-\title{Repeated Measures Power Analysis with Framework Integration}
+\title{Repeated Measures Power Analysis with Framework Integration (v3.0)}
 \usage{
 repeated_measures_power(
   r_partial = NULL,
   n = NULL,
-  power = 0.8,
+  power = NULL,
   n_timepoints = 2,
   correlation_between_measures = 0.5,
   alpha = 0.05,
@@ -17,15 +17,15 @@ repeated_measures_power(
 )
 }
 \arguments{
-\item{r_partial}{Partial correlation coefficient (NULL to calculate)}
+\item{r_partial}{Partial correlation coefficient, analogous to sqrt(partial eta-squared) (NULL to calculate)}
 
 \item{n}{Sample size (NULL to calculate)}
 
 \item{power}{Statistical power (NULL to calculate, default = 0.8)}
 
-\item{n_timepoints}{Number of repeated measures (default = 2)}
+\item{n_timepoints}{Number of repeated measures (default = 2). Note: engine uses paired t-test, best for 2 timepoints.}
 
-\item{correlation_between_measures}{Correlation between measures (default = 0.5)}
+\item{correlation_between_measures}{Average correlation between measures (default = 0.5).}
 
 \item{alpha}{Significance level (default = 0.05)}
 
@@ -33,11 +33,11 @@ repeated_measures_power(
 
 \item{effect_input}{Raw effect size input (alternative to r_partial)}
 
-\item{effect_type}{Type of effect_input ("r", "d", "f2", "r_squared", "eta_squared")}
+\item{effect_type}{Type of effect_input ("r", "d")}
 }
 \value{
 Power analysis results with framework integration
 }
 \description{
-Repeated Measures Power Analysis with Framework Integration
+Repeated Measures Power Analysis with Framework Integration (v3.0)
 }

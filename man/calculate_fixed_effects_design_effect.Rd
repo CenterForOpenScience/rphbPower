@@ -2,7 +2,7 @@
 % Please edit documentation in R/fixed_effects_power.R
 \name{calculate_fixed_effects_design_effect}
 \alias{calculate_fixed_effects_design_effect}
-\title{Calculate Design Effect for Fixed Effects}
+\title{Calculate Design Effect for Fixed Effects (REPORTING ONLY)}
 \usage{
 calculate_fixed_effects_design_effect(n_periods, icc)
 }
@@ -15,5 +15,5 @@ calculate_fixed_effects_design_effect(n_periods, icc)
 Design effect multiplier
 }
 \description{
-Calculate Design Effect for Fixed Effects
+Calculate Design Effect for Fixed Effects (REPORTING ONLY)
 }

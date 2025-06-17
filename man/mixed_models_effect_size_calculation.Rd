@@ -9,8 +9,8 @@ mixed_models_effect_size_calculation(
   power,
   n_per_group,
   icc,
-  alpha,
-  test_level
+  test_level,
+  alpha
 )
 }
 \arguments{
@@ -22,9 +22,9 @@ mixed_models_effect_size_calculation(
 
 \item{icc}{Intraclass correlation}
 
-\item{alpha}{Significance level}
-
 \item{test_level}{Level being tested}
+
+\item{alpha}{Significance level}
 }
 \value{
 Required partial correlation

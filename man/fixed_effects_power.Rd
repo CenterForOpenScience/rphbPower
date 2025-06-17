@@ -2,13 +2,13 @@
 % Please edit documentation in R/fixed_effects_power.R
 \name{fixed_effects_power}
 \alias{fixed_effects_power}
-\title{Fixed Effects Power Analysis with Framework Integration}
+\title{Fixed Effects Power Analysis with Framework Integration (v2.2)}
 \usage{
 fixed_effects_power(
   r_partial = NULL,
   n_units = NULL,
   n_periods = 4,
-  power = 0.8,
+  power = NULL,
   icc = 0.3,
   alpha = 0.05,
   discount_factor = 0.75,
@@ -23,7 +23,7 @@ fixed_effects_power(
 
 \item{n_periods}{Number of time periods per unit (default = 4)}
 
-\item{power}{Statistical power (NULL to calculate, default = 0.8)}
+\item{power}{Statistical power (NULL to calculate, default applied when needed = 0.8)}
 
 \item{icc}{Intraclass correlation coefficient (default = 0.3)}
 
@@ -39,5 +39,5 @@ fixed_effects_power(
 Power analysis results with framework integration
 }
 \description{
-Fixed Effects Power Analysis with Framework Integration
+Fixed Effects Power Analysis with Framework Integration (v2.2)
 }

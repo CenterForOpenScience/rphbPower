@@ -2,33 +2,33 @@
 % Please edit documentation in R/mediation_sem_power.R
 \name{mediation_sem_power_check}
 \alias{mediation_sem_power_check}
-\title{Quick SEM Mediation Power Calculation}
+\title{Quick Mediation SEM Power Check}
 \usage{
 mediation_sem_power_check(
   r_a,
   r_b,
   n,
-  measurement_error = 0.1,
-  n_indicators_total = 9,
-  alpha = 0.05
+  alpha = 0.05,
+  discount_factor = 0.75,
+  measurement_reliability = 0.9
 )
 }
 \arguments{
-\item{r_a}{Path a coefficient}
+\item{r_a}{Latent path a (X->M) coefficient}
 
-\item{r_b}{Path b coefficient}
+\item{r_b}{Latent path b (M->Y|X) coefficient}
 
 \item{n}{Sample size}
 
-\item{measurement_error}{Measurement error (default = 0.1)}
+\item{alpha}{Significance level}
 
-\item{n_indicators_total}{Total indicators (default = 9)}
+\item{discount_factor}{Conservative discount factor}
 
-\item{alpha}{Significance level (default = 0.05)}
+\item{measurement_reliability}{Average reliability of constructs}
 }
 \value{
-Statistical power
+Power
 }
 \description{
-Quick SEM Mediation Power Calculation
+Quick Mediation SEM Power Check
 }

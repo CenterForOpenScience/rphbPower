@@ -4,14 +4,12 @@
 \alias{logistic_regression_power_check}
 \title{Quick Logistic Regression Power Calculation}
 \usage{
-logistic_regression_power_check(r_partial, n, n_predictors = 1, alpha = 0.05)
+logistic_regression_power_check(r_partial, n, alpha = 0.05)
 }
 \arguments{
 \item{r_partial}{Partial correlation}
 
 \item{n}{Sample size}
-
-\item{n_predictors}{Number of predictors (default = 1)}
 
 \item{alpha}{Significance level (default = 0.05)}
 }

@@ -8,38 +8,26 @@ mediation_regression_power(
   r_a = NULL,
   r_b = NULL,
   n = NULL,
-  power = 0.8,
+  power = NULL,
   alpha = 0.05,
-  discount_factor = 0.75,
-  test_type = "sobel",
-  effect_input_a = NULL,
-  effect_input_b = NULL,
-  effect_type = "r"
+  discount_factor = 0.75
 )
 }
 \arguments{
-\item{r_a}{Path coefficient a (X->M) as correlation (NULL to calculate)}
+\item{r_a}{Path a (X->M) coefficient as correlation (NULL to calculate).}
 
-\item{r_b}{Path coefficient b (M->Y|X) as partial correlation (NULL to calculate)}
+\item{r_b}{Path b (M->Y|X) coefficient as partial correlation (NULL to calculate).}
 
-\item{n}{Sample size (NULL to calculate)}
+\item{n}{Sample size (NULL to calculate).}
 
-\item{power}{Statistical power (NULL to calculate, default = 0.8)}
+\item{power}{Statistical power (NULL to calculate, default = 0.8).}
 
-\item{alpha}{Significance level (default = 0.05)}
+\item{alpha}{Significance level (default = 0.05).}
 
-\item{discount_factor}{Conservative discount factor (default = 0.75)}
-
-\item{test_type}{Type of mediation test ("sobel", "joint")}
-
-\item{effect_input_a}{Raw effect size input for a-path (alternative to r_a)}
-
-\item{effect_input_b}{Raw effect size input for b-path (alternative to r_b)}
-
-\item{effect_type}{Type of effect inputs ("r", "d", "f2", "r_squared", "eta_squared")}
+\item{discount_factor}{Conservative discount factor applied to input effect sizes (default = 0.75).}
 }
 \value{
-Power analysis results with framework integration
+A list object containing the power analysis results.
 }
 \description{
 Mediation Regression Power Analysis with Framework Integration

@@ -4,12 +4,14 @@
 \alias{fixed_effects_sample_size_calculation}
 \title{Calculate Sample Size for Fixed Effects}
 \usage{
-fixed_effects_sample_size_calculation(r_partial, power, icc, alpha)
+fixed_effects_sample_size_calculation(r_partial, power, n_periods, icc, alpha)
 }
 \arguments{
 \item{r_partial}{Within-person partial correlation}
 
 \item{power}{Target power}
+
+\item{n_periods}{Number of time periods}
 
 \item{icc}{Intraclass correlation coefficient}
 

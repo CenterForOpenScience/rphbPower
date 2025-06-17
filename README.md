@@ -1,82 +1,142 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# rphbPower - Unified Power Analysis Package
+# rphbPower - Unified Statistical Power Analysis Framework Package
 
 <!-- badges: start -->
 
 <!-- badges: end -->
 
-Comprehensive power analysis functions for regression-based statistical
-methods using partial correlations as the standardized effect size
-metric with integrated conservative planning.
+A comprehensive R framework for a priori statistical power analysis. It
+provides easy-to-use functions for 11 different statistical methods, all
+unified by a common effect size metric and a philosophy of conservative
+study planning.
 
 ## Framework Overview
 
-This package provides power analysis for diverse statistical methods
-unified under a **partial correlation framework**. All analyses convert
-effect sizes to partial correlations, enabling direct comparison across
-correlation, regression, mediation, SEM, multilevel, and longitudinal
-approaches.
+This package provides power analysis for a diverse suite of statistical
+methods unified under a **partial correlation framework**. All analyses
+convert common effect sizes (e.g., Cohen’s d, f²) into partial
+correlations (`r_partial`), enabling direct and intuitive comparisons of
+effect magnitude across all included methods.
 
-**Core Features:**
+The framework is built on two core principles:
 
-- **Unified Effect Size Metric**: Partial correlations across all
-  analysis types
-- **Conservative Planning**: Built-in 0.75 discount factor for realistic
-  sample sizes  
-- **Auto-Detection**: Provide any 2 of (effect size, sample size,
-  power) - calculates the third
-- **Framework Integration**: Conversion between Cohen’s d, f², R²,
-  eta-squared
-- **Mathematical Precision**: Accurate F-distribution calculations for
-  precise power analysis
+1.  **Unified Effect Size**: Using `r_partial` as the common metric
+    simplifies interpretation and promotes a deeper understanding of
+    effect sizes, regardless of the statistical test being used.
+
+2.  **Conservative Planning**: A built-in **0.75 discount factor** is
+    automatically applied to all user-provided effect sizes. This
+    encourages prudent and realistic study planning, helping to prevent
+    underpowered research that can result from overly optimistic effect
+    size estimations.
+
+## Core Features
+
+- **11 Validated Modules**: Covers a wide range of common statistical
+  tests
+- **Unified Effect Size Metric**: All calculations are based on partial
+  correlations (`r_partial`)
+- **Parameter Auto-Detection**: For any given test, provide any two of
+  (effect size, sample size, power) and the framework will solve for the
+  third
+- **Built-in Effect Size Conversion**: Automatically converts from
+  Cohen’s d, f², R², and η² into `r_partial`
+- **Conservative by Default**: A 0.75 discount factor is automatically
+  applied to effect size inputs to encourage robust planning
 
 ## Quick Start
 
-### Basic Power Analysis Pattern
+### 1. Initialize the Framework
+
+Install the package from GitHub and load it in.
 
 ``` r
-# Provide any two parameters - calculates the third
-result <- linear_regression_power(r_partial = 0.25, n = 122, n_predictors = 1)          # → power
-result <- linear_regression_power(r_partial = 0.25, power = 0.8, n_predictors = 1)      # → sample size  
-result <- linear_regression_power(n = 192, power = 0.8, n_predictors = 1)               # → effect size
+devtools::install_github("CenterForOpenScience/rphbPower", build_vignettes = TRUE)
 
-print(result)  # Comprehensive output with framework conversions
+library(rphbPower)
 ```
 
-### Framework Effect Size Integration
+### 2. Run the Power Analysis
+
+The functions follow a consistent pattern. Provide the parameters you
+know, and leave the one you want to find as NULL.
 
 ``` r
-# Direct conversion from any effect size type using effect_input
-result <- linear_regression_power(
-  effect_input = 0.4,          # Cohen's d from literature
-  effect_type = "d",           # Automatic conversion to partial r
-  power = 0.8,
-  n_predictors = 3
-)
+# Example 1: Solve for required sample size (N)
+result_n <- linear_regression_power(r_partial = 0.25, power = 0.8, n_predictors = 2)
+print(result_n$n)
+#> [1] 148
 
-# Multiple effect size types supported
-linear_regression_power(effect_input = 0.15, effect_type = "f2", power = 0.8, n_predictors = 2)
-linear_regression_power(effect_input = 0.09, effect_type = "r_squared", power = 0.8, n_predictors = 2)
-linear_regression_power(effect_input = 0.25, effect_type = "r", power = 0.8, n_predictors = 2)
+# Example 2: Solve for the power of a planned study
+result_power <- linear_regression_power(r_partial = 0.25, n = 156, n_predictors = 2)
+print(result_power$power)
+#> [1] 0.8233404
+```
+
+### 3. Use Any Effect Size
+
+The `effect_input` and `effect_type` arguments allow you to use effect
+sizes directly from the literature. The 0.75 discount factor will be
+applied automatically.
+
+``` r
+# Use a Cohen's d of 0.5 from a previous study
+result <- linear_regression_power(
+  effect_input = 0.5,
+  effect_type = "d",
+  power = 0.8,
+  n_predictors = 2
+)
+print(result)
+#> 
+#>  Linear Regression Power Analysis (v2.1, Corrected) 
+#> = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+#> 
+#> Partial correlation: 0.1843 (Small) 
+#> Sample size: 278 
+#> Statistical power: 0.8 
+#> Number of predictors: 2 
+#> Alpha level: 0.05 
+#> 
+#> Model details:
+#>   Degrees of freedom (num, den): 2 , 275 
+#> 
+#> Framework conversions:
+#>   Cohen's d: 0.375 
+#>   Cohen's f²: 0.035 
+#>   R²: 0.034 
+#> 
+#> Framework details:
+#>   Discount factor applied via effect_input: 0.75 
+#>   Calculation target: sample_size
 ```
 
 ## Available Analysis Methods
 
-| Analysis Type | Key Function | Effect Size Input |
-|----|----|----|
-| **Correlation** | `correlation_power()` | r (zero-order correlation) |
-| **Linear Regression** | `linear_regression_power()` | r_partial |
-| **Logistic Regression** | `logistic_regression_power()` | r_partial or OR |
-| **Cross-Lagged Panel** | `cross_lagged_panel_power()` | r_partial |
-| **Fixed Effects** | `fixed_effects_power()` | r_partial |
-| **Repeated Measures** | `repeated_measures_power()` | r_partial |
-| **Mediation (Regression)** | `mediation_regression_power()` | r_a, r_b paths |
-| **Mediation (SEM)** | `mediation_sem_power()` | r_a, r_b paths |
-| **Multilevel Models** | `mixed_models_power()` | r_partial |
-| **SEM Direct Effects** | `sem_direct_effects_power()` | r_partial |
-| **Nonparametric** | `wilcoxon_signed_rank_power()` | r_partial |
+### Basic and Regression Methods
+
+- **Correlation**: `correlation_power()`
+- **Linear Regression**: `linear_regression_power()`
+- **Logistic Regression**: `logistic_regression_power()`
+
+### Longitudinal Methods
+
+- **Cross-Lagged Panel**: `cross_lagged_panel_power()`
+- **Fixed Effects**: `fixed_effects_power()`
+- **Repeated Measures**: `repeated_measures_power()`
+
+### Mediation Methods
+
+- **Mediation (Regression)**: `mediation_regression_power()`
+- **Mediation (SEM)**: `mediation_sem_power()`
+
+### Advanced Methods
+
+- **Multilevel Models**: `mixed_models_power()`
+- **SEM (Direct Effects)**: `sem_direct_effects_power()`
+- **Wilcoxon Signed-Rank Test**: `wilcoxon_signed_rank_power()`
 
 ## Method Selection Guide
 
@@ -88,7 +148,7 @@ linear_regression_power(effect_input = 0.25, effect_type = "r", power = 0.8, n_p
 - **Binary/categorical outcome** → Logistic regression
 - **Mediation hypotheses** → Mediation regression or SEM
 - **Clustered/nested data** → Multilevel models
-- **Complex structural models** → SEM direct effects
+- **Complex structural models with latent vars** → SEM direct effects
 - **Simple bivariate association** → Correlation
 
 ### By Data Characteristics
@@ -99,151 +159,41 @@ linear_regression_power(effect_input = 0.25, effect_type = "r", power = 0.8, n_p
   measures
 - **Latent variable models** → SEM approaches
 
-## Core Framework Functions
+## Sample Size Planning Guidelines
 
-### Effect Size Conversions
+A critical reality in study planning is that model complexity
+significantly impacts sample size requirements. Simply running a power
+analysis for a simple correlation is often insufficient for a multiple
+regression model. Always specify the actual number of predictors you
+plan to use.
 
-``` r
-# Direct effect size conversion using power analysis functions
-result <- linear_regression_power(effect_input = 0.4, effect_type = "d", power = 0.8, n_predictors = 2)
-r_partial <- result$r_partial  # Converted partial correlation
+**Example Impact** (Effect Size r = 0.20, Target Power = 80%):
 
-# Available effect types: "r", "d", "f2", "r_squared", "eta_squared"
-correlation_power(effect_input = 0.15, effect_type = "f2", power = 0.8)
+- **Correlation (1 predictor)**: ~192 participants
+- **Regression (5 predictors)**: ~262 participants (+36%)
+- **Regression (10 predictors)**: ~348 participants (+81%)
 
-mediation_regression_power(effect_input_a = 0.09, effect_type = "r_squared", r_b = 0.3, power = 0.8)
-```
+This framework helps you account for this complexity directly in your
+power analysis.
 
-### Working with Results
+## Framework Status
 
-``` r
-# All power analysis functions return comprehensive results
-result <- linear_regression_power(r_partial = 0.25, power = 0.8, n_predictors = 3)
-
-# Access key components
-print(result$n)                           # Required sample size
-print(result$effect_size_conversions)     # Cohen's d, f², R²
-print(result$interpretation)              # Effect size interpretation
-print(result$discount_factor)             # Conservative planning factor
-```
-
-## Framework Quality Assurance
-
-### Mathematical Foundation
-
-The framework uses accurate F-distribution calculations with proper
-non-centrality parameter computation (`ncp = f² × df_denominator`)
-ensuring precise power analysis across all regression-based methods.
-
-### Conservative Planning
-
-- **Automatic Discount Factor**: 0.75 applied to all effect sizes for
-  realistic planning
-- **Cross-Method Validation**: Partial correlations enable direct
-  comparison across analyses
-- **Literature Integration**: Systematic conversion from diverse effect
-  size metrics
-
-### Sample Size Planning Guidelines
-
-**Critical Planning Reality**: Model complexity significantly impacts
-sample size requirements. Always specify actual predictor count rather
-than using simple correlation estimates.
-
-**Example Impact (r = 0.20, 80% power)**:
-
-- Single predictor model: ~192 participants
-- Five predictor model: ~320 participants (+67%)
-- Ten predictor model: ~410 participants (+113%)
-
-**Framework Recommendations**:
-
-1.  Use framework auto-detection for precise calculations
-2.  Apply conservative discount factors (default behavior)
-3.  Account for model complexity in planning
-4.  Validate effect sizes through framework conversions
+- **Current Version**: 2.0
+- **Mathematical Status**: All 11 modules have been re-engineered and
+  have passed comprehensive validation tests. The framework is
+  considered complete and robust.
+- **Validation**: 100% pass rate achieved across all modules against
+  external benchmarks or internal consistency checks.
 
 ## Documentation Structure
 
-### Core Documentation
+For detailed tutorials and guides, refer to the vignettes accessed
+through `browseVignettes("rphbPower")`:
 
-Use `browseVignettes("rphbPower")` to see available documentation for
-this package. The “Getting Started” document is a tutorial guide for
-this package.
-
-### Method Documentation
-
-The following vignettes displayed using `browseVignettes("rphbPower")`
-document the various methods.
-
-- Correlation Power Analysis
-- Cross-Lagged Panel Power Analysis
-- Fixed Effects Power Analysis
-- Linear Regression Power Analysis
-- Logistic Regression Power Analysis
-- Mediation Regression Power Analysis
-- Mediation SEM Power Analysis
-- Mixed Models Power Analysis
-- Repeated Measures Power Analysis
-- SEM Direct Effects Power Analysis
-- Wilcoxon Signed-Rank Power Analysis
-
-### Comprehensive Guides
-
-The following vignettes displayed using `browseVignettes("rphbPower")`
-are comprehensive guides.
-
-- Assumption Validation Guide
-- Effect Size Guidelines
-- Method Selection Guide
-- Quick Reference Guide
-- Troubleshooting Guide
-
-## Framework Validation
-
-✅ **Mathematical Accuracy**: All F-distribution calculations verified
-and validated
-
-✅ **Framework Integration**: Unified partial correlation approach
-across 11 methods
-
-✅ **Conservative Planning**: Automatic discount factor system for
-realistic estimates
-
-✅ **Cross-Method Consistency**: Direct comparison enabled through
-standardized effect sizes
-
-✅ **Documentation Quality**: All sample size calculations verified
-
-## Getting Help
-
-### Quick Reference
-
-Use `browseVignettes("rphbPower")` and select the “Quick Reference
-Guide” for fast lookup of functions, parameters, and sample size
-estimates.
-
-### Method Selection
-
-Use `browseVignettes("rphbPower")` and select the “Method Selection
-Guide” for guidance on choosing appropriate analysis approaches.
-
-### Troubleshooting
-
-Use `browseVignettes("rphbPower")` and select the “Troubleshooting
-Guide” for common issues and framework-specific solutions.
-
-## Version Information
-
-**Current Version**: 1.2
-
-**Mathematical Status**: F-distribution calculations verified and
-validated (v1.2)
-
-**Documentation Status**: Sample size calculations verified
-
-**Framework Status**: All 11 methods mathematically verified
-
-The unified framework provides sophisticated power analysis with simple,
-consistent patterns across diverse statistical methods while maintaining
-mathematical precision and conservative planning principles.
+- **Getting Started**: Installation and basic usage
+- **Effect Size Guidelines**: Guidance on choosing an appropriate effect
+  size
+- **Method Selection Guide**: In-depth help for choosing the right
+  analysis
+- **Quick Reference Guide**: A fast lookup for functions and parameters
+- **Troubleshooting**: Solutions for common issues

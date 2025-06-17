@@ -2,7 +2,7 @@
 % Please edit documentation in R/sem_direct_effects_power.R
 \name{sem_direct_effects_effect_size_calculation}
 \alias{sem_direct_effects_effect_size_calculation}
-\title{Calculate Effect Size for SEM Direct Effects}
+\title{Calculate Effect Size for SEM Direct Effects (Approximation)}
 \usage{
 sem_direct_effects_effect_size_calculation(
   n,
@@ -27,5 +27,5 @@ sem_direct_effects_effect_size_calculation(
 Required partial correlation
 }
 \description{
-Calculate Effect Size for SEM Direct Effects
+Calculate Effect Size for SEM Direct Effects (Approximation)
 }

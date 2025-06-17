@@ -2,7 +2,7 @@
 % Please edit documentation in R/sem_direct_effects_power.R
 \name{sem_direct_effects_power_calculation}
 \alias{sem_direct_effects_power_calculation}
-\title{Calculate Power for SEM Direct Effects}
+\title{Calculate Power for SEM Direct Effects (Approximation)}
 \usage{
 sem_direct_effects_power_calculation(
   r_partial,
@@ -27,5 +27,5 @@ sem_direct_effects_power_calculation(
 Statistical power
 }
 \description{
-Calculate Power for SEM Direct Effects
+Calculate Power for SEM Direct Effects (Approximation)
 }

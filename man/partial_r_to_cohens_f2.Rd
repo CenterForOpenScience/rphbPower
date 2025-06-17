@@ -2,7 +2,7 @@
 % Please edit documentation in R/partial_r_to_cohens_f2.R
 \name{partial_r_to_cohens_f2}
 \alias{partial_r_to_cohens_f2}
-\title{Convert Partial Correlation to Cohen's f².}
+\title{Convert Partial Correlation to Cohen's f²}
 \usage{
 partial_r_to_cohens_f2(r)
 }
@@ -13,5 +13,5 @@ partial_r_to_cohens_f2(r)
 Cohen's f\00B2 equivalent
 }
 \description{
-Convert Partial Correlation to Cohen's f².
+Convert Partial Correlation to Cohen's f²
 }

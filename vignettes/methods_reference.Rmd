@@ -1,0 +1,377 @@
+---
+title: "Methods Reference Guide"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Methods Reference Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(rphbPower)
+```
+
+# Methods Reference Guide
+
+This guide provides detailed documentation for each of the 11 power analysis methods in the unified partial correlation framework.
+
+## Core Concept: The Unified Effect Size Framework
+
+**Key Principles:**
+
+- **Unified Metric**: All power analyses use the **partial correlation (r_partial)** as the common, standardized effect size. This allows for direct comparison across correlation, regression, mediation, and other analysis types.
+- **Conservative Planning**: A default **0.75 discount factor** is automatically applied to any effect size you provide from the literature (e.g., Cohen's d, R²). This ensures power calculations are based on a more realistic estimate, guarding against underpowered studies. For example, an input of ` r = 0.20` becomes ` r = 0.15` for the actual calculation.
+- **Flexible Conversions**: The framework provides a suite of functions (`framework_effect_size`, `cohens_d_to_partial_r`, etc.) to seamlessly convert various common effect size metrics into the framework's standard r_partial.
+- **Integration from Test Statistics**: You can also calculate an r_partial directly from the results of previous studies using `partial_correlation_from_t()` or `partial_correlation_from_f()`.
+
+This centralized approach to handling effect sizes is what allows the entire package to be a consistent and unified framework.
+
+## 1. Correlation Analysis
+
+### Overview
+
+Correlation analysis examines the linear relationship between two continuous variables. It serves as the foundational building block for all regression-based analyses in the unified framework.
+
+### Key Features
+
+- **Unified Effect Size**: Uses r_partial for direct comparison with all other methods
+- **Automatic Parameter Detection**: Provide exactly 2 of {r_partial, n, power} and the 3rd is calculated
+- **Conservative Planning**: Built-in 0.75 discount factor
+
+### Main Function: `correlation_power()`
+
+**Parameters:**
+
+- `r_partial`: Partial correlation coefficient (NULL to calculate)
+- `n`: Sample size (NULL to calculate)
+- `power`: Statistical power (NULL to calculate, defaults to 0.8)
+- `alpha`: Significance level (default = 0.05)
+- `two_tailed`: Two-tailed test (default = TRUE)
+- `effect_input`: Alternative to `r_partial` for automatic conversion (e.g., a Cohen's d value)
+- `effect_type`: The type of `effect_input` (e.g., "d", "f2", "r_squared")
+
+### Code Examples
+
+```{r correlation-power-examples}
+# Calculate sample size for a target effect and power
+correlation_power(r_partial = 0.25, power = 0.8)
+
+# Calculate power for a given sample size
+correlation_power(r_partial = 0.3, n = 100)
+
+# Use an effect size from the literature (e.g., Cohen's d)
+correlation_power(effect_input = 0.5, effect_type = "d", power = 0.8)
+```
+
+
+## 2. Linear Regression
+
+### Overview
+
+Linear regression examines the relationship between one or more predictor variables and a single continuous outcome. This is one of the most common analysis types.
+
+### Key Features
+
+- **Model Complexity**: Correctly adjusts power calculations for the number of predictors in the model
+- **Unified Effect Size**: The r_partial represents the unique contribution of one predictor while controlling for all others
+
+### Main Function: `linear_regression_power()`
+
+**Parameters:**
+
+- `r_partial`, `n`, `power`, `alpha`, `effect_input`, `effect_type`: (See Correlation Analysis)
+- `n_predictors`: The total number of predictors in the regression model
+
+### Code Examples
+
+```{r linear-regression-examples}
+# Calculate sample size, accounting for 3 predictors
+linear_regression_power(r_partial = 0.20, power = 0.8, n_predictors = 3)
+
+# Calculate power for a specific design
+linear_regression_power(r_partial = 0.25, n = 120, n_predictors = 4)
+```
+
+
+## 3. Logistic Regression
+
+### Overview
+
+Logistic regression is used when the outcome variable is binary (e.g., success/failure, yes/no).
+
+### Key Features
+
+- **Engine**: Power is calculated by delegating to the {WebPower} package, ensuring robust and validated results
+- **Limitation**: The current engine is designed for a single predictor. The n_predictors argument is ignored
+
+### Main Function: `logistic_regression_power()`
+
+**Parameters:**
+
+- `r_partial`, `n`, `power`, `alpha`, `effect_input`, `effect_type`: (See Correlation Analysis)
+- **Note**: `n_predictors` is an unused argument kept for compatibility
+
+### Code Examples
+
+```{r log-regression-examples}
+# Calculate sample size for a single predictor
+logistic_regression_power(r_partial = 0.20, power = 0.8)
+
+# Calculate power using a Cohen's d from the literature
+logistic_regression_power(effect_input = 0.5, effect_type = "d", n = 150)
+```
+
+
+## 4. Cross-Lagged Panel Models
+
+### Overview
+
+Cross-lagged panel models are used to examine the reciprocal relationships between two variables over time (e.g., does X at Time 1 predict Y at Time 2, while controlling for Y at Time 1?).
+
+### Key Features
+
+- **Engine**: Power is calculated by delegating to the linear_regression_power function
+- **Model Assumption**: The analysis correctly assumes a regression model with 2 predictors (the autoregressive path of the outcome, and the cross-lagged path of interest)
+
+### Main Function: `cross_lagged_panel_power()`
+
+**Parameters:**
+
+- `r_partial`, `n`, `power`, `alpha`, `effect_input`, `effect_type`: (See Correlation Analysis)
+- `n_waves`: Number of waves (default 3, for context)
+- `stability_coefficient`: The expected autoregressive path (default 0.6, for context)
+
+**Note**: `n_waves` and `stability_coefficient` are for user context and do not alter the power calculation.
+
+### Code Examples
+
+```{r clp-examples}
+# Calculate sample size for a small cross-lagged effect
+cross_lagged_panel_power(r_partial = 0.15, power = 0.8)
+
+# Calculate the detectable effect for a given sample size
+cross_lagged_panel_power(n = 400, power = 0.8, n_waves = 4)
+```
+
+
+## 5. Fixed Effects Models
+
+### Overview
+
+Fixed effects models are a powerful tool for panel data. They analyze within-person effects by controlling for all stable, time-invariant characteristics of an individual (observed or unobserved).
+
+### Key Features
+
+- **Focus**: Estimates the effect of a predictor on an outcome within an individual over time
+- **Engine**: Power is calculated using a standard t-test framework where the degrees of freedom are correctly specified as (N_units * N_periods) - N_units - 1
+
+### Main Function: `fixed_effects_power()`
+
+**Parameters:**
+
+- `r_partial`, `power`, `alpha`, `effect_input`, `effect_type`: (See Correlation Analysis)
+- `n_units`: The number of individuals or units (e.g., firms)
+- `n_periods`: The number of time periods per unit
+- `icc`: The intraclass correlation coefficient (for context and reporting)
+
+### Code Examples
+
+```{r fixed-effects-examples}
+# Calculate the number of units required
+fixed_effects_power(r_partial = 0.12, power = 0.8, n_periods = 8, icc = 0.5)
+
+# Calculate the power for a planned study
+fixed_effects_power(r_partial = 0.15, n_units = 150, n_periods = 10, icc = 0.4)
+```
+
+
+## 6. Repeated Measures ANOVA
+
+### Overview
+
+Repeated measures designs analyze effects where the same subjects are measured multiple times. This framework's function is ideal for simple pre-post or two-condition designs.
+
+### Key Features
+
+- **Engine**: Power is calculated using the engine from the {pwr} package for a paired t-test (pwr.t.test)
+- **Use Case**: This approach is most appropriate for designs with two timepoints or two conditions
+
+### Main Function: `repeated_measures_power()`
+
+**Parameters:**
+
+- `r_partial`, `n`, `power`, `alpha`, `effect_input`, `effect_type`: (See Correlation Analysis)
+- `n_timepoints`: Number of repeated measures (defaults to 2)
+
+**Note**: The `correlation_between_measures` parameter is preserved for context but is not used by the new calculation engine.
+
+### Code Examples
+
+```{r repeated-measures-examples}
+# Calculate sample size for a pre-post design
+repeated_measures_power(r_partial = 0.25, power = 0.8, n_timepoints = 2)
+
+# Calculate power given N, for a Cohen's d of 0.5
+repeated_measures_power(effect_input = 0.5, effect_type = "d", n = 50)
+```
+
+
+## 7. Mediation Analysis (Regression)
+
+### Overview
+
+Mediation analysis is used to test causal pathways (X → M → Y) with observed variables.
+
+### Key Features
+
+- **Engine**: Power for the indirect effect (a*b) is calculated using a fast, analytical engine based on the Aroian formula for the Sobel test. This replaces older, slower simulation methods
+- **Flexibility**: Can solve for r_a, r_b, n, or power when the other three are provided
+
+### Main Function: `mediation_regression_power()`
+
+**Parameters:**
+
+- `r_a`: The path coefficient from X to M (NULL to calculate)
+- `r_b`: The path coefficient from M to Y (NULL to calculate)
+- `n`: The sample size (NULL to calculate)
+- `power`: The statistical power (NULL to calculate)
+- `alpha`: Significance level (default = 0.05)
+
+### Code Examples
+
+```{r mediation-regression-examples}
+# Calculate sample size needed to detect two medium paths
+mediation_regression_power(r_a = 0.3, r_b = 0.3, power = 0.8)
+
+# Calculate the power of a planned study
+mediation_regression_power(r_a = 0.4, r_b = 0.25, n = 150)
+```
+
+
+## 8. Mediation Analysis (SEM)
+
+### Overview
+
+SEM-based mediation provides a comprehensive test of mediation hypotheses for latent variables, accounting for the attenuating effect of measurement error.
+
+### Key Features
+
+- **Latent Variables**: Explicitly models the relationship between latent constructs
+- **Engine**: Uses a fast analytical approximation. The engine attenuates the latent path coefficients by the specified measurement reliability, then uses the Aroian formula to calculate power for the indirect effect
+- **Measurement Reliability**: Directly incorporates the reliability of your measures into the power calculation
+
+### Main Function: `mediation_sem_power()`
+
+**Parameters:**
+
+- `r_a`, `r_b`, `n`, `power`, `alpha`: (See Mediation Regression)
+- `measurement_reliability`: The average reliability (e.g., Cronbach's alpha) of the constructs, ranging from 0 to 1 (default = 0.9)
+
+### Code Examples
+
+```{r mediation-sem-examples}
+# Calculate sample size accounting for measurement reliability of 0.9
+mediation_sem_power(r_a = 0.3, r_b = 0.3, power = 0.8, measurement_reliability = 0.9)
+
+# Compare with a regression-based model (which implicitly assumes reliability = 1.0)
+mediation_regression_power(r_a = 0.3, r_b = 0.3, power = 0.8)
+```
+
+
+## 9. Multilevel Models (Mixed Models)
+
+### Overview
+
+Mixed-effects models analyze hierarchical or clustered data (e.g., students in classrooms) by accounting for both fixed effects (population relationships) and random effects (group-level variation).
+
+### Key Features
+
+- **Handles Nested Data**: Appropriately models dependencies in hierarchical data
+- **Engine**: Delegates calculations to the {pwr} and {WebPower} packages for robust results
+- **Level-Specific Testing**: Distinguishes between power for Level-1 (within-group) and Level-2 (between-group) effects
+
+### Main Function: `mixed_models_power()`
+
+**Parameters:**
+
+- `r_partial`, `power`, `alpha`, `effect_input`, `effect_type`: (See Correlation Analysis)
+- `n_groups`: Number of groups or clusters (NULL to calculate)
+- `n_per_group`: Average number of observations per group
+- `icc`: The Intraclass Correlation Coefficient, or the proportion of variance due to between-group differences
+- `test_level`: The level of the effect being tested: "level1" or "level2"
+
+### Code Examples
+
+```{r mixed-models-examples}
+# Calculate number of groups for a Level-1 (within-group) effect
+mixed_models_power(r_partial = 0.2, power = 0.8, n_per_group = 20, icc = 0.1, test_level = "level1")
+
+# Calculate power for a Level-2 (between-group) effect
+mixed_models_power(r_partial = 0.3, n_groups = 50, n_per_group = 10, icc = 0.2, test_level = "level2")
+```
+
+
+## 10. SEM Direct Effects
+
+### Overview
+
+This function estimates power for a single, direct path within a larger Structural Equation Model (SEM), accounting for the reliability of the measurements.
+
+### Key Features
+
+- **Latent Variables**: Designed for power analysis of paths between latent constructs
+- **Engine**: Uses a fast t-test approximation
+- **Measurement Reliability**: The key insight is that the power to detect a latent path is based on the observed correlation, which is the latent path coefficient (r_partial) attenuated by the square root of the measurement_reliability
+
+### Main Function: `sem_direct_effects_power()`
+
+**Parameters:**
+
+- `r_partial`, `n`, `power`, `n_predictors`, `alpha`, `effect_input`, `effect_type`: (See Linear Regression)
+- `measurement_reliability`: The average reliability of the measures used for the latent variables (default = 0.85)
+
+### Code Examples
+
+```{r sem-direct-examples}
+# Calculate sample size for a direct path with high reliability
+sem_direct_effects_power(r_partial = 0.3, power = 0.8, n_predictors = 4, measurement_reliability = 0.9)
+
+# Calculate sample size for the same path with lower reliability
+sem_direct_effects_power(r_partial = 0.3, power = 0.8, n_predictors = 4, measurement_reliability = 0.7)
+```
+
+
+## 11. Wilcoxon Signed-Rank Test
+
+### Overview
+
+The Wilcoxon signed-rank test provides a nonparametric alternative to the paired t-test, used when distributional assumptions like normality are violated.
+
+### Key Features
+
+- **Nonparametric**: Ideal for non-normal data or when working with ranks
+- **Engine**: Power is calculated by delegating to the {pwr} package for a paired t-test (pwr.t.test). This uses the parametric equivalent to estimate power, a standard and robust approach for study planning
+
+### Main Function: `wilcoxon_signed_rank_power()`
+
+**Parameters:**
+
+- `r_partial`, `n`, `power`, `alpha`, `two_tailed`, `effect_input`, `effect_type`: (See Correlation Analysis)
+
+### Code Examples
+
+```{r wilcoxon-sr-examples}
+# Calculate sample size for a medium effect
+wilcoxon_signed_rank_power(r_partial = 0.3, power = 0.8)
+
+# Calculate power for a given N, using a Cohen's d from literature
+wilcoxon_signed_rank_power(effect_input = 0.4, effect_type = "d", n = 70)
+```
+

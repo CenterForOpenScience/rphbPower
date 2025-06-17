@@ -2,13 +2,13 @@
 % Please edit documentation in R/sem_direct_effects_power.R
 \name{sem_direct_effects_power}
 \alias{sem_direct_effects_power}
-\title{SEM Direct Effects Power Analysis with Framework Integration}
+\title{SEM Direct Effects Power Analysis (Approximation)}
 \usage{
 sem_direct_effects_power(
   r_partial = NULL,
   n = NULL,
-  power = 0.8,
-  n_predictors = 3,
+  power = NULL,
+  n_predictors = 1,
   alpha = 0.05,
   discount_factor = 0.75,
   measurement_reliability = 0.85,
@@ -17,19 +17,19 @@ sem_direct_effects_power(
 )
 }
 \arguments{
-\item{r_partial}{Standardized path coefficient as partial correlation (NULL to calculate)}
+\item{r_partial}{Latent path coefficient (standardized beta) as partial correlation (NULL to calculate)}
 
 \item{n}{Sample size (NULL to calculate)}
 
 \item{power}{Statistical power (NULL to calculate, default = 0.8)}
 
-\item{n_predictors}{Number of predictors of the dependent variable (default = 3)}
+\item{n_predictors}{Number of predictors of the dependent variable (default = 1)}
 
 \item{alpha}{Significance level (default = 0.05)}
 
 \item{discount_factor}{Conservative discount factor (default = 0.75)}
 
-\item{measurement_reliability}{Average reliability of measures (default = 0.85)}
+\item{measurement_reliability}{Average reliability (e.g., Cronbach's alpha) of the constructs (default = 0.85)}
 
 \item{effect_input}{Raw effect size input (alternative to r_partial)}
 
@@ -39,5 +39,5 @@ sem_direct_effects_power(
 Power analysis results with framework integration
 }
 \description{
-SEM Direct Effects Power Analysis with Framework Integration
+SEM Direct Effects Power Analysis (Approximation)
 }

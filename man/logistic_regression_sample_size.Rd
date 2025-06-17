@@ -4,19 +4,12 @@
 \alias{logistic_regression_sample_size}
 \title{Quick Logistic Regression Sample Size Calculation}
 \usage{
-logistic_regression_sample_size(
-  r_partial,
-  power = 0.8,
-  n_predictors = 1,
-  alpha = 0.05
-)
+logistic_regression_sample_size(r_partial, power = 0.8, alpha = 0.05)
 }
 \arguments{
 \item{r_partial}{Partial correlation}
 
 \item{power}{Target power (default = 0.8)}
-
-\item{n_predictors}{Number of predictors (default = 1)}
 
 \item{alpha}{Significance level (default = 0.05)}
 }

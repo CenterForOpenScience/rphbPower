@@ -2,48 +2,36 @@
 % Please edit documentation in R/mediation_sem_power.R
 \name{mediation_sem_power}
 \alias{mediation_sem_power}
-\title{Mediation SEM Power Analysis with Framework Integration}
+\title{Mediation SEM Power Analysis (Analytical Approximation)}
 \usage{
 mediation_sem_power(
   r_a = NULL,
   r_b = NULL,
   n = NULL,
-  power = 0.8,
-  measurement_error = 0.1,
-  n_indicators_total = 9,
+  power = NULL,
   alpha = 0.05,
   discount_factor = 0.75,
-  effect_input_a = NULL,
-  effect_input_b = NULL,
-  effect_type = "r"
+  measurement_reliability = 0.9
 )
 }
 \arguments{
-\item{r_a}{X -> Mediator path coefficient (NULL to calculate)}
+\item{r_a}{Latent path a (X->M) coefficient (NULL to calculate).}
 
-\item{r_b}{Mediator -> Y path coefficient (controlling for X)}
+\item{r_b}{Latent path b (M->Y|X) coefficient (NULL to calculate).}
 
-\item{n}{Sample size (NULL to calculate)}
+\item{n}{Sample size (NULL to calculate).}
 
-\item{power}{Statistical power (NULL to calculate, default = 0.8)}
+\item{power}{Statistical power (NULL to calculate, default = 0.8).}
 
-\item{measurement_error}{Measurement error proportion (default = 0.1)}
+\item{alpha}{Significance level (default = 0.05).}
 
-\item{n_indicators_total}{Total number of indicators across all latent variables (default = 9)}
+\item{discount_factor}{Conservative discount factor (default = 0.75).}
 
-\item{alpha}{Significance level (default = 0.05)}
-
-\item{discount_factor}{Conservative discount factor (default = 0.75)}
-
-\item{effect_input_a}{Raw effect size input for path a (alternative to r_a)}
-
-\item{effect_input_b}{Raw effect size input for path b (alternative to r_b)}
-
-\item{effect_type}{Type of effect inputs ("r", "d", "f2", "r_squared", "eta_squared")}
+\item{measurement_reliability}{Average reliability of constructs (default = 0.9).}
 }
 \value{
-Power analysis results with framework integration
+Power analysis results.
 }
 \description{
-Mediation SEM Power Analysis with Framework Integration
+Mediation SEM Power Analysis (Analytical Approximation)
 }

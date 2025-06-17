@@ -2,7 +2,7 @@
 % Please edit documentation in R/sem_direct_effects_power.R
 \name{sem_direct_effects_sample_size_calculation}
 \alias{sem_direct_effects_sample_size_calculation}
-\title{Calculate Sample Size for SEM Direct Effects}
+\title{Calculate Sample Size for SEM Direct Effects (Approximation)}
 \usage{
 sem_direct_effects_sample_size_calculation(
   r_partial,
@@ -27,5 +27,5 @@ sem_direct_effects_sample_size_calculation(
 Required sample size
 }
 \description{
-Calculate Sample Size for SEM Direct Effects
+Calculate Sample Size for SEM Direct Effects (Approximation)
 }

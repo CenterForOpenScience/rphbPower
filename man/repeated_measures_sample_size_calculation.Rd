@@ -7,24 +7,24 @@
 repeated_measures_sample_size_calculation(
   r_partial,
   power,
-  n_timepoints,
+  alpha,
   correlation_between_measures,
-  alpha
+  n_timepoints
 )
 }
 \arguments{
-\item{r_partial}{Partial correlation}
+\item{r_partial}{Partial correlation coefficient, analogous to sqrt(partial eta-squared) (NULL to calculate)}
 
-\item{power}{Target power}
+\item{power}{Statistical power (NULL to calculate, default = 0.8)}
 
-\item{n_timepoints}{Number of timepoints}
+\item{alpha}{Significance level (default = 0.05)}
 
-\item{correlation_between_measures}{Correlation between measures}
+\item{correlation_between_measures}{Average correlation between measures (default = 0.5).}
 
-\item{alpha}{Significance level}
+\item{n_timepoints}{Number of repeated measures (default = 2). Note: engine uses paired t-test, best for 2 timepoints.}
 }
 \value{
-Required sample size
+Sample Size
 }
 \description{
 Calculate Sample Size for Repeated Measures

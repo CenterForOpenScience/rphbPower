@@ -7,33 +7,39 @@
 logistic_regression_power(
   r_partial = NULL,
   n = NULL,
-  power = 0.8,
+  power = NULL,
   n_predictors = 1,
   alpha = 0.05,
   discount_factor = 0.75,
+  mc_reps = 1000,
+  search_reps = 500,
   effect_input = NULL,
   effect_type = "r"
 )
 }
 \arguments{
-\item{r_partial}{Partial correlation coefficient (NULL to calculate)}
+\item{r_partial}{Partial correlation coefficient (NULL to calculate).}
 
-\item{n}{Sample size (NULL to calculate)}
+\item{n}{Sample size (NULL to calculate).}
 
-\item{power}{Statistical power (NULL to calculate, default = 0.8)}
+\item{power}{Statistical power (NULL to calculate, default = 0.8).}
 
-\item{n_predictors}{Number of predictors in model (default = 1)}
+\item{n_predictors}{Number of predictors. (NOTE: Kept for compatibility, but the current engine only supports a single predictor).}
 
-\item{alpha}{Significance level (default = 0.05)}
+\item{alpha}{Significance level (default = 0.05).}
 
-\item{discount_factor}{Conservative discount factor (default = 0.75)}
+\item{discount_factor}{Conservative discount factor (default = 0.75).}
 
-\item{effect_input}{Raw effect size input (alternative to r_partial)}
+\item{mc_reps}{Kept for compatibility, unused by the new engine.}
 
-\item{effect_type}{Type of effect_input ("r", "d", "f2", "r_squared", "eta_squared")}
+\item{search_reps}{Kept for compatibility, unused by the new engine.}
+
+\item{effect_input}{Raw effect size input (alternative to r_partial).}
+
+\item{effect_type}{Type of \code{effect_input} ("r", "d", "f2", "r_squared").}
 }
 \value{
-Power analysis results with framework integration
+A list object containing the power analysis results.
 }
 \description{
 Logistic Regression Power Analysis with Framework Integration

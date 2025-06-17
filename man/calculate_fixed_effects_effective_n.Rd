@@ -2,7 +2,7 @@
 % Please edit documentation in R/fixed_effects_power.R
 \name{calculate_fixed_effects_effective_n}
 \alias{calculate_fixed_effects_effective_n}
-\title{Calculate Effective Sample Size for Fixed Effects}
+\title{Calculate Effective Sample Size for Fixed Effects (REPORTING ONLY)}
 \usage{
 calculate_fixed_effects_effective_n(n_units, n_periods, icc)
 }
@@ -17,5 +17,5 @@ calculate_fixed_effects_effective_n(n_units, n_periods, icc)
 Effective sample size
 }
 \description{
-Calculate Effective Sample Size for Fixed Effects
+Calculate Effective Sample Size for Fixed Effects (REPORTING ONLY)
 }

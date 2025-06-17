@@ -2,12 +2,12 @@
 % Please edit documentation in R/cross_lagged_panel_power.R
 \name{cross_lagged_panel_power}
 \alias{cross_lagged_panel_power}
-\title{Cross-Lagged Panel Power Analysis with Framework Integration}
+\title{Cross-Lagged Panel Power Analysis with Framework Integration (v2.1)}
 \usage{
 cross_lagged_panel_power(
   r_partial = NULL,
   n = NULL,
-  power = 0.8,
+  power = NULL,
   n_waves = 3,
   stability_coefficient = 0.6,
   alpha = 0.05,
@@ -23,9 +23,9 @@ cross_lagged_panel_power(
 
 \item{power}{Statistical power (NULL to calculate, default = 0.8)}
 
-\item{n_waves}{Number of measurement waves (default = 3)}
+\item{n_waves}{Number of measurement waves (for user context, default = 3)}
 
-\item{stability_coefficient}{Autoregressive stability coefficient (default = 0.6)}
+\item{stability_coefficient}{Autoregressive stability coefficient (for user context, default = 0.6)}
 
 \item{alpha}{Significance level (default = 0.05)}
 
@@ -33,11 +33,11 @@ cross_lagged_panel_power(
 
 \item{effect_input}{Raw effect size input (alternative to r_partial)}
 
-\item{effect_type}{Type of effect_input ("r", "d", "f2", "r_squared", "eta_squared")}
+\item{effect_type}{Type of effect_input ("r", "d")}
 }
 \value{
 Power analysis results with framework integration
 }
 \description{
-Cross-Lagged Panel Power Analysis with Framework Integration
+Cross-Lagged Panel Power Analysis with Framework Integration (v2.1)
 }

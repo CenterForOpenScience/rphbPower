@@ -7,24 +7,24 @@
 repeated_measures_power_calculation(
   r_partial,
   n,
-  n_timepoints,
+  alpha,
   correlation_between_measures,
-  alpha
+  n_timepoints
 )
 }
 \arguments{
-\item{r_partial}{Partial correlation}
+\item{r_partial}{Partial correlation coefficient, analogous to sqrt(partial eta-squared) (NULL to calculate)}
 
-\item{n}{Sample size}
+\item{n}{Sample size (NULL to calculate)}
 
-\item{n_timepoints}{Number of timepoints}
+\item{alpha}{Significance level (default = 0.05)}
 
-\item{correlation_between_measures}{Correlation between measures}
+\item{correlation_between_measures}{Average correlation between measures (default = 0.5).}
 
-\item{alpha}{Significance level}
+\item{n_timepoints}{Number of repeated measures (default = 2). Note: engine uses paired t-test, best for 2 timepoints.}
 }
 \value{
-Statistical power
+Power analysis results with framework integration
 }
 \description{
 Calculate Power for Repeated Measures

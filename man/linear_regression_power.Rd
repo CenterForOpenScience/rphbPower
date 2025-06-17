@@ -2,12 +2,12 @@
 % Please edit documentation in R/linear_regression_power.R
 \name{linear_regression_power}
 \alias{linear_regression_power}
-\title{Linear Regression Power Analysis with Framework Integration}
+\title{Linear Regression Power Analysis with Framework Integration (v2.1 - Corrected)}
 \usage{
 linear_regression_power(
   r_partial = NULL,
   n = NULL,
-  power = 0.8,
+  power = NULL,
   n_predictors = 1,
   alpha = 0.05,
   discount_factor = 0.75,
@@ -16,25 +16,25 @@ linear_regression_power(
 )
 }
 \arguments{
-\item{r_partial}{Partial correlation coefficient (NULL to calculate)}
+\item{r_partial}{Partial correlation coefficient for the predictor of interest (NULL to calculate).}
 
-\item{n}{Sample size (NULL to calculate)}
+\item{n}{Sample size (NULL to calculate).}
 
-\item{power}{Statistical power (NULL to calculate, default = 0.8)}
+\item{power}{Statistical power (1 - beta error probability) (NULL to calculate).}
 
-\item{n_predictors}{Number of predictors in model (default = 1)}
+\item{n_predictors}{Total number of predictors in the model (default = 1).}
 
-\item{alpha}{Significance level (default = 0.05)}
+\item{alpha}{The significance level (Type I error probability) (default = 0.05).}
 
-\item{discount_factor}{Conservative discount factor (default = 0.75)}
+\item{discount_factor}{The conservative planning discount factor (default = 0.75).}
 
-\item{effect_input}{Raw effect size input (alternative to r_partial)}
+\item{effect_input}{Alternative to r_partial for automatic conversion from other effect size metrics.}
 
-\item{effect_type}{Type of effect_input ("r", "d", "f2", "r_squared", "eta_squared")}
+\item{effect_type}{The type of \code{effect_input} ("r", "d", "f2", "r_squared").}
 }
 \value{
-Power analysis results with framework integration
+A list object containing the power analysis results.
 }
 \description{
-Linear Regression Power Analysis with Framework Integration
+Linear Regression Power Analysis with Framework Integration (v2.1 - Corrected)
 }

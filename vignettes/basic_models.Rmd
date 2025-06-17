@@ -1,0 +1,118 @@
+---
+title: "Basic Models (Correlation and Linear Regression)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Basic Models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+options(rmarkdown.html_vignette.check_title = FALSE)
+```
+
+```{r setup}
+library(rphbPower)
+```
+
+## PART 1: CORRELATION POWER ANALYSIS
+
+Engine: Custom analytical formulas based on t-distribution.
+
+### Example 1.1: Calculate Sample Size (Solving for n)
+
+```{r ex1-1}
+# Calculate the required sample size for 80% power to detect a small-medium effect (r=0.25).
+result_cor_1 <- correlation_power(r_partial = 0.25, power = 0.8)
+print(result_cor_1)
+
+# Required N is in result_cor_1$n
+cat(result_cor_1$n)
+```
+
+### Example 1.2: Calculate Power (Solving for power)
+
+```{r ex1-2}
+# Calculate the achieved power for a medium effect (r=0.3) with 100 participants.
+result_cor_2 <- correlation_power(r_partial = 0.3, n = 100)
+print(result_cor_2)
+```
+
+### Example 1.3: Calculate Effect Size (Solving for r_partial)
+
+```{r ex1-3}
+# What is the smallest effect size we can detect with 95% power and N=200?
+result_cor_3 <- correlation_power(n = 200, power = 0.95)
+print(result_cor_3)
+```
+
+## PART 2: LINEAR REGRESSION POWER ANALYSIS
+
+Engine: `pwr::pwr.f2.test` for enhanced reliability.
+
+### Example 2.1: Calculate Sample Size with Multiple Predictors
+
+```{r ex2-1}
+# Calculate the sample size needed to detect a predictor's unique effect (r=0.20)
+# with 80% power in a model with 5 total predictors.
+result_reg_1 <- linear_regression_power(r_partial = 0.20, power = 0.8, n_predictors = 5)
+print(result_reg_1)
+```
+
+
+### Example 2.2: The Impact of Model Complexity
+```{r ex2-2}
+# Compare the sample size needed for the same effect (r=0.20) in models
+# with different numbers of predictors.
+r_fixed <- 0.20
+predictor_counts <- c(1, 3, 5, 8)
+
+cat("\nSample Size vs. Model Complexity for r =", r_fixed, "\n")
+
+for (p in predictor_counts) {
+  # **THE FIX IS HERE**: Added `power = 0.8` to the function call.
+  n_result <- linear_regression_power(r_partial = r_fixed, power = 0.8, n_predictors = p)
+  cat(p, "predictor(s): N =", n_result$n, "\n")
+}
+```
+
+## PART 3: DEMONSTRATING THE DISCOUNT FEATURE
+
+A crucial feature of the framework is the built-in 0.75 discount factor for conservative planning. Compare using it vs. not using it.
+
+```{r ex3}
+pilot_d <- 0.5 # From a pilot study or single literature source.
+
+# --- Conservative Planning (Recommended) ---
+# Use the effect_input parameter. The framework automatically applies the
+# 0.75 discount factor before converting to r_partial and calculating power.
+conservative_result <- linear_regression_power(
+  effect_input = pilot_d,
+  effect_type = "d",
+  power = 0.8,
+  n_predictors = 3
+)
+
+# --- Optimistic Planning (Not Recommended) ---
+# To see the result without the discount, we manually convert the effect size first,
+# ensuring the discount is not applied in the conversion or the power function.
+optimistic_r <- cohens_d_to_partial_r(d = pilot_d, apply_discount = FALSE)
+optimistic_result <- linear_regression_power(
+  r_partial = optimistic_r,
+  power = 0.8,
+  n_predictors = 3
+)
+
+paste0(
+  cat("\n--- Conservative vs. Optimistic Planning ---\n"),
+cat("Pilot Study Effect (Cohen's d):", pilot_d, "\n"),
+cat("Conservative Plan (Framework Default): Requires N =", conservative_result$n, "\n"),
+cat("Optimistic Plan (No Discount): Requires N =", optimistic_result$n, "\n"),
+cat("Safety Margin Provided by Framework:", conservative_result$n - optimistic_result$n, "participants\n")
+)
+```
+

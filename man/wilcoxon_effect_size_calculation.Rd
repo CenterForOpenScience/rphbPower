@@ -4,7 +4,7 @@
 \alias{wilcoxon_effect_size_calculation}
 \title{Calculate Effect Size for Wilcoxon Signed-Rank Test}
 \usage{
-wilcoxon_effect_size_calculation(n, power, alpha, two_tailed, asymptotic)
+wilcoxon_effect_size_calculation(n, power, alpha, two_tailed)
 }
 \arguments{
 \item{n}{Sample size}
@@ -14,8 +14,6 @@ wilcoxon_effect_size_calculation(n, power, alpha, two_tailed, asymptotic)
 \item{alpha}{Significance level}
 
 \item{two_tailed}{Two-tailed test flag}
-
-\item{asymptotic}{Use asymptotic approximation}
 }
 \value{
 Required partial correlation

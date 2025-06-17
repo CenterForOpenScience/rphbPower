@@ -4,13 +4,7 @@
 \alias{wilcoxon_sample_size_calculation}
 \title{Calculate Sample Size for Wilcoxon Signed-Rank Test}
 \usage{
-wilcoxon_sample_size_calculation(
-  r_partial,
-  power,
-  alpha,
-  two_tailed,
-  asymptotic
-)
+wilcoxon_sample_size_calculation(r_partial, power, alpha, two_tailed)
 }
 \arguments{
 \item{r_partial}{Partial correlation}
@@ -20,8 +14,6 @@ wilcoxon_sample_size_calculation(
 \item{alpha}{Significance level}
 
 \item{two_tailed}{Two-tailed test flag}
-
-\item{asymptotic}{Use asymptotic approximation}
 }
 \value{
 Required sample size

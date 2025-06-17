@@ -2,9 +2,10 @@
 % Please edit documentation in R/mediation_regression_power.R
 \name{mediation_power_calculation}
 \alias{mediation_power_calculation}
-\title{Calculate Power for Mediation Analysis}
+\title{Calculate Power for Mediation Analysis
+This is the internal engine that performs the power calculation.}
 \usage{
-mediation_power_calculation(r_a, r_b, n, alpha, test_type)
+mediation_power_calculation(r_a, r_b, n, alpha)
 }
 \arguments{
 \item{r_a}{A-path correlation}
@@ -14,12 +15,11 @@ mediation_power_calculation(r_a, r_b, n, alpha, test_type)
 \item{n}{Sample size}
 
 \item{alpha}{Significance level}
-
-\item{test_type}{Type of mediation test}
 }
 \value{
 Statistical power
 }
 \description{
 Calculate Power for Mediation Analysis
+This is the internal engine that performs the power calculation.
 }

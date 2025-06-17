@@ -27,11 +27,12 @@ The unified framework uses **partial correlations** as the standardized effect s
 - **Conservative planning**: Built-in 0.75 discount factor for realistic estimates
 - **Cross-method consistency**: Same effect sizes enable direct comparison across methods
 - **Framework integration**: Automatic conversion from Cohen's d, f², R², eta-squared
-- **Mathematical precision**: Corrected F-distribution calculations ensure accurate power analysis
+- **Validated engines**: All calculation engines have been corrected and validated to ensure accurate power analysis
 
 ## Universal Effect Size Interpretation
 
 ### Partial Correlations (Framework Standard)
+
 | **Magnitude** | **|r_partial|** | **Interpretation** | **Variance Explained** |
 |---------------|-----------------|-------------------|----------------------|
 | **Negligible** | < 0.10 | Practically meaningless | < 1% |
@@ -50,6 +51,7 @@ The unified framework uses **partial correlations** as the standardized effect s
 ## Field-Specific Guidelines
 
 ### Psychology and Social Sciences
+
 | **Research Area** | **Small** | **Medium** | **Large** | **Framework Guidance** |
 |-------------------|-----------|------------|-----------|----------------------|
 | **Clinical interventions** | 0.15 | 0.30 | 0.50 | Treatment vs. control effects |
@@ -59,39 +61,38 @@ The unified framework uses **partial correlations** as the standardized effect s
 
 **Psychology Planning**: Expect r = 0.15-0.25 after framework discount for most applied research.
 
-### Education
+### Education Research
+
 | **Research Area** | **Small** | **Medium** | **Large** | **Framework Guidance** |
 |-------------------|-----------|------------|-----------|----------------------|
-| **Achievement predictors** | 0.15 | 0.30 | 0.50 | Academic performance factors |
-| **Instructional methods** | 0.10 | 0.25 | 0.40 | Teaching intervention effects |
-| **Technology integration** | 0.08 | 0.20 | 0.35 | Often smaller effects in practice |
+| **Academic achievement** | 0.10 | 0.25 | 0.40 | Student outcome measures |
+| **Intervention programs** | 0.15 | 0.30 | 0.45 | Educational treatments |
+| **Teacher effectiveness** | 0.12 | 0.28 | 0.42 | Classroom-level effects |
+| **School factors** | 0.08 | 0.20 | 0.35 | Institutional influences |
 
-**Education Planning**: Budget for r = 0.10-0.20 after framework discount for most educational interventions.
+### Health and Medical Research
 
-### Health and Medicine
 | **Research Area** | **Small** | **Medium** | **Large** | **Framework Guidance** |
 |-------------------|-----------|------------|-----------|----------------------|
-| **Public health interventions** | 0.05 | 0.15 | 0.30 | Population-level effects |
-| **Clinical treatments** | 0.10 | 0.25 | 0.45 | Individual patient outcomes |
-| **Diagnostic accuracy** | 0.25 | 0.50 | 0.75 | Biomarker performance metrics |
+| **Behavioral health** | 0.15 | 0.30 | 0.50 | Lifestyle interventions |
+| **Risk factors** | 0.10 | 0.25 | 0.40 | Disease predictors |
+| **Treatment efficacy** | 0.20 | 0.35 | 0.55 | Clinical trials |
+| **Quality of life** | 0.12 | 0.28 | 0.45 | Patient-reported outcomes |
 
-**Medical Planning**: Use r = 0.05-0.15 after framework discount for population interventions, r = 0.15-0.25 for clinical trials.
+### Business and Organizational Research
 
-### Business and Economics
 | **Research Area** | **Small** | **Medium** | **Large** | **Framework Guidance** |
 |-------------------|-----------|------------|-----------|----------------------|
-| **Organizational behavior** | 0.10 | 0.25 | 0.45 | Workplace outcome predictors |
-| **Marketing effectiveness** | 0.15 | 0.30 | 0.50 | Consumer response measures |
-| **Economic policy** | 0.05 | 0.15 | 0.30 | Market-level impact assessment |
-
-**Business Planning**: Expect r = 0.10-0.25 after framework discount for most organizational research.
+| **Employee performance** | 0.12 | 0.28 | 0.45 | Individual productivity |
+| **Training effectiveness** | 0.15 | 0.32 | 0.50 | Learning interventions |
+| **Customer satisfaction** | 0.10 | 0.25 | 0.40 | Service quality measures |
+| **Leadership impact** | 0.08 | 0.22 | 0.38 | Management effects |
 
 ## Framework Integration Examples
 
 ### Converting Literature Effects
-```r
-library(rphbPower)
 
+```{r convert-lit-effects}
 # Convert Cohen's d from literature
 literature_d <- 0.45
 r_framework <- framework_effect_size(literature_d, "d", apply_discount = TRUE)
@@ -103,104 +104,59 @@ r_framework <- framework_effect_size(meta_r_squared, "r_squared", apply_discount
 # Result: R² = 0.12 → r ≈ 0.26 (after discount)
 
 # Use in any framework analysis
-source("05_methods/5.2_regression/linear_regression/linear_regression_power_analysis.R")
 result <- linear_regression_power(r_partial = r_framework, power = 0.8, n_predictors = 3)
 # Typical sample size: 300-500 participants depending on exact conversion
 ```
 
-### Multiple Study Integration
-```r
-# Literature effects with mixed metrics
-studies <- data.frame(
-  Effect = c(0.25, 0.08, 0.4, 0.15),
-  Type = c("r", "r_squared", "d", "f2")
-)
-
-# Convert all to framework standard
-framework_effects <- sapply(1:nrow(studies), function(i) {
-  framework_effect_size(studies$Effect[i], studies$Type[i], apply_discount = TRUE)
-})
-
-# Meta-analytic average for planning
-planning_effect <- mean(framework_effects)
-# Typical result: r ≈ 0.15-0.20 across mixed literature
-```
 
 ## Analysis-Specific Considerations
 
 ### Correlation Analysis
 
-- **Zero-order**: Direct partial correlation input
+- **Zero-order**: Your effect size estimate is the direct input for r_partial
 - **Typical range**: r = 0.10-0.40 in most research domains
-- **Framework advantage**: Simple 1:1 correspondence with other methods
+- **Framework advantage**: Simple 1:1 correspondence with other methods for single-predictor models
 
-### Linear/Logistic Regression
+### Linear & Logistic Regression
 
 - **Single predictor**: Similar to correlation analysis requirements
-- **Multiple predictors**: Partial correlations typically smaller (0.05-0.25) but require larger samples
-- **Model complexity**: Each additional predictor increases sample size by 10-30%
+- **Multiple predictors**: The r_partial represents the unique effect of one predictor, so expect smaller values (0.05-0.25) than zero-order correlations
+- **Model complexity**: Each additional predictor increases the required sample size
+- **Logistic Regression Engine**: Note: The current validated engine (WebPower) performs calculations for a single predictor only. The n_predictors argument is ignored.
 
-### Mediation Analysis
+### Mediation Analysis (Regression-based)
 
-- **Individual paths**: a-path and b-path typically r = 0.15-0.40
-- **Indirect effects**: Product of paths, usually small (r = 0.02-0.15)
-- **Framework advantage**: Same r_partial across both paths enables direct comparison
-- **Sample size reality**: Requires 30-60% larger samples than single-path analyses
+- **Individual paths**: The effect sizes are the r_a (X→M) and r_b (M→Y|X) path coefficients
+- **Indirect effects**: The power is for the indirect effect (a*b), which is typically small (r = 0.02-0.15)
+- **Framework Engine**: The calculation is performed by a fast analytical engine using the Aroian formula for the Sobel test, replacing the previous slow simulation method
 
 ### Longitudinal Analysis
 
-- **Cross-lagged effects**: Often small (r = 0.05-0.20) but theoretically important
-- **Stability coefficients**: Usually medium-large (r = 0.40-0.70)
-- **Change effects**: Variable depending on time interval and measurement quality
+- **Cross-Lagged Effects**: Often small (r = 0.05-0.20). The power calculation is now delegated to the linear_regression_power function, correctly treating it as a regression with 2 predictors (the cross-lagged path and the stability path)
+- **Repeated Measures (2 waves)**: The calculation uses a paired t-test engine (pwr.t.test). The r_partial is converted to the equivalent Cohen's d for the analysis. Ideal for pre-post designs
+- **Fixed Effects (Multiple waves)**: For analyzing within-person effects over time. The engine uses a t-test with degrees of freedom adjusted for the number of units and time periods (N*T - N - k)
 
 ### SEM and Multilevel Models
 
-- **Direct effects**: Similar to regression guidelines
-- **Random effects**: Often small (r = 0.05-0.20) but important for model fit
-- **Complex models**: Account for additional parameters substantially increasing sample requirements
+- **SEM Direct Effects**: Similar to regression, but you must account for measurement reliability. The framework attenuates the latent r_partial by the square root of the measurement_reliability argument before calculating power. Lower reliability requires a much larger sample size
+- **Multilevel (Mixed) Models**: The framework distinguishes between Level-1 (within-group) and Level-2 (between-group) effects via the test_level argument
+- **Intraclass Correlation (ICC)**: The icc parameter is critical and dramatically impacts power for Level-1 effects
+- **Framework Engine**: Calculations are delegated to the WebPower and pwr packages
 
 ## Effect Size Planning Workflow
 
-### Step 1: Literature Review and Conversion
-Collect effect sizes from relevant studies and convert to framework standard:
+### Cross-Method Sample Size Comparison
 
-```r
-# Create comprehensive conversion table for planning
-literature_values <- c(0.2, 0.5, 0.8)  # Cohen's d from multiple studies
-conversion_table <- unified_effect_size_table(
-  effect_values = literature_values,
-  input_type = "d", 
-  apply_discount = TRUE
-)
-
-print(conversion_table)
-# Results show realistic planning values after discount
-```
-
-### Step 2: Conservative Planning Application
-Framework applies 0.75 discount factor automatically for realistic planning:
-
-```r
-# Framework handles discount automatically
-optimistic_d <- 0.60  # From pilot study
-realistic_planning <- framework_effect_size(optimistic_d, "d", apply_discount = TRUE)
-# Input d=0.60 becomes framework r≈0.23 for conservative planning
-
-# Compare with undiscounted (overly optimistic)
-optimistic_planning <- framework_effect_size(optimistic_d, "d", apply_discount = FALSE)
-# Input d=0.60 becomes r≈0.29 without discount - likely too optimistic
-```
-
-### Step 3: Cross-Method Sample Size Comparison
 Use same r_partial across different analyses to compare sample size requirements:
 
-```r
+```{r cross-method-sample-size}
+
 planning_r <- 0.25  # From literature integration
 
 # Compare sample size requirements across methods
 correlation_n <- correlation_power(r_partial = planning_r, power = 0.8)$n
 regression_n <- linear_regression_power(r_partial = planning_r, power = 0.8, n_predictors = 3)$n
-mediation_n <- mediation_regression_power(r_a = planning_r, r_b = planning_r, power = 0.8)$n
+mediation_n <- mediation_regression_power(r_a = planning_r, r_b = planning_r, power = 0.8, n = NULL)$n
 
 # Typical results for r = 0.25:
 # Correlation: ~122
@@ -208,13 +164,14 @@ mediation_n <- mediation_regression_power(r_a = planning_r, r_b = planning_r, po
 # Mediation: ~180-200
 ```
 
+
 ## Common Planning Mistakes and Solutions
 
 ### ❌ Avoid These Critical Errors
 
 - **Using Cohen's conventions without field context**: Effects vary dramatically by domain
 - **Expecting large effects in most research domains**: Large effects (r > 0.50) are rare
-- **Ignoring measurement reliability effects**: Poor measurement attenuates observed effects
+- **Ignoring measurement reliability effects**: Poor measurement attenuates observed effects. The framework's SEM functions now help you model this directly with the measurement_reliability parameter
 - **Forgetting about restriction of range**: Sampling constraints reduce effect sizes
 - **Using optimistic pilot study effects without discount**: Pilot effects often don't replicate
 - **Underestimating model complexity impact**: Multiple predictors substantially increase sample requirements
@@ -224,71 +181,29 @@ mediation_n <- mediation_regression_power(r_a = planning_r, r_b = planning_r, po
 - **Research field-specific effect size norms**: Use domain-appropriate expectations
 - **Plan for small-to-medium effects in most domains**: r = 0.10-0.30 after discount is typical
 - **Trust framework discount factor for conservative planning**: 0.75 discount prevents underpowering
-- **Account for measurement quality and design factors**: Consider reliability and restriction
+- **Account for measurement quality and design factors**: Use the measurement_reliability and icc parameters when appropriate
 - **Apply unified r_partial for cross-method consistency**: Enables direct comparison across analyses
 - **Use actual framework calculations**: Avoid rules of thumb, use verified mathematical functions
 
-## Practical Significance Thresholds
+## Framework Integration Benefits
 
-### Minimum Meaningful Effects by Domain
-
-- **Clinical research**: r ≥ 0.15 for treatment effects (after discount)
-- **Educational interventions**: r ≥ 0.10 for instructional changes (after discount)
-- **Public health**: r ≥ 0.05 for population-level interventions (after discount)
-- **Organizational**: r ≥ 0.10 for workplace changes (after discount)
-- **Marketing**: r ≥ 0.15 for campaign effectiveness (after discount)
-
-### Framework Integration Benefits
 The unified partial correlation framework enables:
 
 - **Cross-method comparison**: Same effect size metric across all analyses
-- **Conservative planning**: Built-in discount factor prevents underpowered studies  
+- **Conservative planning**: Built-in discount factor prevents underpowered studies
 - **Literature integration**: Convert any effect size type to common metric
-- **Quality assurance**: Consistent interpretation standards across methods
-- **Mathematical precision**: Corrected calculations ensure accurate power analysis
-
-## Framework Reality Check
-
-### Common Effect Size Expectations After Discount
-
-- **Literature d = 0.50** → **Framework r ≈ 0.19** (realistic for planning)
-- **Literature R² = 0.15** → **Framework r ≈ 0.29** (realistic for planning)
-- **Literature f² = 0.10** → **Framework r ≈ 0.22** (realistic for planning)
-
-### Sample Size Implications
-Framework conservative planning typically yields:
-
-- **Small effects (r = 0.15)**: 300-400 participants
-- **Medium effects (r = 0.25)**: 120-150 participants
-- **Large effects (r = 0.40)**: 45-60 participants
-
-**Model complexity substantially increases these requirements.**
-
-## Key Framework Functions
-
-### Essential Conversions
-
-- `framework_effect_size()`: Convert any effect type with discount
-- `unified_effect_size_table()`: Comprehensive conversion table
-- `framework_conversion_summary()`: Complete effect size report
-- `interpret_effect_size()`: Standardized interpretation
-
-### Quality Assurance Functions
-
-- `validate_partial_r()`: Input validation and range checking
-- `partial_correlation_from_t()`: Convert existing statistical test results
-- `partial_correlation_from_f()`: Convert F-statistics to framework standard
+- **Validated and Fast Engines**: Replaces slow, error-prone simulations with fast, validated analytical formulas and delegation to trusted R packages
+- **Mathematical precision**: Validated calculations ensure accurate power analysis
 
 ## Validation Status
 
-✅ **Field-Specific Guidelines**: Updated with framework discount considerations
+✅ **Field-Specific Guidelines**: Updated with framework discount considerations  
+✅ **Conversion Accuracy**: All effect size transformations verified  
 
-✅ **Conversion Accuracy**: All effect size transformations verified
+✅ **Conservative Planning**: Consistent application of 0.75 discount factor  
 
-✅ **Conservative Planning**: Consistent application of 0.75 discount factor
+✅ **Cross-Method Integration**: Unified partial correlations enable precise comparisons  
 
-✅ **Cross-Method Integration**: Unified partial correlations enable precise comparisons
-
-✅ **Mathematical Foundation**: Based on corrected F-distribution calculations
+✅ **Validated Mathematical Foundation**: Based on delegation to trusted packages and corrected analytical formulas  
 
 The framework ensures methodological consistency while providing practical effect size guidance grounded in empirical research across diverse domains, enabling researchers to make informed decisions about study planning with realistic and defensible effect size estimates that account for the complexities of real-world research.

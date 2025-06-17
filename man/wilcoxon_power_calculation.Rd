@@ -4,7 +4,7 @@
 \alias{wilcoxon_power_calculation}
 \title{Calculate Power for Wilcoxon Signed-Rank Test}
 \usage{
-wilcoxon_power_calculation(r_partial, n, alpha, two_tailed, asymptotic)
+wilcoxon_power_calculation(r_partial, n, alpha, two_tailed)
 }
 \arguments{
 \item{r_partial}{Partial correlation}
@@ -14,8 +14,6 @@ wilcoxon_power_calculation(r_partial, n, alpha, two_tailed, asymptotic)
 \item{alpha}{Significance level}
 
 \item{two_tailed}{Two-tailed test flag}
-
-\item{asymptotic}{Use asymptotic approximation}
 }
 \value{
 Statistical power

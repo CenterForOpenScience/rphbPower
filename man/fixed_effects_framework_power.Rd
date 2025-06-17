@@ -9,7 +9,7 @@ fixed_effects_framework_power(
   effect_type = "r",
   n_units = NULL,
   n_periods = 4,
-  power = 0.8,
+  power = NULL,
   icc = 0.3,
   alpha = 0.05,
   discount_factor = 0.75

@@ -2,7 +2,7 @@
 % Please edit documentation in R/wilcoxon_signed_rank_power.R
 \name{wilcoxon_signed_rank_power}
 \alias{wilcoxon_signed_rank_power}
-\title{Wilcoxon Signed-Rank Power Analysis with Framework Integration}
+\title{Wilcoxon Signed-Rank Power Analysis with Framework Integration (v3.1)}
 \usage{
 wilcoxon_signed_rank_power(
   r_partial = NULL,
@@ -11,7 +11,6 @@ wilcoxon_signed_rank_power(
   alpha = 0.05,
   discount_factor = 0.75,
   two_tailed = TRUE,
-  asymptotic = TRUE,
   effect_input = NULL,
   effect_type = "r"
 )
@@ -29,15 +28,13 @@ wilcoxon_signed_rank_power(
 
 \item{two_tailed}{Two-tailed test (default = TRUE)}
 
-\item{asymptotic}{Use asymptotic approximation (default = TRUE)}
-
 \item{effect_input}{Raw effect size input (alternative to r_partial)}
 
-\item{effect_type}{Type of effect_input ("r", "d", "f2", "r_squared", "eta_squared")}
+\item{effect_type}{Type of effect_input ("r", "d")}
 }
 \value{
 Power analysis results with framework integration
 }
 \description{
-Wilcoxon Signed-Rank Power Analysis with Framework Integration
+Wilcoxon Signed-Rank Power Analysis with Framework Integration (v3.1)
 }

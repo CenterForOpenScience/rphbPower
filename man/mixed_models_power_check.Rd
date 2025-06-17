@@ -9,7 +9,8 @@ mixed_models_power_check(
   n_groups,
   n_per_group = 10,
   icc = 0.05,
-  test_level = "level1"
+  test_level = "level1",
+  alpha = 0.05
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ mixed_models_power_check(
 \item{icc}{Intraclass correlation (default = 0.05)}
 
 \item{test_level}{Level being tested (default = "level1")}
+
+\item{alpha}{Significance level}
 }
 \value{
 Statistical power

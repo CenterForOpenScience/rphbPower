@@ -8,7 +8,7 @@ mixed_models_framework_power(
   effect_size,
   effect_type = "r",
   n_groups = NULL,
-  power = 0.8,
+  power = NULL,
   n_per_group = 10,
   icc = 0.05,
   test_level = "level1",

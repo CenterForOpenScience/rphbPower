@@ -4,12 +4,14 @@
 \alias{fixed_effects_effect_size_calculation}
 \title{Calculate Effect Size for Fixed Effects}
 \usage{
-fixed_effects_effect_size_calculation(n_effective, power, icc, alpha)
+fixed_effects_effect_size_calculation(n_units, power, n_periods, icc, alpha)
 }
 \arguments{
-\item{n_effective}{Effective sample size}
+\item{n_units}{Number of units}
 
 \item{power}{Target power}
+
+\item{n_periods}{Number of time periods}
 
 \item{icc}{Intraclass correlation coefficient}
 

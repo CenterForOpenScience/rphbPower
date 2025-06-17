@@ -1,0 +1,81 @@
+---
+title: "Mediation and SEM Models"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Mediation and SEM Models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(rphbPower)
+```
+
+Version: 2.0 - Revised to reflect validated engines and add context.
+
+## PART 1: MEDIATION ANALYSIS (REGRESSION-BASED)
+
+Engine: Analytical approximation based on the Aroian/Sobel test.
+
+### Example 1.1: Sample Size Planning
+
+```{r ex1-1}
+# Target: 80% power to detect mediation where a-path r=0.20 and b-path r=0.30.
+# Note: The function applies the 0.75 discount factor to these paths by default.
+result_med_1 <- mediation_regression_power(r_a = 0.20, r_b = 0.30, power = 0.8)
+print(result_med_1)
+```
+
+### Example 1.2: Demonstrating the Discount Feature
+
+```{r ex1-2}
+# Compare conservative vs. optimistic planning for pilot path coefficients.
+pilot_a <- 0.45
+pilot_b <- 0.35
+
+# Conservative (recommended): The discount is applied to r_a and r_b before the calculation.
+conservative_result <- mediation_regression_power(r_a = pilot_a, r_b = pilot_b, power = 0.8)
+
+# Optimistic: Explicitly set the discount factor to 1.0 to disable it.
+optimistic_result <- mediation_regression_power(r_a = pilot_a, r_b = pilot_b, power = 0.8, discount_factor = 1.0)
+
+cat("\n--- Mediation Conservative vs. Optimistic Planning ---\n")
+cat("Pilot Paths: a =", pilot_a, ", b =", pilot_b, "\n")
+cat("Conservative Plan (Default, discount=0.75): Requires N =", conservative_result$n, "\n")
+cat("Optimistic Plan (discount=1.0): Requires N =", optimistic_result$n, "\n")
+```
+
+## PART 2: MEDIATION ANALYSIS (SEM-BASED)
+
+Engine: Analytical approximation, adjusted for measurement reliability.
+
+NOTE: This is a fast approximation. For definitive results, a full Monte Carlo simulation is recommended.
+
+### Example 2.1: Sample Size Planning with Reliability
+
+```{r ex2-1}
+# We expect latent paths of a=0.3 and b=0.25, with good measurement reliability (0.9).
+result_sem_1 <- mediation_sem_power(r_a = 0.3, r_b = 0.25, power = 0.8, measurement_reliability = 0.9)
+print(result_sem_1)
+```
+
+## PART 3: SEM DIRECT EFFECTS
+
+Engine: t-test approximation for a single path, adjusted for reliability.
+
+### Example 3.1: Sample Size for a Direct Path
+
+```{r ex3-1}
+# Target: 80% power to detect a direct path of r=0.20 in a model with 5 predictors,
+# assuming measurement reliability of 0.85.
+result_sem_dir_1 <- sem_direct_effects_power(r_partial = 0.20, power = 0.8, n_predictors = 5, measurement_reliability = 0.85)
+print(result_sem_dir_1)
+```
+

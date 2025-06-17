@@ -1,0 +1,95 @@
+---
+title: "Longitudinal Models"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Longitudinal Models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(rphbPower)
+```
+
+## PART 1: REPEATED MEASURES ANALYSIS (for 2 timepoints)
+
+Engine: `pwr::pwr.t.test` (type="paired") for robustness.
+
+### Example 1.1: Sample Size for a Pre-Post Design
+
+```{r ex1-1}
+# Calculate N needed for 90% power to detect r=0.25 between two timepoints.
+result_rm_1 <- repeated_measures_power(r_partial = 0.25, power = 0.90)
+print(result_rm_1)
+```
+
+## PART 2: FIXED EFFECTS MODELS (for panel data)
+
+Engine: Analytical t-test based on within-person degrees of freedom.
+
+Use for panel data (many measurements from many units) to estimate within-person effects.
+
+### Example 2.1: Sample Size for a Daily Diary Study
+
+```{r ex2-1}
+# Calculate the number of participants ('n_units') needed for a 14-day study,
+# expecting a within-person effect of r=0.20 and an ICC of 0.4.
+result_fe_1 <- fixed_effects_power(r_partial = 0.20, power = 0.8, n_periods = 14, icc = 0.4)
+print(result_fe_1)
+```
+
+## PART 3: CROSS-LAGGED PANEL MODELS
+
+Engine: Wraps linear_regression_power, using `pwr::pwr.f2.test` with n_predictors=2.
+
+Use to test reciprocal effects (e.g., does X1 predict Y2, and Y1 predict X2?).
+
+### Example 3.1: Sample Size for a Reciprocal Relationship
+```{r ex3-1}
+# Calculate the sample size needed to detect a cross-lagged path of r=0.15 with 80% power.
+result_clpm_1 <- cross_lagged_panel_power(r_partial = 0.15, power = 0.8)
+print(result_clpm_1)
+```
+
+## PART 4: DEMONSTRATING THE DISCOUNT FEATURE
+
+Showcasing the conservative planning feature for a longitudinal study. Literature suggests a within-person effect of d=0.4 for an intervention.
+
+```{r ex4}
+# --- Conservative Planning (Recommended) ---
+# Use the effect_input parameter to automatically apply the 0.75 discount.
+conservative_result <- fixed_effects_power(
+  effect_input = 0.4,
+  effect_type = "d",
+  power = 0.8,
+  n_periods = 10,
+  icc = 0.5
+)
+
+# --- Optimistic Planning (Not Recommended) ---
+# Manually convert without the discount to see the difference.
+optimistic_r <- cohens_d_to_partial_r(d = 0.4, apply_discount = FALSE)
+optimistic_result <- fixed_effects_power(
+  r_partial = optimistic_r,
+  power = 0.8,
+  n_periods = 10,
+  icc = 0.5
+)
+
+cat(paste0(
+  cat("\n--- Fixed Effects Conservative vs. Optimistic Planning ---\n"),
+  cat("Literature Effect (Cohen's d):", 0.4, "\n"),
+  cat("Conservative Plan (Framework Default): Requires N =", 
+      conservative_result$n_units, "units\n"),
+  cat("Optimistic Plan (No Discount): Requires N =", 
+      optimistic_result$n_units, "units\n")
+))
+```
+

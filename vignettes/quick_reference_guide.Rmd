@@ -20,42 +20,75 @@ Complete function reference for the unified partial correlation framework with f
 ## Framework Setup
 
 ### Quick Start Pattern
+
 ```r
-# All methods follow unified pattern: provide any 2 of 3 parameters
-method_power(r_partial = NULL, n = NULL, power = 0.8, ...)
+# All methods follow unified pattern: provide exactly 2 of 3 parameters
+method_power(r_partial = NULL, n = NULL, power = NULL, ...)
+# Power defaults to 0.8 when not explicitly provided in function call
 
 # Framework integration with automatic effect size conversion
 method_power(effect_input = effect_size, effect_type = "d", ...)
 ```
 
+## Parameter Detection Rules
+
+### Core Behavior (All Methods)
+
+```{r core-behavior}
+# Rule: Provide exactly 2 of {r_partial, n, power} - the 3rd is calculated
+# Power defaults to 0.8 when not explicitly provided
+
+# Calculate sample size (r_partial + power provided)
+result <- linear_regression_power(r_partial = 0.25, power = 0.8, n_predictors = 1)
+result$n  # Returns required sample size
+
+# Calculate power (r_partial + n provided, power uses default 0.8)
+result <- linear_regression_power(r_partial = 0.25, n = 120, n_predictors = 1)
+result$power  # Returns achieved power
+
+# Calculate effect size (n + power provided)
+result <- linear_regression_power(n = 150, power = 0.8, n_predictors = 1)
+result$r_partial  # Returns detectable effect size
+```
+
+
 ## Complete Method Reference
 
 | **Analysis Method** | **Function** | **Primary Use Case** | **Key Parameters** |
 |-------------------|-------------|-------------------|------------------|
-| **Correlation** | `correlation_power()` | Simple X-Y relationships | `r_partial, n, power` |
-| **Linear Regression** | `linear_regression_power()` | Multiple predictors, continuous outcome | `r_partial, n, power, n_predictors` |
-| **Logistic Regression** | `logistic_regression_power()` | Binary outcomes | `r_partial, n, power, n_predictors` |
-| **Cross-Lagged Panel** | `cross_lagged_panel_power()` | Reciprocal causation over time | `r_partial, n, power, n_waves, stability_coefficient` |
-| **Fixed Effects** | `fixed_effects_power()` | Panel data, many time points | `r_partial, n_units, power, n_periods` |
-| **Repeated Measures** | `repeated_measures_power()` | Within-subjects design | `r_partial, n, power, n_timepoints` |
-| **Mediation (Regression)** | `mediation_regression_power()` | Causal pathways X→M→Y | `r_a, r_b, n, power, test_type` |
-| **Mediation (SEM)** | `mediation_sem_power()` | Complex mediation models | `r_a, r_b, n, power` |
-| **Mixed Models** | `mixed_models_power()` | Nested/clustered data | `r_partial, n_groups, power, n_per_group, icc` |
-| **SEM Direct Effects** | `sem_direct_effects_power()` | Structural equation models | `r_partial, n, power, n_predictors` |
-| **Nonparametric** | `wilcoxon_signed_rank_power()` | Non-normal, robust analysis | `r_partial, n, power` |
+| Correlation | `correlation_power()` | Simple X-Y relationships | r_partial, n, power |
+| Linear Regression | `linear_regression_power()` | Multiple predictors, continuous outcome | r_partial, n, power, n_predictors |
+| Logistic Regression | `logistic_regression_power()` | Binary outcomes | r_partial, n, power (Note: single predictor only) |
+| Cross-Lagged Panel | `cross_lagged_panel_power()` | Reciprocal causation over time | r_partial, n, power (Note: uses regression engine) |
+| Fixed Effects | `fixed_effects_power()` | Panel data, many time points | r_partial, n_units, power, n_periods, icc |
+| Repeated Measures | `repeated_measures_power()` | Within-subjects design (2 waves) | r_partial, n, power, n_timepoints |
+| Mediation (Regression) | `mediation_regression_power()` | Causal pathways X→M→Y | r_a, r_b, n, power |
+| Mediation (SEM) | `mediation_sem_power()` | Complex mediation, latent variables | r_a, r_b, n, power, measurement_reliability |
+| Mixed Models | `mixed_models_power()` | Nested/clustered data | r_partial, n_groups, power, n_per_group, icc, test_level |
+| SEM Direct Effects | `sem_direct_effects_power()` | Structural equation models | r_partial, n, power, n_predictors, measurement_reliability |
+| Nonparametric | `wilcoxon_signed_rank_power()` | Non-normal, robust analysis | r_partial, n, power |
 
 ## Unified Framework Features
 
 ### Auto-Detection (All Methods)
-```r
-# Provide any 2 parameters, calculates the 3rd
-result <- linear_regression_power(r_partial = 0.25, n = 120, n_predictors = 3)      # → power
+
+```{r auto-detection}
+# Provide exactly 2 parameters, calculates the 3rd
+# Power defaults to 0.8 when not explicitly provided
+
+result <- linear_regression_power(r_partial = 0.25, n = 120, n_predictors = 3)      # → power (uses default)
 result <- linear_regression_power(r_partial = 0.25, power = 0.8, n_predictors = 1)  # → sample size
 result <- linear_regression_power(n = 150, power = 0.8, n_predictors = 2)           # → effect size
+
+# Explicit power specification vs. default behavior
+result1 <- correlation_power(r_partial = 0.25, power = 0.8)    # Power explicitly set to 0.8
+result2 <- correlation_power(r_partial = 0.25, n = 100)       # Power uses default (0.8)
 ```
 
+
 ### Framework Effect Size Integration
-```r
+
+```{r effect-size-integration}
 # Automatic conversion with conservative discount
 linear_regression_power(effect_input = 0.4, effect_type = "d", power = 0.8, n_predictors = 3)
 linear_regression_power(effect_input = 0.15, effect_type = "f2", power = 0.8, n_predictors = 2)
@@ -67,20 +100,25 @@ r_partial <- cohens_f2_to_partial_r(0.15, apply_discount = TRUE)
 r_partial <- r_squared_to_partial_r(0.09, apply_discount = TRUE)
 ```
 
+
 ### Statistical Test Conversions
-```r
+
+```{r stat-test-conversions}
 # From existing results
 r_partial <- partial_correlation_from_t(t_value = 3.2, df = 147)
 r_partial <- partial_correlation_from_f(f_value = 8.5, df_den = 145)
 r_partial <- partial_correlation_from_zero_order(r_xy = 0.45, r_xz = 0.30, r_yz = 0.25)
 ```
 
+
 ## Common Function Patterns
 
 ### Linear Regression (Most Common)
-```r
-# Basic usage
-linear_regression_power(r_partial = 0.25, power = 0.8, n_predictors = 1)
+
+```{r linear-regression}
+# Basic usage - power defaults to 0.8
+linear_regression_power(r_partial = 0.25, n = 120, n_predictors = 1)        # Calculate power
+linear_regression_power(r_partial = 0.25, power = 0.8, n_predictors = 1)    # Calculate sample size
 
 # Multiple predictors
 linear_regression_power(r_partial = 0.20, power = 0.8, n_predictors = 5)
@@ -93,61 +131,62 @@ linear_regression_sample_size(r_partial = 0.25, power = 0.8, n_predictors = 1)
 linear_regression_power_check(r_partial = 0.25, n = 120, n_predictors = 1)
 ```
 
+
 ### Logistic Regression
-```r
+
+```{r log-regression}
+# Note: The n_predictors argument is now ignored by the engine.
+# Power is calculated for a single predictor only.
+
 # Using partial correlations (framework approach)
-logistic_regression_power(r_partial = 0.25, power = 0.8, n_predictors = 1)
+logistic_regression_power(r_partial = 0.25, power = 0.8)
 
 # Framework conversion from Cohen's d
-logistic_regression_power(effect_input = 0.5, effect_type = "d", power = 0.8, n_predictors = 1)
-
-# Framework conversion from Cohen's f²
-logistic_regression_power(effect_input = 0.15, effect_type = "f2", power = 0.8, n_predictors = 2)
+logistic_regression_power(effect_input = 0.5, effect_type = "d", power = 0.8)
 ```
+
 
 ### Mediation Analysis
-```r
+
+```{r mediation-analysis}
 # Regression-based mediation
-mediation_regression_power(r_a = 0.30, r_b = 0.35, power = 0.8, test_type = "sobel")
+mediation_regression_power(r_a = 0.30, r_b = 0.35, n = 200)      # Calculate power
+mediation_regression_power(r_a = 0.30, r_b = 0.35, power = 0.8) # Calculate sample size
 
-# SEM-based mediation
-mediation_sem_power(r_a = 0.25, r_b = 0.40, power = 0.8, n_indicators_total = 9)
-
-# Framework integration for both paths
-mediation_regression_power(effect_input_a = 0.4, effect_input_b = 0.3, effect_type = "d", power = 0.8)
+# SEM-based mediation (note: n_indicators_total replaced by measurement_reliability)
+mediation_sem_power(r_a = 0.25, r_b = 0.40, power = 0.8, measurement_reliability = 0.9)
 ```
+
 
 ### Mixed Models
-```r
-# Calculate required number of groups
-mixed_models_power(r_partial = 0.20, power = 0.8, n_per_group = 20, icc = 0.05)
 
-# Framework approach
-mixed_models_power(effect_input = 0.09, effect_type = "r_squared", power = 0.8, n_per_group = 15)
+```{r mixed-models}
+# Calculate required number of groups for a Level-1 effect
+mixed_models_power(r_partial = 0.20, power = 0.8, n_per_group = 20, icc = 0.05, test_level = "level1")
 
 # Convenience functions
-mixed_models_sample_size(r_partial = 0.20, power = 0.8, n_per_group = 20, icc = 0.05)
-mixed_models_power_check(r_partial = 0.20, n_groups = 25, n_per_group = 20, icc = 0.05)
+mixed_models_sample_size(r_partial = 0.20, power = 0.8, n_per_group = 20, icc = 0.05, test_level = "level1")
+mixed_models_power_check(r_partial = 0.20, n_groups = 25, n_per_group = 20, icc = 0.05, test_level = "level1")
 ```
+
 
 ### Longitudinal Methods
-```r
-# Cross-lagged panel
-cross_lagged_panel_power(r_partial = 0.15, power = 0.8, n_waves = 3, stability_coefficient = 0.6)
+
+```{r longitudinal}
+# Cross-lagged panel (stability_coefficient is a context-only parameter)
+cross_lagged_panel_power(r_partial = 0.15, power = 0.8, n_waves = 3)
 
 # Fixed effects
-fixed_effects_power(r_partial = 0.15, power = 0.8, n_periods = 4, icc = 0.3)
+fixed_effects_power(r_partial = 0.15, n_units = 100, n_periods = 4, icc = 0.3)
 
-# Repeated measures
-repeated_measures_power(r_partial = 0.25, power = 0.8, n_timepoints = 3, correlation_between_measures = 0.6)
-
-# Convenience functions
-cross_lagged_panel_sample_size(r_partial = 0.15, power = 0.8, n_waves = 3, stability_coefficient = 0.6)
-fixed_effects_sample_size(r_partial = 0.15, power = 0.8, n_periods = 4, icc = 0.3)
+# Repeated measures (engine is for 2 timepoints; correlation parameter is for context only)
+repeated_measures_power(r_partial = 0.25, power = 0.8, n_timepoints = 2)
 ```
 
+
 ### SEM and Nonparametric
-```r
+
+```{r sem-nonparametric}
 # SEM direct effects
 sem_direct_effects_power(r_partial = 0.25, power = 0.8, n_predictors = 4, measurement_reliability = 0.85)
 
@@ -155,92 +194,93 @@ sem_direct_effects_power(r_partial = 0.25, power = 0.8, n_predictors = 4, measur
 wilcoxon_signed_rank_power(r_partial = 0.20, power = 0.8, two_tailed = TRUE)
 
 # Convenience functions
-sem_direct_effects_sample_size(r_partial = 0.25, power = 0.8, n_predictors = 4)
 wilcoxon_sample_size(r_partial = 0.20, power = 0.8)
 ```
+
 
 ## Effect Size Guidelines
 
 ### Partial Correlations (All Methods)
-| **Magnitude** | **r_partial** | **Interpretation** | **Typical Fields** |
-|--------------|--------------|------------------|------------------|
-| **Negligible** | \|r\| < 0.10 | Very small effect | Medical research baseline |
-| **Small** | \|r\| = 0.10-0.29 | Small but meaningful | Psychology, education |
-| **Medium** | \|r\| = 0.30-0.49 | Moderate effect | Business, applied research |
-| **Large** | \|r\| ≥ 0.50 | Strong effect | Rare in most fields |
+
+| **Magnitude** | **|r_partial|** | **Interpretation** | **Typical Fields** |
+|--------------|---------------|-------------------|------------------|
+| Negligible | < 0.10 | Practically meaningless | Most domains |
+| Small | 0.10 - 0.29 | Meaningful in context | Psychology, Education |
+| Medium | 0.30 - 0.49 | Clearly meaningful | Experimental studies |
+| Large | ≥ 0.50 | Very strong relationship | Laboratory conditions |
 
 ### Framework Conversions
+
 | **Input Type** | **Small** | **Medium** | **Large** | **Function** |
-|---------------|----------|-----------|-----------|-------------|
-| **Cohen's d** | 0.2 | 0.5 | 0.8 | `framework_effect_size(value, "d")` |
-| **Cohen's f²** | 0.02 | 0.15 | 0.35 | `framework_effect_size(value, "f2")` |
-| **R²** | 0.01 | 0.09 | 0.25 | `framework_effect_size(value, "r_squared")` |
-| **Eta²** | 0.01 | 0.06 | 0.14 | `framework_effect_size(value, "eta_squared")` |
+|---------------|-----------|------------|-----------|--------------|
+| Cohen's d | 0.2 | 0.5 | 0.8 | `framework_effect_size(value, "d")` |
+| Cohen's f² | 0.02 | 0.15 | 0.35 | `framework_effect_size(value, "f2")` |
+| R² | 0.01 | 0.09 | 0.25 | `framework_effect_size(value, "r_squared")` |
+| Eta² | 0.01 | 0.06 | 0.14 | `framework_effect_size(value, "eta_squared")` |
 
 ## Sample Size Planning
 
 ### 80% Power, α = 0.05 (Framework Defaults)
-| **Effect Size** | **Correlation** | **Linear Reg (1 pred)** | **Linear Reg (5 pred)** | **Mediation** | **Mixed Models** |
-|---------------|---------------|------------------------|------------------------|-------------|----------------|
-| **Small (r=0.15)** | ~345 | ~345 | ~375 | ~550 | ~400 (20 groups) |
-| **Medium (r=0.25)** | ~122 | ~122 | ~135 | ~200 | ~150 (20 groups) |
-| **Large (r=0.40)** | ~46 | ~46 | ~55 | ~80 | ~70 (20 groups) |
+
+| **Effect Size** | **Correlation** | **Linear Reg (1 pred)** | **Linear Reg (5 pred)** | **Mediation** | **Mixed Models (L1)** |
+|----------------|----------------|-------------------------|-------------------------|---------------|---------------------|
+| Small (r=0.15) | ~345 | ~345 | ~375 | ~550 | ~400 (20 groups) |
+| Medium (r=0.25) | ~122 | ~122 | ~135 | ~200 | ~150 (20 groups) |
+| Large (r=0.40) | ~46 | ~46 | ~55 | ~80 | ~70 (20 groups) |
 
 ### Model Complexity Planning
-**Example: r = 0.20, 80% power**
+
+Example: r = 0.20, 80% power
+
 - **1 predictor**: 192 participants
-- **5 predictors**: 320 participants (+67%)
-- **10 predictors**: 410 participants (+113%)
+- **5 predictors**: 230 participants (+20%)
+- **10 predictors**: 285 participants (+48%)
 
 **Planning Note**: Model complexity significantly impacts sample size requirements. Always specify actual predictor count rather than using simple correlation estimates.
 
 ## Parameter Defaults
 
 ### Universal Defaults (All Methods)
+
 | **Parameter** | **Default** | **Rationale** |
-|--------------|------------|--------------|
-| `power` | 0.8 | 80% power standard |
-| `alpha` | 0.05 | 5% Type I error rate |
-| `discount_factor` | 0.75 | Conservative planning |
-| `apply_discount` | TRUE | Realistic effect sizes |
+|--------------|-------------|---------------|
+| power | 0.8 | 80% power standard (applied when not explicitly provided) |
+| alpha | 0.05 | 5% Type I error rate |
+| discount_factor | 0.75 | Conservative planning |
 
 ### Method-Specific Defaults
+
 | **Method** | **Special Defaults** | **Notes** |
-|-----------|-------------------|----------|
-| **Mixed Models** | `icc = 0.05, n_per_group = 10, test_level = "level1"` | Typical clustering |
-| **Repeated Measures** | `correlation_between_measures = 0.5` | Moderate correlation |
-| **Cross-Lagged** | `stability_coefficient = 0.6, n_waves = 3` | Typical autoregression |
-| **Fixed Effects** | `n_periods = 4, icc = 0.3` | Panel data structure |
-| **Mediation** | `test_type = "sobel"` | Standard approach |
-| **SEM** | `measurement_reliability = 0.85` | Good measurement quality |
+|-----------|---------------------|-----------|
+| Mixed Models | test_level = "level1", icc = 0.05, n_per_group = 10 | Assumes within-group test with typical clustering |
+| SEM | measurement_reliability = 0.85 | Assumes good measurement quality |
+| Repeated Measures | n_timepoints = 2 | Engine is a paired t-test, ideal for 2 waves |
+| Cross-Lagged | n_waves = 3 | Minimum for model identification |
+| Fixed Effects | n_periods = 4, icc = 0.3 | Typical panel data structure |
 
 ## Framework Utilities
 
 ### Conversion Functions
-```r
+
+```{r conversion-functions}
 # Effect size conversions
 unified_effect_size_table(c(0.2, 0.5, 0.8), "d", apply_discount = TRUE)
 framework_conversion_summary(0.4, "d", apply_discount = TRUE)
 
-# Validation
-validate_partial_r(r_input, allow_zero = FALSE)
+# Validation and Interpretation
+validate_partial_r(0.25, allow_zero = FALSE)
 interpret_effect_size(0.25, standard = "cohen")
 
 # Sample size adjustments
 effective_sample_size(n_nominal = 200, design_effect = 1.5)
 ```
 
-### Quality Control
-```r
-# Framework validation
-show_available_methods()                    # See loaded methods
-framework_quick_start(0.4, "d", "linear_regression")  # Quick analysis
-```
 
 ## Common Usage Patterns
 
 ### Literature Integration
-```r
+
+```{r lit-integration}
 # Step 1: Convert mixed effect sizes
 studies <- data.frame(
   effect = c(0.4, 0.12, 0.08),
@@ -256,8 +296,10 @@ meta_r <- mean(r_values)
 linear_regression_power(r_partial = meta_r, power = 0.8, n_predictors = 3)
 ```
 
+
 ### Cross-Method Comparison
-```r
+
+```{r cross-method-comparison}
 # Same effect, different methods
 effect_r <- 0.25
 
@@ -266,24 +308,47 @@ linear_regression_power(r_partial = effect_r, power = 0.8, n_predictors = 1)$n
 repeated_measures_power(r_partial = effect_r, power = 0.8, n_timepoints = 2)$n
 ```
 
+
 ### Sensitivity Analysis
-```r
+
+```{r sensitivity}
 # Multiple scenarios
 scenarios <- c(0.15, 0.20, 0.25, 0.30)
 sapply(scenarios, function(r) linear_regression_power(r_partial = r, power = 0.8, n_predictors = 3)$n)
 ```
 
+
 ## Troubleshooting Quick Fixes
 
 ### Common Error Messages
+
 | **Error** | **Cause** | **Solution** |
-|-----------|-----------|-------------|
-| "Provide exactly two parameters" | Wrong number of NULL values | Set exactly 2 of: r_partial, n, power |
+|-----------|-----------|--------------|
+| "Provide exactly two of: r_partial, n, power" | Wrong number of NULL values | Set exactly 2 of: r_partial, n, power |
 | "Partial correlation must be < 1" | Effect size too large | Check effect size input; use framework conversion |
-| "Function not found" | Method not loaded | Use `load_analysis_method("method_name")` |
 | "Insufficient degrees of freedom" | Sample size too small | Increase n or reduce n_predictors |
 
+### Parameter Detection Issues
+
+```{r param-detection-issues}
+# Common mistakes and solutions:
+
+# ✗ WRONG: Only 1 parameter provided
+# correlation_power(r_partial = 0.25)
+
+# ✓ CORRECT: Exactly 2 parameters (power uses default)
+correlation_power(r_partial = 0.25, n = 100)
+
+# ✗ WRONG: All 3 parameters provided
+# correlation_power(r_partial = 0.25, n = 100, power = 0.8)
+
+# ✓ CORRECT: Exactly 2 parameters provided
+correlation_power(r_partial = 0.25, power = 0.8)
+```
+
+
 ### Unrealistic Results
+
 | **Issue** | **Typical Cause** | **Solution** |
 |-----------|------------------|--------------|
 | N > 2000 for medium effect | Effect size too small | Check framework discount; validate effect size |
@@ -294,25 +359,25 @@ sapply(scenarios, function(r) linear_regression_power(r_partial = r, power = 0.8
 
 ### Method Selection (30-Second Guide)
 
-1. **Continuous outcome** → `linear_regression_power()`
-2. **Binary outcome** → `logistic_regression_power()`
-3. **Within-subjects design** → `repeated_measures_power()`
-4. **Clustered data** → `mixed_models_power()`
-5. **Mediation question** → `mediation_regression_power()`
-6. **Longitudinal/causal** → `fixed_effects_power()` or `cross_lagged_panel_power()`
-7. **Complex structural model** → `sem_direct_effects_power()`
+- **Continuous outcome** → `linear_regression_power()`
+- **Binary outcome** → `logistic_regression_power()`
+- **Within-subjects design** → `repeated_measures_power()`
+- **Clustered data** → `mixed_models_power()`
+- **Mediation question** → `mediation_regression_power()`
+- **Longitudinal/causal** → `fixed_effects_power()` or `cross_lagged_panel_power()`
+- **Complex structural model** → `sem_direct_effects_power()`
 
 ### Effect Size Selection (30-Second Guide)
 
-1. **Have pilot data** → Use `partial_correlation_from_t()` or similar
-2. **Have literature** → Use `framework_effect_size()` with appropriate type
-3. **No data** → Psychology: r=0.20; Education: r=0.25; Medicine: r=0.15
-4. **Conservative planning** → Use framework defaults (0.75 discount applied automatically)
+- **Have pilot data** → Use `partial_correlation_from_t()` or similar
+- **Have literature** → Use `framework_effect_size()` with appropriate type
+- **No data** → Psychology: r=0.20; Education: r=0.25; Medicine: r=0.15
+- **Conservative planning** → Use framework defaults (0.75 discount applied automatically)
 
 ### Sample Size Reality Check
 
 - **N < 50**: Very large effects only
-- **N = 50-150**: Medium to large effects 
+- **N = 50-150**: Medium to large effects
 - **N = 150-300**: Small to medium effects
 - **N > 300**: Small effects detectable
 

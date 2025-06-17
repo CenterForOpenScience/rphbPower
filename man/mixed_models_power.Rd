@@ -2,13 +2,13 @@
 % Please edit documentation in R/mixed_models_power.R
 \name{mixed_models_power}
 \alias{mixed_models_power}
-\title{Mixed Models Power Analysis with Framework Integration}
+\title{Mixed Models Power Analysis - Corrected Formulas}
 \usage{
 mixed_models_power(
   r_partial = NULL,
   n_groups = NULL,
   n_per_group = 10,
-  power = 0.8,
+  power = NULL,
   icc = 0.05,
   alpha = 0.05,
   discount_factor = 0.75,
@@ -18,29 +18,31 @@ mixed_models_power(
 )
 }
 \arguments{
-\item{r_partial}{Partial correlation coefficient (NULL to calculate)}
+\item{r_partial}{Partial correlation coefficient (NULL to calculate).}
 
-\item{n_groups}{Number of groups/clusters (NULL to calculate)}
+\item{n_groups}{Number of groups/clusters (NULL to calculate).}
 
-\item{n_per_group}{Average observations per group (default = 10)}
+\item{n_per_group}{Average observations per group (default = 10).}
 
-\item{power}{Statistical power (NULL to calculate, default = 0.8)}
+\item{power}{Statistical power (NULL to calculate, default applied when needed = 0.8).}
 
-\item{icc}{Intraclass correlation coefficient (default = 0.05)}
+\item{icc}{Intraclass correlation coefficient (default = 0.05).}
 
-\item{alpha}{Significance level (default = 0.05)}
+\item{alpha}{Significance level (default = 0.05).}
 
-\item{discount_factor}{Conservative discount factor (default = 0.75)}
+\item{discount_factor}{Conservative discount factor (default = 0.75).}
 
-\item{test_level}{Level being tested ("level1" or "level2")}
+\item{test_level}{Level being tested ("level1" or "level2").}
 
-\item{effect_input}{Raw effect size input (alternative to r_partial)}
+\item{effect_input}{Raw effect size input (alternative to r_partial).}
 
-\item{effect_type}{Type of effect_input ("r", "d", "f2", "r_squared", "eta_squared")}
+\item{effect_type}{Type of effect_input ("r", "d", "f2", "r_squared", "eta_squared").}
 }
 \value{
-Power analysis results with framework integration
+A list containing power analysis results and framework integrations.
 }
 \description{
-Mixed Models Power Analysis with Framework Integration
+Performs power analysis for mixed models, calculating either partial
+correlation, number of groups, or statistical power based on provided inputs.
+This version delegates calculations to validated external packages.
 }
