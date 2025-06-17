@@ -2,7 +2,7 @@
 % Please edit documentation in R/linear_regression_power.R
 \name{linear_regression_power}
 \alias{linear_regression_power}
-\title{Linear Regression Power Analysis with Framework Integration (v2.1 - Corrected)}
+\title{Linear Regression Power Analysis with Framework Integration}
 \usage{
 linear_regression_power(
   r_partial = NULL,
@@ -36,5 +36,5 @@ linear_regression_power(
 A list object containing the power analysis results.
 }
 \description{
-Linear Regression Power Analysis with Framework Integration (v2.1 - Corrected)
+Linear Regression Power Analysis with Framework Integration
 }
