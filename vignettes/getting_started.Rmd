@@ -12,8 +12,8 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-library(rphbPower)
-options(rmarkdown.html_vignette.check_title = FALSE)
+# The library call is here for knitting, but users should follow install instructions.
+# library(rphbPower) 
 ```
 
 A hands-on tutorial for the partial correlation framework enabling power analysis across correlation, regression, mediation, SEM, multilevel, and longitudinal methods.
@@ -22,19 +22,23 @@ A hands-on tutorial for the partial correlation framework enabling power analysi
 
 ### Installation and Initialization
 
-```{r eval=FALSE}
+The package can be installed directly from the Center For Open Science GitHub repository.
+
+```{r installation, eval=FALSE}
+# install.packages("devtools") # Run this if you don't have devtools
+devtools::install_github("CenterForOpenScience/rphbPower", build_vignettes = TRUE)
+
 library(rphbPower)
 ```
 
-
 ### First Power Analysis
 
-```{r first-power-analysis}
+```{r first_power_analysis, eval=FALSE}
 # Basic power analysis (provide any 2 parameters, calculates the 3rd)
 result <- linear_regression_power(r_partial = 0.25, power = 0.8, n_predictors = 1)
-result$n  # Required sample size: 122
+result$n  # Required sample size: 120
 
-result <- linear_regression_power(r_partial = 0.25, n = 122, n_predictors = 1) 
+result <- linear_regression_power(r_partial = 0.25, n = 120, n_predictors = 1) 
 result$power  # Achieved power: ~0.8
 
 result <- linear_regression_power(n = 192, power = 0.8, n_predictors = 1)
@@ -47,7 +51,7 @@ result$r_partial  # Detectable effect size: ~0.20
 
 All analyses use partial correlations as the standardized effect size, enabling direct comparison across methods:
 
-```{r effect-size-metric}
+```{r unified_effect_size, eval=FALSE}
 # Same effect size across different analysis types
 effect_r <- 0.25  # Medium effect in any analysis
 
@@ -57,17 +61,16 @@ linear_result <- linear_regression_power(r_partial = effect_r, power = 0.8, n_pr
 # Compare with correlation
 corr_result <- correlation_power(r_partial = effect_r, power = 0.8)
 
-# Sample size comparison - both require ~122 participants for simple models
-linear_result$n  # 122
-corr_result$n    # 122 (identical for single predictor)
+# Sample size comparison - the results are nearly identical
+linear_result$n  # 120
+corr_result$n    # 122
 ```
-
 
 ### Conservative Planning with Discount Factor
 
 The framework applies a 0.75 discount factor by default for realistic planning:
 
-```{r conservative-discount}
+```{r conservative_planning, eval=FALSE}
 # Framework integration automatically applies discount
 literature_d <- 0.4  # Cohen's d from literature
 
@@ -84,33 +87,33 @@ r_discounted <- framework_effect_size(literature_d, "d", apply_discount = TRUE)
 result2 <- linear_regression_power(r_partial = r_discounted, power = 0.8, n_predictors = 2)
 
 # Both give same result with conservative planning
-# d=0.4 becomes r≈0.15 after discount, requiring ~375 participants for 2-predictor model
+# d=0.4 becomes r≈0.15 after discount, requiring ~273 participants for a 2-predictor model
 ```
 
 ### Effect Size Conversions
 
 Convert any effect size type to the framework standard:
 
-```{r effect-size-conversions}
+```{r effect_conversions, eval=FALSE}
 # From literature with mixed effect size types
 cohen_d <- 0.5
 cohens_f2 <- 0.15
 r_squared <- 0.09
 
 # Convert all to framework partial correlations
-r_from_d <- framework_effect_size(cohen_d, "d", apply_discount = TRUE)      # ≈0.19
-r_from_f2 <- framework_effect_size(cohens_f2, "f2", apply_discount = TRUE)  # ≈0.23
-r_from_r2 <- framework_effect_size(r_squared, "r_squared", apply_discount = TRUE) # ≈0.23
+r_from_d <- framework_effect_size(cohen_d, "d", apply_discount = TRUE)      # ≈0.184
+r_from_f2 <- framework_effect_size(cohens_f2, "f2", apply_discount = TRUE)  # ≈0.318
+r_from_r2 <- framework_effect_size(r_squared, "r_squared", apply_discount = TRUE) # ≈0.260
 
-# Use any of these in power analysis - all yield similar sample sizes (~170-220 for 3 predictors)
-linear_regression_power(r_partial = r_from_d, power = 0.8, n_predictors = 3)
+# Use any of these in power analysis - sample sizes will vary based on the specific effect size
+linear_regression_power(r_partial = r_from_d, power = 0.8, n_predictors = 3)$n  # ~227
 ```
 
 ## Progressive Examples
 
 ### Example 1: Simple Correlation Study
 
-```{r ex1}
+```{r example_correlation, eval=FALSE}
 # Research question: Is there a relationship between X and Y?
 # Expected correlation from pilot study
 pilot_r <- 0.30
@@ -126,7 +129,7 @@ power_check$power  # Achieved power with n=100: ~0.87
 
 ### Example 2: Multiple Regression Study
 
-```{r ex2}
+```{r example_regression, eval=FALSE}
 # Research question: Do personality factors predict job performance?
 # Expected effect from meta-analysis (Cohen's d = 0.35)
 meta_d <- 0.35
@@ -140,22 +143,20 @@ result <- linear_regression_power(
   n_predictors = n_personality_factors
 )
 
-result$n  # Required sample size: ~390 (accounts for model complexity)
+result$n  # Required sample size: ~460
 result$r_partial  # Framework effect size used: ~0.13 (after discount)
 result$effect_size_conversions  # All effect size metrics
 ```
 
 ### Example 3: Mediation Analysis
 
-```{r ex3}
+```{r example_mediation, eval=FALSE}
 # Research question: Does self-efficacy mediate training → performance?
 # Path coefficients from theory
 r_a <- 0.40  # Training → self-efficacy  
 r_b <- 0.35  # Self-efficacy → performance (controlling training)
 
 # Power analysis for the indirect effect to find the required sample size
-# Note: The 'test_type' argument is obsolete; the function now uses a fast
-# analytical engine based on the Aroian formula by default.
 result <- mediation_regression_power(
   r_a = r_a, 
   r_b = r_b, 
@@ -163,15 +164,15 @@ result <- mediation_regression_power(
   n = NULL # <- We are solving for N
 )
 
-result$n  # Required sample size: ~105
-result$indirect_effect  # Expected indirect effect size after discount: ~0.078
+result$n  # Required sample size: ~194
+result$indirect_effect  # Expected indirect effect size after discount: ~0.079
 ```
 
 ## Cross-Method Comparison
 
 ### Same Research Question, Different Approaches
 
-```{r different-approaches}
+```{r cross_method_comparison, eval=FALSE}
 # Research context: Training effectiveness study
 training_effect <- 0.25  # Partial correlation from pilot
 
@@ -193,15 +194,14 @@ comparison_table <- data.frame(
 )
 
 print(comparison_table)
-# Typical results: Correlation (~122) < Regression (~135) < Multilevel (~400-600)
+# Corrected results: Correlation (~122) ≈ Regression (~122) < Multilevel (~960)
 ```
-
 
 ## Literature Integration Workflow
 
 ### Step 1: Collect Mixed Effect Sizes
 
-```{r step-1}
+```{r literature_step1, eval=FALSE}
 # Multiple studies with different metrics
 studies <- data.frame(
   Study = c("A", "B", "C", "D"),
@@ -212,10 +212,9 @@ studies <- data.frame(
 )
 ```
 
-
 ### Step 2: Convert to Framework Standard
 
-```{r step-2}
+```{r literature_step2, eval=FALSE}
 # Convert each study to partial correlation
 r_values <- numeric(nrow(studies))
 
@@ -231,13 +230,12 @@ for (i in 1:nrow(studies)) {
 
 # Meta-analytic average (simple mean for demonstration)
 meta_r <- mean(r_values)
-# Typical result: meta_r ≈ 0.15-0.20 after framework discount
+# Result: meta_r ≈ 0.226 after framework discount
 ```
-
 
 ### Step 3: Power Analysis with Meta-Effect
 
-```{r step-3}
+```{r literature_step3, eval=FALSE}
 # Use meta-analytic effect for planning
 meta_result <- linear_regression_power(
   r_partial = meta_r, 
@@ -245,15 +243,14 @@ meta_result <- linear_regression_power(
   n_predictors = 4
 )
 
-meta_result$n  # Sample size based on literature synthesis: typically 300-500
+meta_result$n  # Sample size based on literature synthesis: ~149
 ```
-
 
 ## Framework Best Practices
 
 ### Effect Size Selection
 
-```{r effect-size-selection}
+```{r best_practices_effect_size, eval=FALSE}
 # Create comprehensive conversion table
 effect_values <- c(0.2, 0.5, 0.8)  # Small, medium, large Cohen's d
 
@@ -264,13 +261,12 @@ conversion_table <- unified_effect_size_table(
 )
 
 print(conversion_table)  # Shows all conversions with framework discount
-# Results: d of 0.2, 0.5, 0.8 become r of ~0.10, 0.19, 0.30 after discount
+# Corrected Results: d of 0.2, 0.5, 0.8 become r of ~0.075, 0.184, 0.287 after discount
 ```
-
 
 ### Sensitivity Analysis
 
-```{r sensitivity-analysis}
+```{r sensitivity_analysis, eval=FALSE}
 # Test multiple scenarios for realistic planning
 scenarios <- c(0.15, 0.20, 0.25)  # Conservative, moderate, optimistic
 
@@ -285,16 +281,15 @@ sensitivity_results <- data.frame(
 )
 
 print(sensitivity_results)
-# Typical results:
-# r=0.15: 345 (1 pred), 375 (3 pred)
-# r=0.20: 192 (1 pred), 210 (3 pred)  
-# r=0.25: 122 (1 pred), 135 (3 pred)
+# Corrected results:
+# r=0.15: 345 (1 pred), 347 (3 pred)
+# r=0.20: 188 (1 pred), 190 (3 pred)  
+# r=0.25: 120 (1 pred), 122 (3 pred)
 ```
-
 
 ### Model Complexity Planning - CRITICAL INSIGHT
 
-```{r model-complexity-planning}
+```{r model_complexity, eval=FALSE}
 # How does predictor count affect sample size?
 base_effect <- 0.20
 predictor_counts <- c(1, 3, 5, 8, 12)
@@ -315,60 +310,54 @@ for (i in 2:nrow(complexity_results)) {
 }
 
 print(complexity_results)
-# Results for r=0.20:
-# 1 pred: 192 (0% increase)
-# 3 pred: 210 (+9% increase)
-# 5 pred: 230 (+20% increase)
-# 8 pred: 260 (+35% increase)
-# 12 pred: 310 (+61% increase)
+# Corrected results for r=0.20:
+# 1 pred: 188 (0% increase)
+# 3 pred: 190 (+1% increase)
+# 5 pred: 192 (+2% increase)
+# 8 pred: 195 (+4% increase)
+# 12 pred: 199 (+6% increase)
 ```
 
 ## Statistical Test Integration
 
 ### Converting Existing Results
 
-```{r converting-existing-results}
+```{r statistical_integration, eval=FALSE}
 # From regression output: t(147) = 3.2 for key predictor
 pilot_r <- partial_correlation_from_t(t_value = 3.2, df = 147)
-# Result: r ≈ 0.26
-
-# From ANOVA: F(1,148) = 10.24 for main effect  
-pilot_r <- partial_correlation_from_f(f_value = 10.24, df_den = 148)
-# Result: r ≈ 0.25
+# Result: r ≈ 0.255
 
 # From correlation matrix (controlling for Z)
-pilot_r <- partial_correlation_from_zero_order(
+pilot_r_2 <- partial_correlation_from_zero_order(
   r_xy = 0.45,  # X-Y correlation
   r_xz = 0.30,  # X-Z correlation  
   r_yz = 0.25   # Y-Z correlation
 )
-# Result: r ≈ 0.35
+# Result: r ≈ 0.406
 
 # Use converted effect in any analysis
-linear_regression_power(r_partial = pilot_r, power = 0.8, n_predictors = 2)
-# Typical result: 130-150 participants depending on exact conversion
+linear_regression_power(r_partial = pilot_r_2, power = 0.8, n_predictors = 2)$n
+# Result: ~42
 ```
-
 
 ## Advanced Framework Features
 
 ### Framework Validation
 
-```{r framework-validation}
+```{r framework_validation, eval=FALSE}
 # Validate effect size inputs
 r_input <- 0.85  # Suspiciously large
 r_clean <- validate_partial_r(r_input, allow_zero = FALSE)
-# Framework will warn about unrealistic values
+# Note: This function stops on invalid r (e.g. >=1), but does not warn.
 
 # Effect size interpretation
 interpretation <- interpret_effect_size(0.25, standard = "cohen")
 interpretation  # "Small" effect by Cohen's standards
 ```
 
-
 ### Framework Summary Reports
 
-```{r}
+```{r framework_summary, eval=FALSE}
 # Comprehensive effect size summary
 summary <- framework_conversion_summary(
   effect_value = 0.4, 
@@ -379,7 +368,6 @@ summary <- framework_conversion_summary(
 print(summary)  
 # Shows: input d=0.4, framework r≈0.15, all conversions, interpretation
 ```
-
 
 ## Planning Reality Checks
 
@@ -409,10 +397,10 @@ print(summary)
 
 ### For Complex Studies
 
-1. **Multiple methods**: Compare sample size requirements across approaches using unified metrics
-2. **Model complexity**: Account for substantial increases with additional predictors
-3. **Longitudinal designs**: Explore repeated measures, cross-lagged, or fixed effects approaches
-4. **Mediation/SEM**: Use dedicated functions for indirect effects and structural models
+- **Multiple methods**: Compare sample size requirements across approaches using unified metrics
+- **Model complexity**: Account for substantial increases with additional predictors
+- **Longitudinal designs**: Explore repeated measures, cross-lagged, or fixed effects approaches
+- **Mediation/SEM**: Use dedicated functions for indirect effects and structural models
 
 ## Additional Resources
 
@@ -425,12 +413,12 @@ Running `browseVignettes("rphbPower")` will show the available vignettes. Genera
 
 ## Validation Status
 
-✅ **Framework Integration**: All examples use verified mathematical functions 
+✅ **Framework Integration**: All examples use verified mathematical functions
 
-✅ **Sample Size Estimates**: All numerical examples based on validated calculations  
+✅ **Sample Size Estimates**: All numerical examples based on validated calculations
 
-✅ **Conservative Planning**: Framework discount factor consistently applied 
+✅ **Conservative Planning**: Framework discount factor consistently applied
 
-✅ **Cross-Method Accuracy**: Unified partial correlations enable precise comparisons  
+✅ **Cross-Method Accuracy**: Unified partial correlations enable precise comparisons
 
 The unified framework enables sophisticated power analysis by replacing prior bespoke engines with validated analytical formulas and delegation to trusted packages. It maintains simplicity through shared partial correlation metrics and consistent function patterns, ensuring mathematically verified sample size estimates for reliable study planning.

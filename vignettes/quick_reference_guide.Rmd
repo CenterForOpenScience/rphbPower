@@ -223,20 +223,20 @@ wilcoxon_sample_size(r_partial = 0.20, power = 0.8)
 ### 80% Power, α = 0.05 (Framework Defaults)
 
 | **Effect Size** | **Correlation** | **Linear Reg (1 pred)** | **Linear Reg (5 pred)** | **Mediation** | **Mixed Models (L1)** |
-|----------------|----------------|-------------------------|-------------------------|---------------|---------------------|
-| Small (r=0.15) | ~345 | ~345 | ~375 | ~550 | ~400 (20 groups) |
-| Medium (r=0.25) | ~122 | ~122 | ~135 | ~200 | ~150 (20 groups) |
-| Large (r=0.40) | ~46 | ~46 | ~55 | ~80 | ~70 (20 groups) |
+|:---|:---|:---|:---|:---|:---|
+| Small (r=0.15) | ~345 | ~345 | **~349** | ~550 | ~400 (20 groups) |
+| Medium (r=0.25)| ~122 | ~120 | **~124** | ~194 | ~150 (20 groups) |
+| Large (r=0.40) | ~46 | ~45 | **~46** | ~78 | ~70 (20 groups) |
 
 ### Model Complexity Planning
 
 Example: r = 0.20, 80% power
 
-- **1 predictor**: 192 participants
-- **5 predictors**: 230 participants (+20%)
-- **10 predictors**: 285 participants (+48%)
+- **1 predictor**: **188 participants**
+- **5 predictors**: **192 participants (+2%)**
+- **10 predictors**: **197 participants (+5%)**
 
-**Planning Note**: Model complexity significantly impacts sample size requirements. Always specify actual predictor count rather than using simple correlation estimates.
+**Planning Note**: For a given `r_partial`, the impact of adding more predictors on sample size is modest.
 
 ## Parameter Defaults
 

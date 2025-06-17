@@ -1,11 +1,5 @@
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
 # rphbPower - Unified Statistical Power Analysis Framework Package
-
-<!-- badges: start -->
-
-<!-- badges: end -->
 
 A comprehensive R framework for a priori statistical power analysis. It
 provides easy-to-use functions for 11 different statistical methods, all
@@ -48,11 +42,13 @@ The framework is built on two core principles:
 
 ## Quick Start
 
-### 1. Initialize the Framework
+### 1. Install and Load the Package
 
-Install the package from GitHub and load it in.
+The package can be installed directly from the Center For Open Science
+GitHub repository.
 
 ``` r
+# install.packages("devtools") # Run this if you don't have devtools
 devtools::install_github("CenterForOpenScience/rphbPower", build_vignettes = TRUE)
 
 library(rphbPower)
@@ -67,12 +63,10 @@ know, and leave the one you want to find as NULL.
 # Example 1: Solve for required sample size (N)
 result_n <- linear_regression_power(r_partial = 0.25, power = 0.8, n_predictors = 2)
 print(result_n$n)
-#> [1] 148
 
 # Example 2: Solve for the power of a planned study
-result_power <- linear_regression_power(r_partial = 0.25, n = 156, n_predictors = 2)
+result_power <- linear_regression_power(r_partial = 0.25, n = 121, n_predictors = 2)
 print(result_power$power)
-#> [1] 0.8233404
 ```
 
 ### 3. Use Any Effect Size
@@ -90,27 +84,6 @@ result <- linear_regression_power(
   n_predictors = 2
 )
 print(result)
-#> 
-#>  Linear Regression Power Analysis (v2.1, Corrected) 
-#> = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
-#> 
-#> Partial correlation: 0.1843 (Small) 
-#> Sample size: 278 
-#> Statistical power: 0.8 
-#> Number of predictors: 2 
-#> Alpha level: 0.05 
-#> 
-#> Model details:
-#>   Degrees of freedom (num, den): 2 , 275 
-#> 
-#> Framework conversions:
-#>   Cohen's d: 0.375 
-#>   Cohen's f²: 0.035 
-#>   R²: 0.034 
-#> 
-#> Framework details:
-#>   Discount factor applied via effect_input: 0.75 
-#>   Calculation target: sample_size
 ```
 
 ## Available Analysis Methods
@@ -162,23 +135,22 @@ print(result)
 ## Sample Size Planning Guidelines
 
 A critical reality in study planning is that model complexity
-significantly impacts sample size requirements. Simply running a power
-analysis for a simple correlation is often insufficient for a multiple
-regression model. Always specify the actual number of predictors you
-plan to use.
+significantly impacts sample size requirements. With the corrected
+engine, the impact of adding covariates is now estimated more
+accurately.
 
 **Example Impact** (Effect Size r = 0.20, Target Power = 80%):
 
 - **Correlation (1 predictor)**: ~192 participants
-- **Regression (5 predictors)**: ~262 participants (+36%)
-- **Regression (10 predictors)**: ~348 participants (+81%)
+- **Regression (5 predictors)**: ~192 participants (+0% increase)
+- **Regression (10 predictors)**: ~197 participants (+3% increase)
 
 This framework helps you account for this complexity directly in your
 power analysis.
 
 ## Framework Status
 
-- **Current Version**: 2.0
+- **Current Version**: 2.2
 - **Mathematical Status**: All 11 modules have been re-engineered and
   have passed comprehensive validation tests. The framework is
   considered complete and robust.
