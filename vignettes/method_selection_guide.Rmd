@@ -38,7 +38,7 @@ All power analysis methods in this package use **partial correlations** as the s
 | X predicts Y (multiple predictors) | Linear Regression | `linear_regression_power()` | Most common choice |
 | Binary outcome prediction | Logistic Regression | `logistic_regression_power()` | Yes/no, success/failure; **Note: single predictor only** |
 | Within-subjects design (2 waves) | Repeated Measures | `repeated_measures_power()` | Pre-post, two conditions |
-| Clustered/nested data | Multilevel Models | `mixed_models_power()` | Students in schools, etc. |
+| Clustered/nested data | Multilevel Models | `mixed_models_power()` | **Note: L1 engine is simulation-based; only solves for power** |
 | Causal pathway testing | Mediation | `mediation_regression_power()` | X → M → Y mechanisms; fast analytical engine |
 | Complex structural models | SEM | `sem_direct_effects_power()` | Latent variables, accounts for reliability |
 | Panel/longitudinal data | Fixed Effects | `fixed_effects_power()` | Within-person effects over many time points |
@@ -172,21 +172,22 @@ repeated_measures_power(
 
 **Best for**: Clustered, nested, or hierarchical data (e.g., students in classrooms, patients in hospitals)
 
-```{r mixed-models}
-# Calculate number of groups for a Level-1 (within-group) effect
+```{r mixed-models-new}
+# Calculate power for a Level-1 (within-group) effect
 mixed_models_power(
-  r_partial = 0.20,
-  power = 0.8,
-  n_per_group = 20,
-  icc = 0.10,
+  r_partial = 0.25,
+  n_groups = 50,
+  n_per_group = 25,
+  icc = 0.15,
   test_level = "level1"
 )
 ```
 
 **Key considerations:**
 
-- **Test Level**: You must specify whether you are testing a level1 (within-group) or level2 (between-group) effect. The framework uses different validated engines for each (WebPower for L1, pwr for L2)
-- **Intraclass Correlation (ICC)**: This parameter is critical and dramatically impacts power, especially for Level-1 effects
+- **Test Level**: You must specify whether you are testing a level1 (within-group) or level2 (between-group) effect.
+- **Engine**: The engine for Level-2 effects is analytical (using pwr). The engine for Level-1 effects is a robust Monte Carlo simulation.
+- **Limitations**: Because it uses simulation, the Level-1 engine can only solve for power.
 
 ### Mediation Analysis
 
@@ -290,13 +291,13 @@ between_n <- linear_regression_power(r_partial = research_effect, power = 0.8, n
 within_n <- repeated_measures_power(r_partial = research_effect, power = 0.8, n_timepoints = 2)$n
 
 # Mixed design efficiency
-# Note: get total N by multiplying n_groups * n_per_group
-mixed_result <- mixed_models_power(r_partial = research_effect, power = 0.8, n_per_group = 10, test_level = "level1")
-mixed_n <- mixed_result$n_groups * mixed_result$n_per_group
+# NOTE: The L1 engine only solves for power. We test the power for N=200 (20 groups of 10).
+mixed_power <- mixed_models_power(r_partial = research_effect, n_groups = 20, n_per_group = 10, test_level = "level1")$power
 
-# Efficiency ratios
-within_n / between_n        # Repeated measures efficiency
-mixed_n / between_n         # Mixed model efficiency
+# Efficiency comparison
+cat(paste("N for 80% power (Between-subjects):", between_n))
+cat(paste("\nN for 80% power (Within-subjects):", within_n))
+cat(paste("\nPower for N=200 (Mixed Model L1):", round(mixed_power, 2)))
 ```
 
 

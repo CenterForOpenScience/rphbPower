@@ -161,12 +161,13 @@ mediation_sem_power(r_a = 0.25, r_b = 0.40, power = 0.8, measurement_reliability
 ### Mixed Models
 
 ```{r mixed-models}
-# Calculate required number of groups for a Level-1 effect
-mixed_models_power(r_partial = 0.20, power = 0.8, n_per_group = 20, icc = 0.05, test_level = "level1")
+# --- Example: Power for a Level-1 (within-group) effect ---
+# The Level-1 engine uses simulation and can only solve for power.
+mixed_models_power(r_partial = 0.25, n_groups = 50, n_per_group = 25, icc = 0.15, test_level = "level1")
 
-# Convenience functions
-mixed_models_sample_size(r_partial = 0.20, power = 0.8, n_per_group = 20, icc = 0.05, test_level = "level1")
-mixed_models_power_check(r_partial = 0.20, n_groups = 25, n_per_group = 20, icc = 0.05, test_level = "level1")
+# --- Example: Sample size for a Level-2 (between-group) effect ---
+# The Level-2 engine is analytical and can solve for any parameter.
+mixed_models_power(r_partial = 0.30, power = 0.8, test_level = "level2")
 ```
 
 
@@ -224,9 +225,9 @@ wilcoxon_sample_size(r_partial = 0.20, power = 0.8)
 
 | **Effect Size** | **Correlation** | **Linear Reg (1 pred)** | **Linear Reg (5 pred)** | **Mediation** | **Mixed Models (L1)** |
 |:---|:---|:---|:---|:---|:---|
-| Small (r=0.15) | ~345 | ~345 | **~349** | ~550 | ~400 (20 groups) |
-| Medium (r=0.25)| ~122 | ~120 | **~124** | ~194 | ~150 (20 groups) |
-| Large (r=0.40) | ~46 | ~45 | **~46** | ~78 | ~70 (20 groups) |
+| Small (r=0.15) | ~345 | ~345 | **~349** | ~550 | Varies by ICC/N |
+| Medium (r=0.25)| ~122 | ~120 | **~124** | ~194 | Varies by ICC/N |
+| Large (r=0.40) | ~46 | ~45 | **~49** | ~78 | Varies by ICC/N |
 
 ### Model Complexity Planning
 

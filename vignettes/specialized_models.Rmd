@@ -32,18 +32,25 @@ result_log_1 <- logistic_regression_power(r_partial = 0.25, power = 0.8)
 print(result_log_1)
 ```
 
-## PART 2: MIXED-EFFECTS MODELS
+# ==============================================================================
+# PART 2: MIXED-EFFECTS MODELS
+# ==============================================================================
+# The engine for Level-1 effects is a robust Monte Carlo simulation.
+# The engine for Level-2 effects is an analytical formula using `pwr::pwr.f2.test`.
+# library(rphbPower)
 
-Engine: `WebPower::wp.crt2arm` (Level 1) and `pwr::pwr.f2.test` (Level 2).
-
-### Example 2.1: Sample Size for a Clustered Design (Level 1 Effect)
-
-```{r ex2-1}
-# Calculate the number of groups needed for a Level-1 (within-group) effect of r=0.20.
-# Assumes 15 students per school and an ICC of 0.05. You must specify `test_level`.
-result_mix_1 <- mixed_models_power(r_partial = 0.20, power = 0.8, n_per_group = 15, icc = 0.05, test_level = "level1")
+# --- Example 2.1: Power for a Clustered Design (Level 1) ---
+# Calculate the power to detect a within-group effect of r=0.25,
+# given 50 groups with 25 individuals each and an ICC of 0.15.
+# NOTE: The Level-1 simulation engine can only solve for power.
+result_mix_1 <- mixed_models_power(
+  r_partial = 0.25,
+  n_groups = 50,
+  n_per_group = 25,
+  icc = 0.15,
+  test_level = "level1"
+)
 print(result_mix_1)
-```
 
 ### Example 2.2: Power for a Between-Group Effect (Level 2 Effect)
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/mixed_models_power.R
 \name{mixed_models_power}
 \alias{mixed_models_power}
-\title{Mixed Models Power Analysis - Corrected Formulas}
+\title{Mixed Models Power Analysis (Final)}
 \usage{
 mixed_models_power(
   r_partial = NULL,
@@ -13,36 +13,37 @@ mixed_models_power(
   alpha = 0.05,
   discount_factor = 0.75,
   test_level = "level1",
+  n_sims_l1 = 500,
   effect_input = NULL,
   effect_type = "r"
 )
 }
 \arguments{
-\item{r_partial}{Partial correlation coefficient (NULL to calculate).}
+\item{r_partial}{Partial correlation for the effect of interest (NULL to calculate).}
 
-\item{n_groups}{Number of groups/clusters (NULL to calculate).}
+\item{n_groups}{Number of groups (Level-2 units) (NULL to calculate).}
 
-\item{n_per_group}{Average observations per group (default = 10).}
+\item{n_per_group}{Average number of observations per group (Level-1 units).}
 
-\item{power}{Statistical power (NULL to calculate, default applied when needed = 0.8).}
+\item{power}{Target statistical power (NULL to calculate).}
 
-\item{icc}{Intraclass correlation coefficient (default = 0.05).}
+\item{icc}{Intraclass Correlation Coefficient.}
 
-\item{alpha}{Significance level (default = 0.05).}
+\item{alpha}{Significance level.}
 
-\item{discount_factor}{Conservative discount factor (default = 0.75).}
+\item{discount_factor}{Conservative planning discount factor.}
 
-\item{test_level}{Level being tested ("level1" or "level2").}
+\item{test_level}{The level of the predictor: "level1" or "level2".}
 
-\item{effect_input}{Raw effect size input (alternative to r_partial).}
+\item{n_sims_l1}{Number of simulations for Level-1 power estimation.}
 
-\item{effect_type}{Type of effect_input ("r", "d", "f2", "r_squared", "eta_squared").}
+\item{effect_input}{Alternative raw effect size.}
+
+\item{effect_type}{Type of \code{effect_input}.}
 }
 \value{
-A list containing power analysis results and framework integrations.
+A list with power analysis results.
 }
 \description{
-Performs power analysis for mixed models, calculating either partial
-correlation, number of groups, or statistical power based on provided inputs.
-This version delegates calculations to validated external packages.
+Performs power analysis for mixed-effects (multilevel) models for both Level-1 (within-group) and Level-2 (between-group) effects.
 }

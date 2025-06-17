@@ -310,8 +310,9 @@ Mixed-effects models analyze hierarchical or clustered data (e.g., students in c
 ### Code Examples
 
 ```{r mixed-models-examples}
-# Calculate number of groups for a Level-1 (within-group) effect
-mixed_models_power(r_partial = 0.2, power = 0.8, n_per_group = 20, icc = 0.1, test_level = "level1")
+# Calculate power for a Level-1 (within-group) effect
+# Note: L1 engine is a simulation and can only solve for power.
+mixed_models_power(r_partial = 0.18, n_groups = 50, n_per_group = 25, icc = 0.20, test_level = "level1")
 
 # Calculate power for a Level-2 (between-group) effect
 mixed_models_power(r_partial = 0.3, n_groups = 50, n_per_group = 10, icc = 0.2, test_level = "level2")

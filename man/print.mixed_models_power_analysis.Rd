@@ -2,15 +2,15 @@
 % Please edit documentation in R/mixed_models_power.R
 \name{print.mixed_models_power_analysis}
 \alias{print.mixed_models_power_analysis}
-\title{Print Method for Mixed Models Power Analysis}
+\title{Print method for mixed models power analysis}
 \usage{
 \method{print}{mixed_models_power_analysis}(x, ...)
 }
 \arguments{
-\item{x}{Mixed models power analysis result}
+\item{x}{A \code{mixed_models_power_analysis} object.}
 
-\item{...}{Additional arguments}
+\item{...}{Additional arguments passed to \code{print}.}
 }
 \description{
-Print Method for Mixed Models Power Analysis
+Print method for mixed models power analysis
 }

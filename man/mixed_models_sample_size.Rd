@@ -2,33 +2,33 @@
 % Please edit documentation in R/mixed_models_power.R
 \name{mixed_models_sample_size}
 \alias{mixed_models_sample_size}
-\title{Quick Mixed Models Sample Size Calculation}
+\title{Quick Mixed Models Sample Size}
 \usage{
 mixed_models_sample_size(
   r_partial,
   power = 0.8,
+  alpha = 0.05,
   n_per_group = 10,
   icc = 0.05,
-  test_level = "level1",
-  alpha = 0.05
+  test_level = "level2"
 )
 }
 \arguments{
-\item{r_partial}{Partial correlation}
+\item{r_partial}{Partial correlation for the Level-2 predictor.}
 
-\item{power}{Target power (default = 0.8)}
+\item{power}{Target power (default = 0.8).}
 
-\item{n_per_group}{Observations per group (default = 10)}
+\item{alpha}{Significance level (default = 0.05).}
 
-\item{icc}{Intraclass correlation (default = 0.05)}
+\item{n_per_group}{Number of observations per group (for context in some calculations).}
 
-\item{test_level}{Level being tested (default = "level1")}
+\item{icc}{Intraclass correlation (for context).}
 
-\item{alpha}{Significance level}
+\item{test_level}{The level of the effect, must be "level2" for this function.}
 }
 \value{
-Required number of groups
+Required number of groups.
 }
 \description{
-Quick Mixed Models Sample Size Calculation
+Convenience function to calculate the number of groups for a Level-2 effect.
 }

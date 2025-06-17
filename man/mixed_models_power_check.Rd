@@ -2,33 +2,33 @@
 % Please edit documentation in R/mixed_models_power.R
 \name{mixed_models_power_check}
 \alias{mixed_models_power_check}
-\title{Quick Mixed Models Power Calculation}
+\title{Quick Mixed Models Power Check}
 \usage{
 mixed_models_power_check(
   r_partial,
   n_groups,
+  alpha = 0.05,
   n_per_group = 10,
   icc = 0.05,
-  test_level = "level1",
-  alpha = 0.05
+  test_level = "level1"
 )
 }
 \arguments{
-\item{r_partial}{Partial correlation}
+\item{r_partial}{Partial correlation for the predictor.}
 
-\item{n_groups}{Number of groups}
+\item{n_groups}{Number of groups.}
 
-\item{n_per_group}{Observations per group (default = 10)}
+\item{alpha}{Significance level (default = 0.05).}
 
-\item{icc}{Intraclass correlation (default = 0.05)}
+\item{n_per_group}{Number of observations per group (default = 10).}
 
-\item{test_level}{Level being tested (default = "level1")}
+\item{icc}{Intraclass correlation (default = 0.05).}
 
-\item{alpha}{Significance level}
+\item{test_level}{The level of the effect, "level1" or "level2".}
 }
 \value{
-Statistical power
+Achieved statistical power.
 }
 \description{
-Quick Mixed Models Power Calculation
+Convenience function to calculate power.
 }
