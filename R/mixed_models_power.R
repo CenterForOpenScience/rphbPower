@@ -13,12 +13,11 @@
 # ==============================================================================
 
 # --- Internal Simulation Engine for Level-1 Effects (Corrected Beta) ---
-# v6.3: Refined parameters::parameters() call to suppress 'merDeriv' messages.
+# v6.4: Added informative error catching to diagnose model failures with extreme effect sizes.
 mixed_model_level1_sim_engine <- function(r_partial, n_groups, n_per_group, icc, alpha, n_sims) {
   significant_results <- 0
   total_n <- n_groups * n_per_group
 
-  # Mathematical Derivation of Beta from r_partial
   if (abs(r_partial) >= 1) stop("r_partial must be between -1 and 1.")
   beta_sq <- (r_partial^2 * (1 - icc)) / (1 - r_partial^2)
   beta <- sqrt(beta_sq) * sign(r_partial)
@@ -27,7 +26,6 @@ mixed_model_level1_sim_engine <- function(r_partial, n_groups, n_per_group, icc,
   pb <- utils::txtProgressBar(min = 0, max = n_sims, style = 3)
 
   for (i in 1:n_sims) {
-    # Data Generation using correct variance components
     sd_intercepts <- sqrt(icc)
     sd_residuals <- sqrt(1 - icc)
 
@@ -39,15 +37,17 @@ mixed_model_level1_sim_engine <- function(r_partial, n_groups, n_per_group, icc,
     y <- random_intercepts[group_id] + beta * x_level1 + error
     sim_data <- data.frame(Y = y, X = x_level1, Group = as.factor(group_id))
 
-    # Model Fitting and P-Value Extraction
+    # --- REVISED tryCatch Block ---
     p_value <- tryCatch({
       model <- suppressMessages(lmerTest::lmer(Y ~ X + (1 | Group), data = sim_data))
-      # --- THIS LINE IS NOW CORRECTED ---
-      # By specifying effects = "fixed", we prevent the check for merDeriv.
       params <- parameters::parameters(model, effects = "fixed")
       params$p[params$Parameter == "X"]
     }, error = function(e) {
-      1.0
+      # This block now prints the error for the first few failures.
+      if (i < 5) { # Limit to the first 4 errors to avoid flooding the console
+        cat("\nCaught model-fitting error on simulation", i, ":", conditionMessage(e), "\n")
+      }
+      1.0 # Treat as non-significant
     })
 
     if (length(p_value) == 1 && !is.na(p_value) && p_value < alpha) {
