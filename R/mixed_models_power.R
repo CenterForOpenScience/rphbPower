@@ -12,8 +12,8 @@
 #
 # ==============================================================================
 
-# --- Internal Simulation Engine for Level-1 Effects (Corrected Beta) ---
-# v6.4: Added informative error catching to diagnose model failures with extreme effect sizes.
+#' Internal Simulation Engine for Level-1 Effects
+#' @keywords internal
 mixed_model_level1_sim_engine <- function(r_partial, n_groups, n_per_group, icc, alpha, n_sims) {
   significant_results <- 0
   total_n <- n_groups * n_per_group
@@ -37,17 +37,13 @@ mixed_model_level1_sim_engine <- function(r_partial, n_groups, n_per_group, icc,
     y <- random_intercepts[group_id] + beta * x_level1 + error
     sim_data <- data.frame(Y = y, X = x_level1, Group = as.factor(group_id))
 
-    # --- REVISED tryCatch Block ---
+    # --- FINAL FIX: Extract p-value directly from model summary ---
     p_value <- tryCatch({
       model <- suppressMessages(lmerTest::lmer(Y ~ X + (1 | Group), data = sim_data))
-      params <- parameters::parameters(model, effects = "fixed")
-      params$p[params$Parameter == "X"]
+      # This gets the raw numerical p-value from the coefficients table
+      summary(model)$coefficients["X", "Pr(>|t|)"]
     }, error = function(e) {
-      # This block now prints the error for the first few failures.
-      if (i < 5) { # Limit to the first 4 errors to avoid flooding the console
-        cat("\nCaught model-fitting error on simulation", i, ":", conditionMessage(e), "\n")
-      }
-      1.0 # Treat as non-significant
+      1.0 # Treat as non-significant on error
     })
 
     if (length(p_value) == 1 && !is.na(p_value) && p_value < alpha) {
@@ -81,49 +77,41 @@ mixed_models_power <- function(r_partial = NULL, n_groups = NULL, n_per_group = 
                                discount_factor = 0.75, test_level = "level1",
                                n_sims_l1 = 500, effect_input = NULL, effect_type = "r") {
 
-  # I. Parameter Validation & Setup
-  # NOTE: The helper function framework_effect_size() was not provided, but is assumed to exist.
+  # --- 1. Parameter & Effect Size Validation (CORRECTED LOGIC) ---
+  # Determine if an effect size has been provided, either directly or via effect_input
+  effect_provided <- !is.null(r_partial) || !is.null(effect_input)
+
+  # Count how many of the three core parameters are specified
+  provided_args <- c(effect_provided, !is.null(n_groups), !is.null(power))
+  if (sum(provided_args) != 2) {
+    stop("Provide exactly two of: r_partial (or effect_input), n_groups, power")
+  }
+
+  # Now, determine the calculation target
+  params_list <- list(r_partial = effect_provided, n_groups = !is.null(n_groups), power = !is.null(power))
+  target_param <- names(which(!unlist(params_list)))
+
+  # Handle effect_input and discount factor
   if (!is.null(effect_input)) {
-    # This line will fail if framework_effect_size is not defined elsewhere.
-    # r_partial <- framework_effect_size(effect_input, effect_type, apply_discount = (discount_factor != 1.0))
-    # For now, using a placeholder conversion if effect_type is f2 as in the original example
-    if(effect_type == "f2"){
-      r_partial <- sqrt(effect_input / (1 + effect_input)) * sign(effect_input)
-    }
+    # This call now correctly uses the discount_factor from the function signature
+    r_partial <- framework_effect_size(effect_input, effect_type, apply_discount = (discount_factor != 1.0))
   }
 
-
-  if (is.null(power)) {
-    power_default_used <- TRUE
+  # Use the provided power value or set a default if it's the target
+  power_in <- power
+  if (target_param == "power" && is.null(power)){
     power_in <- 0.8
-  } else {
-    power_default_used <- FALSE
-    power_in <- power
   }
 
-  provided_params <- c(
-    r_partial = !is.null(r_partial),
-    n_groups = !is.null(n_groups),
-    power = !power_default_used
-  )
-
-  if (sum(provided_params) != 2) {
-    stop("Provide exactly two of: r_partial, n_groups, power (or use effect_input)")
-  }
-  target_param <- names(which(!provided_params))
-
-  # II. Core Calculation
+  # --- II. Core Calculation ---
   if (test_level == "level1") {
     if (target_param != "power") stop("For Level-1 effects, the simulation engine can only solve for power.")
 
-    # --- THIS LINE IS NOW CORRECTED ---
     calculated_power <- mixed_model_level1_sim_engine(r_partial, n_groups, n_per_group, icc, alpha, n_sims_l1)
     result <- list(power = calculated_power, calculation_target = "power")
 
   } else if (test_level == "level2") {
-    # NOTE: Helper functions partial_r_to_cohens_f2 and cohens_f2_to_partial_r were not provided.
-    # Assuming they exist elsewhere or using placeholder logic.
-    f2 <- if(!is.null(r_partial)) (r_partial^2) / (1 - r_partial^2) else NULL
+    f2 <- if(!is.null(r_partial)) partial_r_to_cohens_f2(r_partial) else NULL
     power_to_pass <- if(target_param == "power") NULL else power_in
 
     pwr_result <- pwr::pwr.f2.test(u = 1, v = if(!is.null(n_groups)) n_groups - 2 else NULL, f2 = f2, sig.level = alpha, power = power_to_pass)
@@ -134,13 +122,13 @@ mixed_models_power <- function(r_partial = NULL, n_groups = NULL, n_per_group = 
       result <- list(power = pwr_result$power, calculation_target = "power")
     } else {
       f2_res <- pwr_result$f2
-      result <- list(r_partial = sqrt(f2_res / (1 + f2_res)), calculation_target = "effect_size")
+      result <- list(r_partial = cohens_f2_to_partial_r(f2_res), calculation_target = "effect_size")
     }
   } else {
     stop("`test_level` must be either 'level1' or 'level2'.")
   }
 
-  # III. Assemble Output
+  # --- III. Assemble Output ---
   final_output <- list(
     method = "Mixed Models Power Analysis",
     engine = if(test_level == "level1") "Monte Carlo Simulation" else "Analytical (pwr)",
