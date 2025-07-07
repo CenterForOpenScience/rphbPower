@@ -4,17 +4,24 @@
 \alias{logistic_regression_power_check}
 \title{Quick Logistic Regression Power Calculation}
 \usage{
-logistic_regression_power_check(r_partial, n, alpha = 0.05)
+logistic_regression_power_check(
+  r_partial = NULL,
+  n = NULL,
+  n_predictors = 1,
+  ...
+)
 }
 \arguments{
-\item{r_partial}{Partial correlation}
+\item{r_partial}{Partial correlation for the predictor of interest.}
 
-\item{n}{Sample size}
+\item{n}{The sample size.}
 
-\item{alpha}{Significance level (default = 0.05)}
+\item{n_predictors}{Total number of predictors in the model.}
+
+\item{...}{Other arguments passed to \code{logistic_regression_power}, such as \code{effect_input}, \code{effect_type}, \code{alpha}, or \code{discount_factor}.}
 }
 \value{
-Statistical power
+Achieved statistical power.
 }
 \description{
 Quick Logistic Regression Power Calculation

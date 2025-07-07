@@ -48,6 +48,20 @@ The unified framework uses **partial correlations** as the standardized effect s
 
 **Framework Reality**: Most research achieves small-to-medium effects (r = 0.10-0.30) after conservative discount factor application.
 
+### Odds Ratios (for Logistic Regression)
+
+The odds ratio (OR) is the most common effect size in logistic regression. An OR of **1.0 indicates no effect**. The magnitude of the effect is how far the OR is from 1.0 in either direction.
+
+| **Magnitude** | **Odds Ratio (OR) for Risk or Protective Effect** | **Interpretation** |
+|---------------|---------------------------------------------------|--------------------------------------------|
+| **Small** | **1.50 or 0.67** | A small but potentially meaningful change in odds. |
+| **Medium** | **3.45 or 0.29** | A substantial change in odds. |
+| **Large** | **9.00 or 0.11** | A very strong, decisive change in odds. |
+
+*Note: Benchmarks are based on conventions mapping to Cohen's d. The values less than 1 are the inverses of the values greater than 1 (e.g., 1/1.50 ≈ 0.67), representing effects of the same strength in the opposite direction.*
+
+**Framework Guidance**: You can now provide the odds ratio directly to the `logistic_regression_power` function by setting `effect_type = "or"`. The function correctly handles values both greater and less than 1.
+
 ## Field-Specific Guidelines
 
 ### Psychology and Social Sciences
@@ -117,12 +131,14 @@ result <- linear_regression_power(r_partial = r_framework, power = 0.8, n_predic
 - **Typical range**: r = 0.10-0.40 in most research domains
 - **Framework advantage**: Simple 1:1 correspondence with other methods for single-predictor models
 
-### Linear & Logistic Regression
+### Linear Regression
+- **Single predictor**: Sample size requirements are very similar to a standard correlation.
+- **Multiple predictors**: The `r_partial` represents the unique effect of one predictor controlling for all others. Expect to need a slightly larger sample size as more predictors are added, which you can model with the `n_predictors` argument.
 
-- **Single predictor**: Similar to correlation analysis requirements
-- **Multiple predictors**: The r_partial represents the unique effect of one predictor, so expect smaller values (0.05-0.25) than zero-order correlations
-- **Model complexity**: Each additional predictor increases the required sample size
-- **Logistic Regression Engine**: Note: The current validated engine (WebPower) performs calculations for a single predictor only. The n_predictors argument is ignored.
+### Logistic Regression
+- **Recommended Effect Size**: The **odds ratio (OR)** is the most natural effect size. You can provide it directly using `effect_input = YOUR_OR` and `effect_type = "or"`.
+- **Engine**: Power is calculated using a robust **Monte Carlo Simulation** engine to ensure high accuracy, especially in models with multiple predictors.
+- **Model Complexity**: The `n_predictors` argument is fully supported, allowing you to accurately plan for models with covariates.
 
 ### Mediation Analysis (Regression-based)
 
@@ -192,7 +208,7 @@ The unified partial correlation framework enables:
 - **Cross-method comparison**: Same effect size metric across all analyses
 - **Conservative planning**: Built-in discount factor prevents underpowered studies
 - **Literature integration**: Convert any effect size type to common metric
-- **Validated and Fast Engines**: Replaces slow, error-prone simulations with fast, validated analytical formulas and delegation to trusted R packages
+- **Validated and Fast Engines**: Flexible and Validated Engines: Uses fast analytical formulas where possible and robust Monte Carlo simulations for complex models (like logistic regression) where analytical solutions are less accurate.
 - **Mathematical precision**: Validated calculations ensure accurate power analysis
 
 ## Validation Status

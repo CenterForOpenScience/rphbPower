@@ -1,5 +1,5 @@
 ---
-title: "Basic Models (Correlation and Linear Regression)"
+title: "Basic Models (Correlation, Linear & Logistic Regression)"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Basic Models}
@@ -80,7 +80,53 @@ for (p in predictor_counts) {
 }
 ```
 
-## PART 3: DEMONSTRATING THE DISCOUNT FEATURE
+
+## PART 3: LOGISTIC REGRESSION POWER ANALYSIS
+
+Engine: Monte Carlo Simulation for high accuracy with multiple predictors.
+
+### Example 3.1: Calculate Sample Size using an Odds Ratio
+
+This is the recommended approach for logistic regression. We can directly input the expected odds ratio (OR) from prior research.
+
+```{r ex3-1}
+# Research Question: What sample size is needed to detect an effect where the odds
+# of success are 2.5 times higher for the treatment group, controlling for 2 covariates?
+# We want 90% power.
+
+result_log_1 <- logistic_regression_power(
+  effect_input = 2.5, # Expected Odds Ratio
+  effect_type = "or",
+  power = 0.90,
+  n_predictors = 3 # 1 variable of interest + 2 covariates
+)
+
+print(result_log_1)
+```
+
+### Example 3.2: Calculate Power
+
+We can also solve for power given a fixed sample size.
+
+```{r ex3-2}
+# A grant limits our total sample size to N=250. What is our power to detect
+# a small-to-medium partial correlation of r=0.18, controlling for 4 other variables?
+
+result_log_2 <- logistic_regression_power(
+  r_partial = 0.18,
+  n = 250,
+  n_predictors = 5, # 1 variable of interest + 4 covariates
+  power = NULL # We are solving for power
+)
+
+print(result_log_2)
+```
+
+### A Note on the Simulation Engine
+
+Unlike the other basic models, logistic regression power is calculated via simulation. This is because analytical formulas become less accurate when accounting for multiple predictors. While more robust, this method is slower. You can adjust the number of simulations with the `n_sims` parameter to trade speed for precision.
+
+## PART 4: DEMONSTRATING THE DISCOUNT FEATURE
 
 A crucial feature of the framework is the built-in 0.75 discount factor for conservative planning. Compare using it vs. not using it.
 

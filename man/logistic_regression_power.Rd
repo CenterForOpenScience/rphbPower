@@ -2,7 +2,7 @@
 % Please edit documentation in R/logistic_regression_power.R
 \name{logistic_regression_power}
 \alias{logistic_regression_power}
-\title{Logistic Regression Power Analysis with Framework Integration}
+\title{Logistic Regression Power Analysis (Simulation-Based)}
 \usage{
 logistic_regression_power(
   r_partial = NULL,
@@ -11,36 +11,33 @@ logistic_regression_power(
   n_predictors = 1,
   alpha = 0.05,
   discount_factor = 0.75,
-  mc_reps = 1000,
-  search_reps = 500,
+  n_sims = 500,
   effect_input = NULL,
   effect_type = "r"
 )
 }
 \arguments{
-\item{r_partial}{Partial correlation coefficient (NULL to calculate).}
+\item{r_partial}{Partial correlation coefficient for the predictor of interest (NULL to calculate).}
 
 \item{n}{Sample size (NULL to calculate).}
 
-\item{power}{Statistical power (NULL to calculate, default = 0.8).}
+\item{power}{Statistical power (NULL to calculate).}
 
-\item{n_predictors}{Number of predictors. (NOTE: Kept for compatibility, but the current engine only supports a single predictor).}
+\item{n_predictors}{Total number of predictors in the model (default = 1).}
 
-\item{alpha}{Significance level (default = 0.05).}
+\item{alpha}{The significance level (default = 0.05).}
 
-\item{discount_factor}{Conservative discount factor (default = 0.75).}
+\item{discount_factor}{The conservative planning discount factor (default = 0.75).}
 
-\item{mc_reps}{Kept for compatibility, unused by the new engine.}
+\item{n_sims}{Number of simulations to run (default = 500).}
 
-\item{search_reps}{Kept for compatibility, unused by the new engine.}
+\item{effect_input}{Alternative to r_partial for automatic conversion.}
 
-\item{effect_input}{Raw effect size input (alternative to r_partial).}
-
-\item{effect_type}{Type of \code{effect_input} ("r", "d", "f2", "r_squared").}
+\item{effect_type}{The type of \code{effect_input} ("r", "d", "f2", "or").}
 }
 \value{
 A list object containing the power analysis results.
 }
 \description{
-Logistic Regression Power Analysis with Framework Integration
+Logistic Regression Power Analysis (Simulation-Based)
 }

@@ -14,6 +14,7 @@ framework_effect_size <- function(effect_size, effect_type = "r", apply_discount
          "f2" = cohens_f2_to_partial_r(discounted_effect, apply_discount = FALSE),
          "r_squared" = r_squared_to_partial_r(discounted_effect, apply_discount = FALSE),
          "eta_squared" = eta_squared_to_partial_r(discounted_effect, apply_discount = FALSE),
+         "or" = odds_ratio_to_partial_r(discounted_effect, apply_discount = FALSE),
          stop("Unsupported effect_type. Use: r, d, f2, r_squared, eta_squared")
   )
 }

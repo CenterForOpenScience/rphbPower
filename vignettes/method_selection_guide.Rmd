@@ -36,7 +36,7 @@ All power analysis methods in this package use **partial correlations** as the s
 |----------------------|-------------------|------------------|-----------|
 | Simple relationship between X and Y | Correlation | `correlation_power()` | Bivariate associations |
 | X predicts Y (multiple predictors) | Linear Regression | `linear_regression_power()` | Most common choice |
-| Binary outcome prediction | Logistic Regression | `logistic_regression_power()` | Yes/no, success/failure; **Note: single predictor only** |
+| Binary outcome prediction | Logistic Regression | `logistic_regression_power()` | Yes/no, success/failure; Handles multiple predictors |
 | Within-subjects design (2 waves) | Repeated Measures | `repeated_measures_power()` | Pre-post, two conditions |
 | Clustered/nested data | Multilevel Models | `mixed_models_power()` | **Note: L1 engine is simulation-based; only solves for power** |
 | Causal pathway testing | Mediation | `mediation_regression_power()` | X → M → Y mechanisms; fast analytical engine |
@@ -119,29 +119,25 @@ linear_regression_power(
 
 ### Logistic Regression
 
-**Best for**: Binary outcomes (yes/no, success/failure)
+**Best for**: Binary outcomes (yes/no, success/failure, admitted/rejected).
 
 ```{r log-regression}
-# Note: The 'n_predictors' argument is ignored by the current engine.
-# Power is calculated for a single predictor.
+# Recommended workflow: Use an odds ratio (OR) and specify all predictors.
+# This example calculates the power for a given sample size.
 
-# Using framework partial correlations 
-logistic_regression_power(r_partial = 0.25, power = 0.8)
-
-# Framework conversion from literature effect sizes
 logistic_regression_power(
-  effect_input = 0.15,         # Cohen's f² from meta-analysis
-  effect_type = "f2",
-  power = 0.8
+  effect_input = 2.0,      # Expected Odds Ratio
+  effect_type = "or",      # Specify 'or' as the effect type
+  n = 350,                 # Provide N to solve for power
+  n_predictors = 4         # Correctly accounts for all predictors
 )
 ```
 
+**Key considerations:**
 
-**Critical considerations:**
-
-- **Engine Limitation**: The current validated engine (WebPower) is designed for a single predictor. The n_predictors argument is kept for compatibility but is ignored in the calculation
-- Larger samples are often needed compared to linear regression for equivalent effects
-- Use Cohen's d or r_partial as a reasonable effect size proxy for binary outcomes
+- **Engine**: Power is calculated using a robust **Monte Carlo Simulation** to ensure high accuracy, especially in models with multiple predictors.
+- **Recommended Effect Size**: The **odds ratio (OR)** is the most natural effect size for this method. You should provide it directly via `effect_input`.
+- **Model Complexity**: The `n_predictors` argument is now **fully supported** and essential for accurate planning.
 
 ### Repeated Measures
 

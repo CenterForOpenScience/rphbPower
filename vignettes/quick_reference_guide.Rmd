@@ -58,7 +58,7 @@ result$r_partial  # Returns detectable effect size
 |-------------------|-------------|-------------------|------------------|
 | Correlation | `correlation_power()` | Simple X-Y relationships | r_partial, n, power |
 | Linear Regression | `linear_regression_power()` | Multiple predictors, continuous outcome | r_partial, n, power, n_predictors |
-| Logistic Regression | `logistic_regression_power()` | Binary outcomes | r_partial, n, power (Note: single predictor only) |
+| Logistic Regression | `logistic_regression_power()` | Binary outcomes | effect_input (esp. OR), n, power, n_predictors |
 | Cross-Lagged Panel | `cross_lagged_panel_power()` | Reciprocal causation over time | r_partial, n, power (Note: uses regression engine) |
 | Fixed Effects | `fixed_effects_power()` | Panel data, many time points | r_partial, n_units, power, n_periods, icc |
 | Repeated Measures | `repeated_measures_power()` | Within-subjects design (2 waves) | r_partial, n, power, n_timepoints |
@@ -135,14 +135,19 @@ linear_regression_power_check(r_partial = 0.25, n = 120, n_predictors = 1)
 ### Logistic Regression
 
 ```{r log-regression}
-# Note: The n_predictors argument is now ignored by the engine.
-# Power is calculated for a single predictor only.
+# Recommended workflow: Use an odds ratio (OR) directly as the effect size.
+# The n_predictors argument is now fully supported by the simulation engine.
 
-# Using partial correlations (framework approach)
-logistic_regression_power(r_partial = 0.25, power = 0.8)
+# Calculate sample size for an OR of 1.75 with 3 total predictors
+logistic_regression_power(
+  effect_input = 1.75,
+  effect_type = "or",
+  power = 0.8,
+  n_predictors = 3
+)
 
-# Framework conversion from Cohen's d
-logistic_regression_power(effect_input = 0.5, effect_type = "d", power = 0.8)
+# Convenience functions are also available
+logistic_regression_sample_size(effect_input = 1.75, effect_type = "or", power = 0.8, n_predictors = 3)
 ```
 
 
@@ -215,6 +220,7 @@ wilcoxon_sample_size(r_partial = 0.20, power = 0.8)
 | **Input Type** | **Small** | **Medium** | **Large** | **Function** |
 |---------------|-----------|------------|-----------|--------------|
 | Cohen's d | 0.2 | 0.5 | 0.8 | `framework_effect_size(value, "d")` |
+| Odds Ratio | 1.5 | 3.5 | 9.0 | `framework_effect_size(value, "or")` |
 | Cohen's f² | 0.02 | 0.15 | 0.35 | `framework_effect_size(value, "f2")` |
 | R² | 0.01 | 0.09 | 0.25 | `framework_effect_size(value, "r_squared")` |
 | Eta² | 0.01 | 0.06 | 0.14 | `framework_effect_size(value, "eta_squared")` |

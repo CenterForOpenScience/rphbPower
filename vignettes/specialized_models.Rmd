@@ -22,13 +22,19 @@ Version: 2.0 - Revised to reflect validated engines.
 
 ## PART 1: LOGISTIC REGRESSION
 
-Engine: `WebPower::wp.logistic`. Supports a SINGLE predictor only.
+Engine: Monte Carlo Simulation for high accuracy with multiple predictors.
 
-### Example 1.1: Sample Size for a Binary Outcome
+### Example 1.1: Power for a Binary Outcome
 
 ```{r ex1-1}
-# Calculate N for 80% power to detect an effect of r=0.25.
-result_log_1 <- logistic_regression_power(r_partial = 0.25, power = 0.8)
+# Calculate the power to detect an odds ratio of 2.0 with N=400
+# in a model with 3 total predictors.
+result_log_1 <- logistic_regression_power(
+  effect_input = 2.0,
+  effect_type = "or",
+  n = 400,
+  n_predictors = 3
+)
 print(result_log_1)
 ```
 

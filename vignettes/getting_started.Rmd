@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 # library(rphbPower) 
 ```
 
-A hands-on tutorial for the partial correlation framework enabling power analysis across correlation, regression, mediation, SEM, multilevel, and longitudinal methods.
+A hands-on tutorial for the partial correlation framework enabling power analysis across correlation, logistic/linear regression, mediation, SEM, multilevel, and longitudinal methods.
 
 ## Quick Setup
 
@@ -148,7 +148,33 @@ result$r_partial  # Framework effect size used: ~0.13 (after discount)
 result$effect_size_conversions  # All effect size metrics
 ```
 
-### Example 3: Mediation Analysis
+
+### Example 3: Logistic Regression Study
+
+Here we'll plan a study with a binary outcome. The `logistic_regression_power` function now uses a robust simulation engine to provide accurate estimates.
+
+```{r example_logistic, eval=FALSE}
+# Research question: Does a new website design increase the probability of a user signing up?
+# Expected effect from a previous A/B test is an odds ratio of 1.75.
+# We also want to control for 2 other variables (e.g., user age, country).
+pilot_or <- 1.75
+n_covariates <- 2
+
+# We can now input the odds ratio directly. The total number of predictors
+# is our variable of interest (1) plus the covariates (2).
+result <- logistic_regression_power(
+  effect_input = pilot_or,
+  effect_type = "or",      # Use the new "or" type
+  power = 0.8,
+  n_predictors = 1 + n_covariates # Total predictors = 3
+)
+
+# The function runs a simulation to find the required sample size.
+result$n  # Required sample size: ~335
+```
+
+
+### Example 4: Mediation Analysis
 
 ```{r example_mediation, eval=FALSE}
 # Research question: Does self-efficacy mediate training → performance?
@@ -389,7 +415,7 @@ print(summary)
 - **Cross-method consistency**: Same r_partial enables direct comparison
 - **Model complexity awareness**: Automatically accounts for additional predictors
 - **Literature integration**: Converts any effect size type to common metric
-- **Validated and Fast Engines**: Replaces slow, error-prone simulations with fast, validated analytical formulas and delegation to trusted R packages (pwr, WebPower)
+- **Validated and Fast Engines**: Uses fast analytical formulas where possible, and robust Monte Carlo simulations for complex models (like logistic regression) where analytical solutions are less accurate.
 
 ## Next Steps
 
