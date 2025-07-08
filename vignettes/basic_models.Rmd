@@ -83,48 +83,52 @@ for (p in predictor_counts) {
 
 ## PART 3: LOGISTIC REGRESSION POWER ANALYSIS
 
-Engine: Monte Carlo Simulation for high accuracy with multiple predictors.
+Engine: Monte Carlo Simulation for high accuracy. This function supports two distinct workflows for planning.
 
-### Example 3.1: Calculate Sample Size using an Odds Ratio
+### Workflow 1: Direct Replication (Default Behavior)
 
-This is the recommended approach for logistic regression. We can directly input the expected odds ratio (OR) from prior research.
+This is the most common use case, intended for when you are replicating a prior study and have a **partial effect size** (e.g., an odds ratio from a published multiple logistic regression).
+
+By default, the function assumes your predictors are uncorrelated (`inter_predictor_cor = 0`). This is the correct approach to avoid the "double penalty" problem, as the multicollinearity from the original study is already "baked into" the partial effect size you are providing.
 
 ```{r ex3-1}
-# Research Question: What sample size is needed to detect an effect where the odds
-# of success are 2.5 times higher for the treatment group, controlling for 2 covariates?
-# We want 90% power.
+# Research Question: What sample size is needed to replicate a finding where the
+# partial odds ratio was 1.75? We want 80% power. The original model had 3 predictors.
 
 result_log_1 <- logistic_regression_power(
-  effect_input = 2.5, # Expected Odds Ratio
+  effect_input = 1.75, # The partial OR from the original study
   effect_type = "or",
-  power = 0.90,
-  n_predictors = 3 # 1 variable of interest + 2 covariates
+  power = 0.80,
+  n_predictors = 3 # The total predictors in the new study
+  # Note: inter_predictor_cor = 0 by default, which is correct for this workflow.
 )
 
 print(result_log_1)
 ```
 
-### Example 3.2: Calculate Power
+### Workflow 2: Novel Study with Correlated Predictors
 
-We can also solve for power given a fixed sample size.
+This workflow is for when you are designing a new study from theory. You start with an estimate of a simple (zero-order) effect and then model the impact of expected multicollinearity.
 
-```{r ex3-2}
-# A grant limits our total sample size to N=250. What is our power to detect
-# a small-to-medium partial correlation of r=0.18, controlling for 4 other variables?
+```{r ex 3.2}
+
+# Research Question: We expect a simple relationship between our predictor and outcome
+# to have an OR of 2.5, but we know our predictors will be correlated at r=0.3.
+# What sample size do we need for 80% power in a model with 3 predictors?
 
 result_log_2 <- logistic_regression_power(
-  r_partial = 0.18,
-  n = 250,
-  n_predictors = 5, # 1 variable of interest + 4 covariates
-  power = NULL # We are solving for power
+  effect_input = 2.5, # Our estimate of the simple, zero-order OR
+  effect_type = "or",
+  power = 0.80,
+  n_predictors = 3,
+  inter_predictor_cor = 0.3 # Explicitly model the multicollinearity
 )
 
+# Note: The required sample size will be much larger than if we ignored the correlation.
 print(result_log_2)
+
 ```
 
-### A Note on the Simulation Engine
-
-Unlike the other basic models, logistic regression power is calculated via simulation. This is because analytical formulas become less accurate when accounting for multiple predictors. While more robust, this method is slower. You can adjust the number of simulations with the `n_sims` parameter to trade speed for precision.
 
 ## PART 4: DEMONSTRATING THE DISCOUNT FEATURE
 

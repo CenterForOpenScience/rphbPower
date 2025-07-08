@@ -45,20 +45,72 @@ result_fe_1 <- fixed_effects_power(r_partial = 0.20, power = 0.8, n_periods = 14
 print(result_fe_1)
 ```
 
-## PART 3: CROSS-LAGGED PANEL MODELS
+## PART 3: MIXED-EFFECTS (MULTILEVEL) MODELS
+
+Engine: A robust Monte Carlo Simulation for Level-1 effects and an analytical engine for Level-2 effects. This section focuses on the Level-1 simulation, which supports two planning workflows.
+
+### Workflow 1: Direct Replication (Default Behavior)
+
+Use this approach when you have a **partial effect size** from a prior multilevel study and want to plan a direct replication. This is the default.
+
+```{r ex3-1}
+# Research Question: What is our power to replicate a within-person effect of r=0.25,
+# given a study with 50 participants and 20 observations each?
+
+# We provide the partial r from the original study. The function correctly uses
+# inter_predictor_cor = 0 to avoid a "double penalty".
+result_mm_1 <- mixed_models_power(
+  r_partial = 0.25,
+  n_groups = 50,
+  n_per_group = 20,
+  icc = 0.2,
+  test_level = "level1"
+)
+
+print(result_mm_1)
+```
+
+### Workflow 2: Novel Study with Correlated Predictors
+
+Use this approach when planning a new study from theory, starting with a simple (zero-order) effect size and an assumption about multicollinearity.
+
+
+```{r 3.2}
+
+# Research Question: We expect a simple effect of r=0.25, but we assume our
+# within-person predictors will be correlated at r=0.3. What is our power
+# with 50 participants and 20 observations each?
+
+result_mm_2 <- mixed_models_power(
+  r_partial = 0.25, # Our estimate of the simple effect
+  n_groups = 50,
+  n_per_group = 20,
+  icc = 0.2,
+  test_level = "level1",
+  inter_predictor_cor = 0.3 # Explicitly model the multicollinearity
+)
+
+# Note: The power will be lower than in the Direct Replication workflow.
+print(result_mm_2)
+
+```
+
+
+## PART 4: CROSS-LAGGED PANEL MODELS
 
 Engine: Wraps linear_regression_power, using `pwr::pwr.f2.test` with n_predictors=2.
 
 Use to test reciprocal effects (e.g., does X1 predict Y2, and Y1 predict X2?).
 
-### Example 3.1: Sample Size for a Reciprocal Relationship
-```{r ex3-1}
+### Example 4.1: Sample Size for a Reciprocal Relationship
+```{r ex4-1}
 # Calculate the sample size needed to detect a cross-lagged path of r=0.15 with 80% power.
 result_clpm_1 <- cross_lagged_panel_power(r_partial = 0.15, power = 0.8)
 print(result_clpm_1)
 ```
 
-## PART 4: DEMONSTRATING THE DISCOUNT FEATURE
+
+## PART 5: DEMONSTRATING THE DISCOUNT FEATURE
 
 Showcasing the conservative planning feature for a longitudinal study. Literature suggests a within-person effect of d=0.4 for an intervention.
 

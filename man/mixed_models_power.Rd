@@ -2,7 +2,7 @@
 % Please edit documentation in R/mixed_models_power.R
 \name{mixed_models_power}
 \alias{mixed_models_power}
-\title{Mixed Models Power Analysis (Final)}
+\title{Mixed Models Power Analysis}
 \usage{
 mixed_models_power(
   r_partial = NULL,
@@ -15,17 +15,18 @@ mixed_models_power(
   test_level = "level1",
   n_sims_l1 = 500,
   effect_input = NULL,
-  effect_type = "r"
+  effect_type = "r",
+  inter_predictor_cor = 0
 )
 }
 \arguments{
-\item{r_partial}{Partial correlation for the effect of interest (NULL to calculate).}
+\item{r_partial}{Partial correlation for the effect of interest.}
 
-\item{n_groups}{Number of groups (Level-2 units) (NULL to calculate).}
+\item{n_groups}{Number of groups (Level-2 units).}
 
 \item{n_per_group}{Average number of observations per group (Level-1 units).}
 
-\item{power}{Target statistical power (NULL to calculate).}
+\item{power}{Target statistical power.}
 
 \item{icc}{Intraclass Correlation Coefficient.}
 
@@ -40,10 +41,12 @@ mixed_models_power(
 \item{effect_input}{Alternative raw effect size.}
 
 \item{effect_type}{Type of \code{effect_input}.}
+
+\item{inter_predictor_cor}{The estimated correlation between predictors (default = 0).}
 }
 \value{
 A list with power analysis results.
 }
 \description{
-Performs power analysis for mixed-effects (multilevel) models for both Level-1 (within-group) and Level-2 (between-group) effects.
+Performs power analysis for mixed-effects (multilevel) models.
 }

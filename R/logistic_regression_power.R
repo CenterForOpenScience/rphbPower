@@ -14,115 +14,101 @@
 #
 # ==============================================================================
 
-#' Internal Simulation Engine for Multiple Logistic Regression
-#'
-#' This is an internal helper function that runs a Monte Carlo simulation
-#' to estimate power for a logistic regression model with one or more predictors.
-#' It is not intended for direct use.
-#'
-#' @param r_partial The partial correlation of the target predictor, after any discounts.
-#' @param n The sample size for the simulation run.
-#' @param n_predictors The total number of predictors in the model.
-#' @param alpha The significance level (alpha).
-#' @param n_sims The number of simulations to run for the power estimation.
-#' @return Estimated statistical power (a single numeric value).
+#' Internal Simulation Engine for Multiple Logistic Regression (with correlated predictors)
 #' @keywords internal
-logistic_multi_predictor_sim_engine <- function(r_partial, n, n_predictors, alpha, n_sims) {
+logistic_multi_predictor_sim_engine <- function(r_partial, n, n_predictors, alpha, n_sims, inter_predictor_cor = 0.3) {
   d_target <- partial_r_to_cohens_d(r_partial)
   beta_target <- d_target * pi / sqrt(3)
   significant_results <- 0
 
+  # Handle the n_predictors = 1 edge case first
+  if (n_predictors == 1) {
+    inter_predictor_cor <- 0
+  }
+
+  # Build the correlation matrix for all predictors
+  cor_matrix <- matrix(inter_predictor_cor, nrow = n_predictors, ncol = n_predictors)
+  diag(cor_matrix) <- 1
+
+  # Cholesky decomposition to create correlated variables
+  chol_matrix <- chol(cor_matrix)
+
   for (i in 1:n_sims) {
-    X_target <- stats::rnorm(n)
+    # Generate independent normal variables first
+    Z <- matrix(rnorm(n * n_predictors), ncol = n_predictors)
+    # Multiply by the Cholesky matrix to induce correlation
+    X_correlated <- Z %*% chol_matrix
 
-    # Handle n_predictors = 1 edge case separately
-    if (n_predictors > 1) {
-      betas_nuisance <- rep(0, n_predictors - 1)
-      X_nuisance <- matrix(stats::rnorm(n * (n_predictors - 1)), ncol = n_predictors - 1)
-      log_odds <- (beta_target * X_target) + (X_nuisance %*% betas_nuisance)
-      prob <- 1 / (1 + exp(-log_odds))
-      Y <- stats::rbinom(n, 1, prob)
-      sim_data <- as.data.frame(cbind(Y, X_target, X_nuisance))
-      model <- suppressWarnings(stats::glm(Y ~ ., data = sim_data, family = "binomial"))
+    # Assume the effect of nuisance predictors is 0 for a standard power calculation
+    betas <- c(beta_target, rep(0, n_predictors - 1))
+    log_odds <- X_correlated %*% betas
+    prob <- 1 / (1 + exp(-log_odds))
+    Y <- stats::rbinom(n, 1, prob)
 
-    } else { # Case where n_predictors is exactly 1
-      log_odds <- beta_target * X_target
-      prob <- 1 / (1 + exp(-log_odds))
-      Y <- stats::rbinom(n, 1, prob)
-      sim_data <- data.frame(Y = Y, X_target = X_target)
-      model <- suppressWarnings(stats::glm(Y ~ X_target, data = sim_data, family = "binomial"))
-    }
+    sim_data <- as.data.frame(cbind(Y, X_correlated))
+    model <- suppressWarnings(stats::glm(Y ~ ., data = sim_data, family = "binomial"))
 
-    p_value <- summary(model)$coefficients["X_target", "Pr(>|z|)"]
+    # Extract p-value for the target predictor (V2, which is the first column of X_correlated)
+    p_value <- summary(model)$coefficients[2, "Pr(>|z|)"]
+
     if (!is.na(p_value) && p_value < alpha) {
       significant_results <- significant_results + 1
     }
   }
-
   return(significant_results / n_sims)
 }
 
 
 #' Logistic Regression Power Analysis (Simulation-Based)
-#' @param r_partial Partial correlation coefficient for the predictor of interest (NULL to calculate).
-#' @param n Sample size (NULL to calculate).
-#' @param power Statistical power (NULL to calculate).
-#' @param n_predictors Total number of predictors in the model (default = 1).
-#' @param alpha The significance level (default = 0.05).
-#' @param discount_factor The conservative planning discount factor (default = 0.75).
-#' @param n_sims Number of simulations to run (default = 500).
+#' @param r_partial Partial correlation coefficient for the predictor of interest.
+#' @param n Sample size.
+#' @param power Statistical power.
+#' @param n_predictors Total number of predictors in the model.
+#' @param alpha The significance level.
+#' @param discount_factor The conservative planning discount factor.
+#' @param n_sims Number of simulations to run.
 #' @param effect_input Alternative to r_partial for automatic conversion.
-#' @param effect_type The type of `effect_input` ("r", "d", "f2", "or").
+#' @param effect_type The type of `effect_input`.
+#' @param inter_predictor_cor The estimated correlation between predictors (default = 0).
 #' @return A list object containing the power analysis results.
+#' @importFrom stats rnorm
 #' @export
 logistic_regression_power <- function(r_partial = NULL, n = NULL, power = NULL,
                                       n_predictors = 1, alpha = 0.05, discount_factor = 0.75,
-                                      n_sims = 500, effect_input = NULL, effect_type = "r") {
+                                      n_sims = 500, effect_input = NULL, effect_type = "r",
+                                      inter_predictor_cor = 0) { # <-- VALUE CHANGED TO 0
 
-  # --- 1. Parameter & Effect Size Validation (CORRECTED LOGIC) ---
-  # Determine if an effect size has been provided, either directly or via effect_input
+  # --- Parameter Validation (remains the same) ---
   effect_provided <- !is.null(r_partial) || !is.null(effect_input)
-
-  # Count how many of the three core parameters are specified
   provided_args <- c(effect_provided, !is.null(n), !is.null(power))
   if (sum(provided_args) != 2) {
     stop("Provide exactly two of: r_partial (or effect_input), n, power")
   }
-
-  # Now, determine the calculation target
   params_list <- list(r_partial = effect_provided, n = !is.null(n), power = !is.null(power))
   target_param <- names(which(!unlist(params_list)))
 
-  # Determine the initial effect size before discounting
+  # --- Effect Size Setup (remains the same) ---
   r_initial <- NULL
   if (!is.null(effect_input)) {
     r_initial <- framework_effect_size(effect_input, effect_type, apply_discount = FALSE)
   } else if (!is.null(r_partial)) {
     r_initial <- r_partial
   }
-
-  # Apply the discount factor to the effective r
   r_for_calc <- if(!is.null(r_initial)) apply_discount_factor(r_initial, discount_factor) else NULL
 
-  # --- 2. Core Calculation ---
+  # --- Core Calculation (pass new argument to engine) ---
   cat(paste("Running simulation-based power analysis for", target_param, "...\n"))
-
   if (target_param == "power") {
-    cat(paste("Simulations per run:", n_sims, "\n"))
-    calculated_power <- logistic_multi_predictor_sim_engine(r_for_calc, n, n_predictors, alpha, n_sims)
+    calculated_power <- logistic_multi_predictor_sim_engine(r_for_calc, n, n_predictors, alpha, n_sims, inter_predictor_cor)
     result <- list(power = calculated_power)
-
-  } else { # Solving for n or r_partial requires a search
+  } else {
     power_goal <- power
-    # Define a function for the solver: (calculated_power - desired_power)
     power_diff_func <- function(val) {
       current_r <- if (target_param == "r_partial") val else r_for_calc
       current_n <- if (target_param == "n") ceiling(val) else n
-      # Reduce sims during search to improve speed
-      current_power <- logistic_multi_predictor_sim_engine(current_r, current_n, n_predictors, alpha, n_sims = 250)
+      current_power <- logistic_multi_predictor_sim_engine(current_r, current_n, n_predictors, alpha, 100, inter_predictor_cor)
       return(current_power - power_goal)
     }
-
     search_interval <- if(target_param == "n") c(n_predictors + 5, 100000) else c(0.01, 0.99)
     solution <- tryCatch(
       stats::uniroot(power_diff_func, interval = search_interval),
@@ -131,9 +117,9 @@ logistic_regression_power <- function(r_partial = NULL, n = NULL, power = NULL,
     result <- list(value = solution$root)
   }
 
-  # --- 3. Format Output ---
+  # --- Assemble Output (add new parameter) ---
   final_output <- list(
-    method = "Logistic Regression Power Analysis (v5.2, Simulation Engine)",
+    method = "Logistic Regression Power Analysis (Simulation Engine)",
     engine_details = paste(n_sims, "simulations per run"),
     calculation_target = target_param,
     r_partial = if (target_param == "r_partial") result$value else r_initial,
@@ -141,7 +127,8 @@ logistic_regression_power <- function(r_partial = NULL, n = NULL, power = NULL,
     power = if (target_param == "power") result$power else power,
     n_predictors = n_predictors,
     alpha = alpha,
-    discount_factor = discount_factor
+    discount_factor = discount_factor,
+    inter_predictor_cor = inter_predictor_cor # <-- ADD THIS TO OUTPUT
   )
   final_output$interpretation <- interpret_effect_size(final_output$r_partial)
   final_output$effect_size_conversions <- framework_conversion_summary(
@@ -158,7 +145,7 @@ logistic_regression_power <- function(r_partial = NULL, n = NULL, power = NULL,
 #' @param r_partial Partial correlation for the predictor of interest.
 #' @param power Target statistical power (defaults to 0.8).
 #' @param n_predictors Total number of predictors in the model.
-#' @param ... Other arguments passed to `logistic_regression_power`, such as `effect_input`, `effect_type`, `alpha`, or `discount_factor`.
+#' @param ... Other arguments passed to `logistic_regression_power`, such as `effect_input`, `effect_type`, `alpha`, or `inter_predictor_cor`.
 #' @return Required sample size (N).
 #' @export
 logistic_regression_sample_size <- function(r_partial = NULL, power = 0.8, n_predictors = 1, ...) {
@@ -175,7 +162,7 @@ logistic_regression_sample_size <- function(r_partial = NULL, power = 0.8, n_pre
 #' @param r_partial Partial correlation for the predictor of interest.
 #' @param n The sample size.
 #' @param n_predictors Total number of predictors in the model.
-#' @param ... Other arguments passed to `logistic_regression_power`, such as `effect_input`, `effect_type`, `alpha`, or `discount_factor`.
+#' @param ... Other arguments passed to `logistic_regression_power`, such as `effect_input`, `effect_type`, `alpha`, or `inter_predictor_cor`.
 #' @return Achieved statistical power.
 #' @export
 logistic_regression_power_check <- function(r_partial = NULL, n = NULL, n_predictors = 1, ...) {

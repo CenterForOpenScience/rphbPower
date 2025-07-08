@@ -2,7 +2,7 @@
 % Please edit documentation in R/linear_regression_power.R
 \name{linear_regression_power}
 \alias{linear_regression_power}
-\title{Linear Regression Power Analysis with Framework Integration}
+\title{Linear Regression Power Analysis}
 \usage{
 linear_regression_power(
   r_partial = NULL,
@@ -16,25 +16,33 @@ linear_regression_power(
 )
 }
 \arguments{
-\item{r_partial}{Partial correlation coefficient for the predictor of interest (NULL to calculate).}
+\item{r_partial}{The expected partial correlation for the predictor of interest. See the 'Planning for Multicollinearity' section for details.}
 
-\item{n}{Sample size (NULL to calculate).}
+\item{n}{The total sample size.}
 
-\item{power}{Statistical power (1 - beta error probability) (NULL to calculate).}
+\item{power}{The desired statistical power (e.g., 0.8 for 80\%).}
 
-\item{n_predictors}{Total number of predictors in the model (default = 1).}
+\item{n_predictors}{The total number of predictors in the final model.}
 
-\item{alpha}{The significance level (Type I error probability) (default = 0.05).}
+\item{alpha}{The significance level (Type I error rate, default = 0.05).}
 
 \item{discount_factor}{The conservative planning discount factor (default = 0.75).}
 
-\item{effect_input}{Alternative to r_partial for automatic conversion from other effect size metrics.}
+\item{effect_input}{An alternative to \code{r_partial} for automatic conversion from other effect size metrics (e.g., d, f2).}
 
-\item{effect_type}{The type of \code{effect_input} ("r", "d", "f2", "r_squared").}
+\item{effect_type}{The type of \code{effect_input}.}
 }
 \value{
 A list object containing the power analysis results.
 }
 \description{
-Linear Regression Power Analysis with Framework Integration
+Performs a power analysis for a single coefficient in a multiple linear
+regression model using the pwr package, which is based on Cohen's f-squared.
 }
+\section{Planning for Multicollinearity}{
+
+The \code{r_partial} argument is the cornerstone of this analysis. It represents the expected partial correlation between your predictor of interest and the outcome, \emph{after controlling for all other predictors in the model}.
+
+It is critical \strong{not} to use a simple zero-order correlation for this argument if your model contains multiple predictors. Doing so will result in a highly optimistic and likely inaccurate power analysis because it fails to account for the variance your predictor shares with the other covariates. A higher degree of multicollinearity will lead to a smaller partial correlation, which will require a larger sample size.
+}
+

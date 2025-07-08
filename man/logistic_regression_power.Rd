@@ -13,27 +13,30 @@ logistic_regression_power(
   discount_factor = 0.75,
   n_sims = 500,
   effect_input = NULL,
-  effect_type = "r"
+  effect_type = "r",
+  inter_predictor_cor = 0
 )
 }
 \arguments{
-\item{r_partial}{Partial correlation coefficient for the predictor of interest (NULL to calculate).}
+\item{r_partial}{Partial correlation coefficient for the predictor of interest.}
 
-\item{n}{Sample size (NULL to calculate).}
+\item{n}{Sample size.}
 
-\item{power}{Statistical power (NULL to calculate).}
+\item{power}{Statistical power.}
 
-\item{n_predictors}{Total number of predictors in the model (default = 1).}
+\item{n_predictors}{Total number of predictors in the model.}
 
-\item{alpha}{The significance level (default = 0.05).}
+\item{alpha}{The significance level.}
 
-\item{discount_factor}{The conservative planning discount factor (default = 0.75).}
+\item{discount_factor}{The conservative planning discount factor.}
 
-\item{n_sims}{Number of simulations to run (default = 500).}
+\item{n_sims}{Number of simulations to run.}
 
 \item{effect_input}{Alternative to r_partial for automatic conversion.}
 
-\item{effect_type}{The type of \code{effect_input} ("r", "d", "f2", "or").}
+\item{effect_type}{The type of \code{effect_input}.}
+
+\item{inter_predictor_cor}{The estimated correlation between predictors (default = 0).}
 }
 \value{
 A list object containing the power analysis results.

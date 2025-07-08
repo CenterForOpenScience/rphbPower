@@ -2,27 +2,18 @@
 % Please edit documentation in R/logistic_regression_power.R
 \name{logistic_multi_predictor_sim_engine}
 \alias{logistic_multi_predictor_sim_engine}
-\title{Internal Simulation Engine for Multiple Logistic Regression}
+\title{Internal Simulation Engine for Multiple Logistic Regression (with correlated predictors)}
 \usage{
-logistic_multi_predictor_sim_engine(r_partial, n, n_predictors, alpha, n_sims)
-}
-\arguments{
-\item{r_partial}{The partial correlation of the target predictor, after any discounts.}
-
-\item{n}{The sample size for the simulation run.}
-
-\item{n_predictors}{The total number of predictors in the model.}
-
-\item{alpha}{The significance level (alpha).}
-
-\item{n_sims}{The number of simulations to run for the power estimation.}
-}
-\value{
-Estimated statistical power (a single numeric value).
+logistic_multi_predictor_sim_engine(
+  r_partial,
+  n,
+  n_predictors,
+  alpha,
+  n_sims,
+  inter_predictor_cor = 0.3
+)
 }
 \description{
-This is an internal helper function that runs a Monte Carlo simulation
-to estimate power for a logistic regression model with one or more predictors.
-It is not intended for direct use.
+Internal Simulation Engine for Multiple Logistic Regression (with correlated predictors)
 }
 \keyword{internal}

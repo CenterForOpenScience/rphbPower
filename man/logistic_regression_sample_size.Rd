@@ -18,7 +18,7 @@ logistic_regression_sample_size(
 
 \item{n_predictors}{Total number of predictors in the model.}
 
-\item{...}{Other arguments passed to \code{logistic_regression_power}, such as \code{effect_input}, \code{effect_type}, \code{alpha}, or \code{discount_factor}.}
+\item{...}{Other arguments passed to \code{logistic_regression_power}, such as \code{effect_input}, \code{effect_type}, \code{alpha}, or \code{inter_predictor_cor}.}
 }
 \value{
 Required sample size (N).

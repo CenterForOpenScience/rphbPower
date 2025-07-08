@@ -12,13 +12,17 @@
 #
 # ==============================================================================
 
-#' Internal Simulation Engine for Level-1 Effects
+#' Internal Simulation Engine for Level-1 Effects with Correlated Predictors
 #' @keywords internal
-mixed_model_level1_sim_engine <- function(r_partial, n_groups, n_per_group, icc, alpha, n_sims) {
+mixed_model_level1_sim_engine <- function(r_partial, n_groups, n_per_group, icc, alpha, n_sims, inter_predictor_cor = 0) {
   significant_results <- 0
   total_n <- n_groups * n_per_group
 
   if (abs(r_partial) >= 1) stop("r_partial must be between -1 and 1.")
+
+  # Note: The relationship between a partial r and beta becomes more complex
+  # with correlated predictors. For this engine, we use a pragmatic approach
+  # where the beta is set to achieve the desired r_partial in a simplified model.
   beta_sq <- (r_partial^2 * (1 - icc)) / (1 - r_partial^2)
   beta <- sqrt(beta_sq) * sign(r_partial)
 
@@ -29,22 +33,32 @@ mixed_model_level1_sim_engine <- function(r_partial, n_groups, n_per_group, icc,
     sd_intercepts <- sqrt(icc)
     sd_residuals <- sqrt(1 - icc)
 
+    # --- NEW: Generate Correlated Predictors ---
+    # We only model multiple predictors if n_per_group is large enough
+    n_predictors <- ifelse(n_per_group > 2, 2, 1) # Simplified to 2 predictors for this example
+
+    cor_matrix <- matrix(inter_predictor_cor, nrow = n_predictors, ncol = n_predictors)
+    diag(cor_matrix) <- 1
+
+    Z <- matrix(rnorm(total_n * n_predictors), ncol = n_predictors)
+    chol_matrix <- chol(cor_matrix)
+    X_correlated <- Z %*% chol_matrix
+
+    x_level1 <- X_correlated[, 1] # Target predictor
+
     group_id <- rep(1:n_groups, each = n_per_group)
     random_intercepts <- stats::rnorm(n_groups, 0, sd_intercepts)
-    x_level1 <- stats::rnorm(total_n, 0, 1)
     error <- stats::rnorm(total_n, 0, sd_residuals)
 
+    # The outcome is generated from the target predictor only
     y <- random_intercepts[group_id] + beta * x_level1 + error
-    sim_data <- data.frame(Y = y, X = x_level1, Group = as.factor(group_id))
+    sim_data <- data.frame(Y = y, X = X_correlated, Group = as.factor(group_id))
 
-    # --- FINAL FIX: Extract p-value directly from model summary ---
     p_value <- tryCatch({
-      model <- suppressMessages(lmerTest::lmer(Y ~ X + (1 | Group), data = sim_data))
-      # This gets the raw numerical p-value from the coefficients table
-      summary(model)$coefficients["X", "Pr(>|t|)"]
-    }, error = function(e) {
-      1.0 # Treat as non-significant on error
-    })
+      # The model includes both predictors to test the partial effect
+      model <- suppressMessages(lmerTest::lmer(Y ~ X.1 + X.2 + (1 | Group), data = sim_data))
+      summary(model)$coefficients["X.1", "Pr(>|t|)"]
+    }, error = function(e) { 1.0 })
 
     if (length(p_value) == 1 && !is.na(p_value) && p_value < alpha) {
       significant_results <- significant_results + 1
@@ -57,12 +71,12 @@ mixed_model_level1_sim_engine <- function(r_partial, n_groups, n_per_group, icc,
   return(significant_results / n_sims)
 }
 
-#' @title Mixed Models Power Analysis (Final)
-#' @description Performs power analysis for mixed-effects (multilevel) models for both Level-1 (within-group) and Level-2 (between-group) effects.
-#' @param r_partial Partial correlation for the effect of interest (NULL to calculate).
-#' @param n_groups Number of groups (Level-2 units) (NULL to calculate).
+#' @title Mixed Models Power Analysis
+#' @description Performs power analysis for mixed-effects (multilevel) models.
+#' @param r_partial Partial correlation for the effect of interest.
+#' @param n_groups Number of groups (Level-2 units).
 #' @param n_per_group Average number of observations per group (Level-1 units).
-#' @param power Target statistical power (NULL to calculate).
+#' @param power Target statistical power.
 #' @param icc Intraclass Correlation Coefficient.
 #' @param alpha Significance level.
 #' @param discount_factor Conservative planning discount factor.
@@ -70,12 +84,14 @@ mixed_model_level1_sim_engine <- function(r_partial, n_groups, n_per_group, icc,
 #' @param n_sims_l1 Number of simulations for Level-1 power estimation.
 #' @param effect_input Alternative raw effect size.
 #' @param effect_type Type of `effect_input`.
+#' @param inter_predictor_cor The estimated correlation between predictors (default = 0).
 #' @return A list with power analysis results.
 #' @export
 mixed_models_power <- function(r_partial = NULL, n_groups = NULL, n_per_group = 10,
                                power = NULL, icc = 0.05, alpha = 0.05,
                                discount_factor = 0.75, test_level = "level1",
-                               n_sims_l1 = 500, effect_input = NULL, effect_type = "r") {
+                               n_sims_l1 = 500, effect_input = NULL, effect_type = "r",
+                               inter_predictor_cor = 0) {
 
   # --- 1. Parameter & Effect Size Validation (CORRECTED LOGIC) ---
   # Determine if an effect size has been provided, either directly or via effect_input
@@ -107,7 +123,7 @@ mixed_models_power <- function(r_partial = NULL, n_groups = NULL, n_per_group = 
   if (test_level == "level1") {
     if (target_param != "power") stop("For Level-1 effects, the simulation engine can only solve for power.")
 
-    calculated_power <- mixed_model_level1_sim_engine(r_partial, n_groups, n_per_group, icc, alpha, n_sims_l1)
+    calculated_power <- calculated_power <- mixed_model_level1_sim_engine(r_partial, n_groups, n_per_group, icc, alpha, n_sims_l1, inter_predictor_cor)
     result <- list(power = calculated_power, calculation_target = "power")
 
   } else if (test_level == "level2") {
